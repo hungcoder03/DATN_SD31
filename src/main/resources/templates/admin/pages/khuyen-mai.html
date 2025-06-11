@@ -1,5 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý phiếu giảm giá</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">QUẢN LÝ PHIẾU GIẢM GIÁ</h2>
+
+    <form th:action="@{/admin/save}" method="post" th:object="${voucher}">
+        <input type="hidden" th:field="*{id}"/>
+
+        <div class="row">
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Mã</label>
+                <input type="text" class="form-control" th:field="*{ma}">
+                <div class="text-danger" th:if="${#fields.hasErrors('ma')}" th:errors="*{ma}"></div>
+            </div>
+
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Tên</label>
+                <input type="text" class="form-control" th:field="*{ten}">
+                <div class="text-danger" th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}"></div>
+            </div>
+
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Loại phiếu giảm giá</label>
+                <select th:field="*{loaiPhieuGiamGia}" id="loaiPhieu" class="form-control" onchange="toggleGiamToiDa()">
+                    <option value="">-- Chọn loại --</option>
+                    <option value="Phần trăm">Giảm theo phần trăm</option>
+                    <option value="Tiền mặt">Giảm theo tiền mặt</option>
+                </select>
+                <div class="text-danger" th:if="${#fields.hasErrors('loaiPhieuGiamGia')}" th:errors="*{loaiPhieuGiamGia}"></div>
+            </div>
 
 
-<div th:fragment="page">
-    <h1>Hihi</h1>
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Mức độ giảm giá</label>
+                <input type="number" step="0.01" class="form-control" th:field="*{mucDo}">
+                <div class="text-danger" th:if="${#fields.hasErrors('mucDo')}" th:errors="*{mucDo}"></div>
+            </div>
+
+            <div class="mb-3 col-md-6" id="giamToiDaGroup">
+                <label class="form-label">Giảm tối đa</label>
+                <input type="number" step="0.01" class="form-control" th:field="*{giamToiDa}" id="giamToiDaInput" disabled>
+                <div class="text-danger" th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"></div>
+            </div>
+
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Điều kiện áp dụng</label>
+                <input type="number" step="0.01" class="form-control" th:field="*{dieuKien}">
+                <div class="text-danger" th:if="${#fields.hasErrors('dieuKien')}" th:errors="*{dieuKien}"></div>
+            </div>
+
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Số lượng tồn</label>
+                <input type="number" class="form-control" th:field="*{soLuongTon}">
+                <div class="text-danger" th:if="${#fields.hasErrors('soLuongTon')}" th:errors="*{soLuongTon}"></div>
+            </div>
+
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Ngày bắt đầu</label>
+                <input type="date" class="form-control" th:field="*{ngayBatDau}">
+            </div>
+
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Ngày kết thúc</label>
+                <input type="date" class="form-control" th:field="*{ngayKetThuc}">
+            </div>
+
+            <div class="mb-3 col-md-6">
+                <label class="form-label">Trạng thái</label>
+                <select class="form-control" th:field="*{trangThai}">
+                    <option th:value="true">Còn</option>
+                    <option th:value="false">Hết</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a href="/admin/hienThi" class="btn btn-secondary">Làm mới</a>
+    </form>
+    <hr/>
+    <h4>Danh sách phiếu giảm giá</h4>
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>Mã</th>
+            <th>Tên</th>
+            <th>Loại</th>
+            <th>Mức độ</th>
+            <th>Giảm tối đa</th>
+            <th>Điều kiện</th>
+            <th>Ngày BĐ</th>
+            <th>Ngày KT</th>
+            <th>Trạng thái</th>
+            <th>Số lượng</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="v : ${listVoucher}">
+            <td th:text="${v.ma}"></td>
+            <td th:text="${v.ten}"></td>
+            <td th:text="${v.loaiPhieuGiamGia}"></td>
+            <td th:text="${v.mucDo}"></td>
+            <td th:text="${v.giamToiDa}"></td>
+            <td th:text="${v.dieuKien}"></td>
+            <td th:text="${v.ngayBatDau}"></td>
+            <td th:text="${v.ngayKetThuc}"></td>
+            <td th:text="${v.trangThai ? 'Còn' : 'Hết'}"></td>
+            <td th:text="${v.soLuongTon}"></td>
+            <td>
+                <a th:href="@{/voucher/edit/{id}(id=${v.id})}" class="btn btn-sm btn-warning">Sửa</a>
+                <a th:href="@{/voucher/delete/{id}(id=${v.id})}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Bạn có chắc muốn xóa?');">Xóa</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 </div>
+<script>
+    function toggleGiamToiDa() {
+        var loai = document.getElementById("loaiPhieu").value;
+        var giamToiDaGroup = document.getElementById("giamToiDaGroup");
+        var giamToiDaInput = document.getElementById("giamToiDaInput");
+
+        if (loai === "Phần trăm") {
+            giamToiDaGroup.style.display = "block";
+            giamToiDaInput.disabled = false;
+        } else if (loai === "Tiền mặt") {
+            giamToiDaGroup.style.display = "none";
+            giamToiDaInput.disabled = true;
+        } else {
+            // Nếu chưa chọn gì: vẫn hiện ô, nhưng disable
+            giamToiDaGroup.style.display = "block";
+            giamToiDaInput.disabled = true;
+        }
+    }
+
+    window.onload = function () {
+        toggleGiamToiDa();
+    };
+</script>
+
+</body>
+</html>

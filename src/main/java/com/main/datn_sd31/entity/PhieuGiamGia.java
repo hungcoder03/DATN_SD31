@@ -1,6 +1,7 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -25,14 +26,14 @@ public class PhieuGiamGia {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Size(max = 50)
-    @NotNull
+    @Size(max = 50, message = "Mã không được vượt quá 50 ký tự")
+    @NotBlank(message = "Mã không được để trống")
     @Nationalized
     @Column(name = "ma", nullable = false, length = 50)
     private String ma;
 
-    @Size(max = 100)
-    @NotNull
+    @Size(max = 100, message = "Tên không được vượt quá 100 ký tự")
+    @NotBlank(message = "Tên không được để trống")
     @Nationalized
     @Column(name = "ten", nullable = false, length = 100)
     private String ten;
@@ -56,7 +57,7 @@ public class PhieuGiamGia {
     private Boolean trangThai = false;
 
     @Size(max = 50)
-    @NotNull
+    @NotBlank(message = "Loại phiếu giảm giá không được để trống")
     @Nationalized
     @Column(name = "loai_phieu_giam_gia", nullable = false, length = 50)
     private String loaiPhieuGiamGia;
@@ -67,19 +68,19 @@ public class PhieuGiamGia {
     @Column(name = "ngay_ket_thuc")
     private LocalDate ngayKetThuc;
 
-    @NotNull
+    @NotNull(message = "Mức độ giảm giá không được để trống")
     @Column(name = "muc_do", nullable = false, precision = 18, scale = 2)
     private BigDecimal mucDo;
 
-    @NotNull
+    @NotNull(message = "Giá trị giảm tối đa không được để trống")
     @Column(name = "giam_toi_da", nullable = false, precision = 18, scale = 2)
     private BigDecimal giamToiDa;
 
-    @NotNull
+    @NotNull(message = "Điều kiện áp dụng không được để trống")
     @Column(name = "dieu_kien", nullable = false, precision = 18, scale = 2)
     private BigDecimal dieuKien;
 
-    @NotNull
+    @NotNull(message = "Số lượng tồn không được để trống")
     @Column(name = "so_luong_ton", nullable = false)
     private Integer soLuongTon;
 
