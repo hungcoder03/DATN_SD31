@@ -1,0 +1,364 @@
+<style>
+  .filter-section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+  }
+
+  .filter-buttons .btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
+
+  .table-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .table-section .table thead th {
+    background-color: #f1f1f1;
+  }
+
+  .action-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px;
+  }
+
+  .action-btn.accept {
+    color: green;
+  }
+
+  .action-btn.cancel {
+    color: red;
+  }
+</style>
+
+<div th:fragment="page">
+  <div class="container mt-4">
+    <h2 class="mb-4 text-center">Quản Lý Phiếu giảm giá</h2>
+    <button
+            class="btn btn-success mb-3"
+            onclick="resetForm()"
+    >
+      + Thêm mới
+    </button>
+    <div
+            class="modal fade"
+            id="createModal"
+            tabindex="-1"
+            aria-labelledby="createModalLabel"
+            aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <form
+                id="phieuGiamGiaForm"
+                th:action="@{/admin/phieu-giam-gia/create}"
+                th:object="${phieuGiamGia}"
+                method="post"
+                class="modal-content"
+        >
+          <div class="modal-header">
+            <h5
+                    class="modal-title"
+                    id="createModalLabel"
+                    th:text="${phieuGiamGia.id != null} ? 'Cập nhật Phiếu Giảm Giá' : 'Thêm Mới Phiếu Giảm Giá'"
+            ></h5>
+            <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Đóng"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <input
+                    type="hidden"
+                    th:field="*{id}"
+            />
+            <div class="mb-3">
+              <label>Tên</label>
+              <input
+                      type="text"
+                      class="form-control"
+                      th:field="*{ten}"
+                      required
+              />
+            </div>
+            <div class="mb-3">
+              <label>Mã</label>
+              <input
+                      type="text"
+                      class="form-control"
+                      th:field="*{ma}"
+                      required
+              />
+            </div>
+            <div class="mb-3">
+              <label>Loại Phiếu</label>
+              <select
+                      class="form-select"
+                      th:field="*{loaiPhieuGiamGia}"
+                      id="loaiPhieuGiamGia"
+                      required
+              >
+                <option value="">-- Chọn loại phiếu --</option>
+                <option value="GIAM_PERCENT">Giảm %</option>
+                <option value="GIAM_TIEN">Giảm tiền</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label>Ngày bắt đầu</label>
+              <input
+                      type="date"
+                      class="form-control"
+                      th:field="*{ngayBatDau}"
+              />
+            </div>
+            <div class="mb-3">
+              <label>Ngày kết thúc</label>
+              <input
+                      type="date"
+                      class="form-control"
+                      th:field="*{ngayKetThuc}"
+              />
+            </div>
+            <div class="mb-3">
+              <label>Mức giảm</label>
+              <input
+                      type="number"
+                      class="form-control"
+                      th:field="*{mucDo}"
+                      required
+              />
+            </div>
+            <div class="mb-3" id="divGiamToiDa">
+              <label>Giảm tối đa</label>
+              <input
+                      type="number"
+                      class="form-control"
+                      th:field="*{giamToiDa}"
+                      id="giamToiDa"
+                      required
+              />
+            </div>
+            <div class="mb-3">
+              <label>Điều kiện</label>
+              <input
+                      min="0"
+                      type="number"
+                      class="form-control"
+                      th:field="*{dieuKien}"
+                      required
+              />
+            </div>
+            <div class="mb-3">
+              <label>Số lượng</label>
+              <input
+                      type="number"
+                      class="form-control"
+                      th:field="*{soLuongTon}"
+                      required
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal"
+            >
+              Hủy
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label for="startDate" class="form-label">Ngày bắt đầu</label>
+          <input
+                  type="date"
+                  class="form-control"
+                  id="startDate"
+                  th:value="${startDate}"
+          />
+        </div>
+        <div class="col-md-3">
+          <label for="endDate" class="form-label">Ngày kết thúc</label>
+          <input
+                  type="date"
+                  class="form-control"
+                  id="endDate"
+                  th:value="${endDate}"
+          />
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-primary w-100">Tìm kiếm</button>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-outline-secondary w-100">Làm mới</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-section">
+      <div class="table-section">
+        <table
+                class="table table-bordered"
+                id="phieuGiamGiaTable"
+                style="width: 100%"
+        >
+          <thead>
+          <tr>
+            <th>STT</th>
+            <th>Tên</th>
+            <th>Mã</th>
+            <th>Loại phiếu</th>
+            <th>Mức giảm</th>
+            <th>Giảm tối đa</th>
+            <th>Số lượng</th>
+            <th>Điều kiện</th>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            <th>Thao Tác</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="item, iterStat : ${listData}">
+            <td th:text="${iterStat.index + 1}"></td>
+            <td th:text="${item.ten}"></td>
+            <td th:text="${item.ma}"></td>
+            <td th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? 'Giảm %' : 'Giảm tiền'}"></td>
+            <td
+                    th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? item.mucDo.stripTrailingZeros().toPlainString() + '%' : item.mucDo.stripTrailingZeros().toPlainString() + ' đ'}"
+            ></td>
+            <td
+                    th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? 0 : item.giamToiDa.stripTrailingZeros().toPlainString() + ' đ'}"
+            ></td>
+            <td
+                    th:text="${item.soLuongTon != null ? item.soLuongTon : 0}"
+            ></td>
+            <td
+                    th:text="${item.dieuKien}"
+            ></td>
+            <td th:text="${item.ngayKetThuc}"></td>
+            <td>
+              <a
+                      href="#"
+                      class="b đtn btn-primary btn-edit btn-sm"
+                      th:data-id="${item.id}"
+              >Sửa</a
+              >
+              <a
+                      th:href="@{'/admin/phieu-giam-gia/delete/' + ${item.id}}"
+                      onclick="return confirm('Bạn có chắc muốn xóa phiếu này không?')"
+                      class="btn btn-danger btn-sm"
+              >
+                Xóa
+              </a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    $(".table").DataTable({
+      language: {
+        url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/vi.json",
+      },
+      pageLength: 10,
+      lengthMenu: [10, 25, 50, 100],
+    });
+
+    $("#phieuGiamGiaForm").on("submit", function (e) {
+      e.preventDefault();
+      const form = $(this);
+      $.ajax({
+        type: "POST",
+        url: form.attr("action"),
+        data: form.serialize(),
+        success: function (response) {
+          if (response.success) {
+            alert("Lưu thành công!");
+            location.reload();
+          } else {
+            alert("Có lỗi xảy ra: " + response.message);
+          }
+        },
+        error: function () {
+          alert("Có lỗi xảy ra khi lưu dữ liệu.");
+        },
+      });
+    });
+
+    $("table .btn-edit").on("click", function (e) {
+      e.preventDefault();
+      const id = $(this).data("id");
+      $.ajax({
+        url: "/admin/phieu-giam-gia/get/" + id,
+        method: "GET",
+        success: function (data) {
+          $("#phieuGiamGiaForm").attr("action", "/admin/phieu-giam-gia/update");
+          $("#createModalLabel").text("Cập nhật Phiếu Giảm Giá");
+          $("#phieuGiamGiaForm")
+                  .find("input, select")
+                  .each(function () {
+                    const field = $(this).attr("name");
+                    $(this).val(data[field]);
+                  });
+          $("#loaiPhieuGiamGia").change();
+          $("#createModal").modal("show");
+        },
+        error: function () {
+          alert("Không thể lấy dữ liệu phiếu giảm giá.");từ
+        },
+      });
+    });
+
+    $("#loaiPhieuGiamGia").on("change", function () {
+      const selectedValue = $(this).val();
+      if (selectedValue === "GIAM_PERCENT") {
+        $("#mucDo").attr("placeholder", "Nhập phần trăm giảm giá");
+        $("#divGiamToiDa").show();
+        $("#giamToiDa").attr("required", true).val(0);
+      } else if (selectedValue === "GIAM_TIEN") {
+        $("#mucDo").attr("placeholder", "Nhập số tiền giảm");
+        $("#divGiamToiDa").hide();
+        $("#giamToiDa").removeAttr("required").val(0);
+
+      }
+    });
+  });
+
+  function resetForm() {
+    const form = $("#phieuGiamGiaForm").get(0);
+    if (form && typeof form.reset === "function") {
+      form.reset();
+    }
+    const hiddenId = $("input[name='id']");
+    if (hiddenId) hiddenId.val("");
+    $("#createModal").modal("show");
+  }
+</script>
+
+<script th:if="${showCreateModal}" th:inline="javascript">
+  const createModal = new bootstrap.Modal(
+          document.getElementById("createModal")
+  );
+  createModal.show();
+</script>
