@@ -38,25 +38,25 @@
 
             <div class="mb-3 col-md-6">
                 <label class="form-label">Mức độ giảm giá</label>
-                <input type="number" step="0.01" class="form-control" th:field="*{mucDo}">
+                <input type="number" step="0.01"  class="form-control" th:field="*{mucDo}">
                 <div class="text-danger" th:if="${#fields.hasErrors('mucDo')}" th:errors="*{mucDo}"></div>
             </div>
 
             <div class="mb-3 col-md-6" id="giamToiDaGroup">
                 <label class="form-label">Giảm tối đa</label>
-                <input type="number" step="0.01" class="form-control" th:field="*{giamToiDa}" id="giamToiDaInput" disabled>
+                <input type="number" step="0.01"  class="form-control" th:field="*{giamToiDa}" id="giamToiDaInput" disabled>
                 <div class="text-danger" th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"></div>
             </div>
 
             <div class="mb-3 col-md-6">
                 <label class="form-label">Điều kiện áp dụng</label>
-                <input type="number" step="0.01" class="form-control" th:field="*{dieuKien}">
+                <input type="number" step="0.01"  class="form-control" th:field="*{dieuKien}">
                 <div class="text-danger" th:if="${#fields.hasErrors('dieuKien')}" th:errors="*{dieuKien}"></div>
             </div>
 
             <div class="mb-3 col-md-6">
                 <label class="form-label">Số lượng tồn</label>
-                <input type="number" class="form-control" th:field="*{soLuongTon}">
+                <input type="number"  class="form-control" th:field="*{soLuongTon}">
                 <div class="text-danger" th:if="${#fields.hasErrors('soLuongTon')}" th:errors="*{soLuongTon}"></div>
             </div>
 
@@ -113,7 +113,12 @@
             <td th:text="${v.trangThai ? 'Còn' : 'Hết'}"></td>
             <td th:text="${v.soLuongTon}"></td>
             <td>
-                <a th:href="@{/voucher/edit/{id}(id=${v.id})}" class="btn btn-sm btn-warning">Sửa</a>
+                <a href="javascript:void(0)" class="btn btn-sm btn-warning"
+                   th:attr="data-id=${v.id}, data-ma=${v.ma}, data-ten=${v.ten}, data-loai=${v.loaiPhieuGiamGia},
+            data-mucdo=${v.mucDo}, data-giamtoida=${v.giamToiDa}, data-dieukien=${v.dieuKien},
+            data-ngaybd=${v.ngayBatDau}, data-ngaykt=${v.ngayKetThuc},
+            data-trangthai=${v.trangThai}, data-soluong=${v.soLuongTon}"
+                   onclick="openEditModal(this)">Sửa</a>
                 <a th:href="@{/voucher/delete/{id}(id=${v.id})}" class="btn btn-sm btn-danger"
                    onclick="return confirm('Bạn có chắc muốn xóa?');">Xóa</a>
             </td>
@@ -144,6 +149,76 @@
         toggleGiamToiDa();
     };
 </script>
+<!-- Modal Form Sửa -->
+<div class="modal fade" id="editVoucherModal" tabindex="-1" aria-labelledby="editVoucherModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="/admin/save">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editVoucherModalLabel">Sửa phiếu giảm giá</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="edit-id">
+
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Mã</label>
+                            <input type="text" class="form-control" name="ma" id="edit-ma">
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Tên</label>
+                            <input type="text" class="form-control" name="ten" id="edit-ten">
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Loại phiếu giảm giá</label>
+                            <select class="form-control" name="loaiPhieuGiamGia" id="edit-loaiPhieu" onchange="toggleModalGiamToiDa()">
+                                <option value="">-- Chọn loại --</option>
+                                <option value="Phần trăm">Giảm theo phần trăm</option>
+                                <option value="Tiền mặt">Giảm theo tiền mặt</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Mức độ giảm giá</label>
+                            <input type="number" step="0.01" class="form-control" name="mucDo" id="edit-mucDo">
+                        </div>
+                        <div class="mb-3 col-md-6" id="modalGiamToiDaGroup">
+                            <label class="form-label">Giảm tối đa</label>
+                            <input type="number" step="0.01" class="form-control" name="giamToiDa" id="edit-giamToiDa">
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Điều kiện áp dụng</label>
+                            <input type="number" step="0.01" class="form-control" name="dieuKien" id="edit-dieuKien">
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Số lượng tồn</label>
+                            <input type="number" class="form-control" name="soLuongTon" id="edit-soLuongTon">
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Ngày bắt đầu</label>
+                            <input type="date" class="form-control" name="ngayBatDau" id="edit-ngayBatDau">
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Ngày kết thúc</label>
+                            <input type="date" class="form-control" name="ngayKetThuc" id="edit-ngayKetThuc">
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-control" name="trangThai" id="edit-trangThai">
+                                <option value="true">Còn</option>
+                                <option value="false">Hết</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Sửa</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
