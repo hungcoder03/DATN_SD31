@@ -243,19 +243,21 @@
                     th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? item.mucDo.stripTrailingZeros().toPlainString() + '%' : item.mucDo.stripTrailingZeros().toPlainString() + ' đ'}"
             ></td>
             <td
-                    th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? 0 : item.giamToiDa.stripTrailingZeros().toPlainString() + ' đ'}"
+                    th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? item.giamToiDa.stripTrailingZeros().toPlainString() + ' đ':0}"
             ></td>
             <td
                     th:text="${item.soLuongTon != null ? item.soLuongTon : 0}"
             ></td>
             <td
-                    th:text="${item.dieuKien}"
-            ></td>
+                    th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? item.dieuKien.stripTrailingZeros().toPlainString() + ' đ' : 0}"
+            ></td>s
+            <td th:text="${item.ngayBatDau}"></td>
+
             <td th:text="${item.ngayKetThuc}"></td>
             <td>
               <a
                       href="#"
-                      class="b đtn btn-primary btn-edit btn-sm"
+                      class="btn btn-primary btn-edit btn-sm"
                       th:data-id="${item.id}"
               >Sửa</a
               >
