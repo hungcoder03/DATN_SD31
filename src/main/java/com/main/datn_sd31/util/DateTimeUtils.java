@@ -1,8 +1,11 @@
 package com.main.datn_sd31.util;
 
+import org.springframework.stereotype.Component;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Component("utils_date")
 public class DateTimeUtils {
 
     // Mặc định định dạng chuẩn: HH:mm:ss dd/MM/yyyy

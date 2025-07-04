@@ -1,5 +1,6 @@
 package com.main.datn_sd31.entity;
 
+import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -27,9 +28,11 @@ public class LichSuHoaDon {
     @Column(name = "nguoi_sua")
     private Integer nguoiSua;
 
+    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 
+    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 
@@ -47,5 +50,27 @@ public class LichSuHoaDon {
     @Lob
     @Column(name = "ghi_chu", nullable = false)
     private String ghiChu;
+
+    @Transient
+    public String getTrangThaiMoTa() {
+        TrangThaiLichSuHoaDon enumTrangThai = TrangThaiLichSuHoaDon.fromValue(this.trangThai);
+        return (enumTrangThai != null) ? enumTrangThai.getMoTa() : "Không xác định";
+    }
+
+    @Transient
+    public String getIconTrangThai() {
+        return switch (this.trangThai) {
+            case 1 -> "bi bi-hourglass-split";        // Chờ xác nhận
+            case 2 -> "bi bi-check-square";           // Xác nhận
+            case 3 -> "bi bi-truck";                  // Chờ giao hàng
+            case 4 -> "bi bi-box-seam";               // Đã giao
+            case 5 -> "bi bi-check-circle";           // Hoàn thành
+            case 6 -> "bi bi-arrow-counterclockwise"; // Yêu cầu hoàn hàng
+            case 7 -> "bi bi-arrow-repeat";           // Xác nhận hoàn hàng
+            case 8 -> "bi bi-box-arrow-in-left";      // Đã hoàn
+            case 9 -> "bi bi-x-circle";               // Hủy
+            default -> "bi bi-question-circle";       // Không xác định
+        };
+    }
 
 }

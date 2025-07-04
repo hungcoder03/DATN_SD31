@@ -32,10 +32,12 @@ public class HoaDon {
     private String ma;
 
     @NotNull
+    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao", nullable = false)
     private LocalDateTime ngayTao;
 
     @NotNull
+    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua", nullable = false)
     private LocalDateTime ngaySua;
 
@@ -43,15 +45,10 @@ public class HoaDon {
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = false;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "khach_hang_id", nullable = false)
     private KhachHang khachHang;
 
-    @Column(name = "loai_hoa_don", nullable = false)
-    private String loaihoadon;
-
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "nhan_vien_id", nullable = false)
     private NhanVien nhanVien;
@@ -81,6 +78,9 @@ public class HoaDon {
     @NotNull
     @Column(name = "thanh_tien", nullable = false, precision = 18, scale = 2)
     private BigDecimal thanhTien;
+
+    @Column(name = "loai_hoa_don", nullable = false)
+    private String loaihoadon;
 
     @Size(max = 100)
     @NotNull

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout}">
 <head>
@@ -9,193 +9,187 @@
     <style>
         body { background-color: #f8f9fa; }
         .card { border-radius: 10px; margin-bottom: 20px; }
-        .table th, .table td { vertical-align: middle; }
         .total { font-size: 1.2rem; font-weight: bold; color: #e74c3c; }
     </style>
 </head>
 <body>
 <section layout:fragment="content">
-<div>
-    <h2 class="text-center mb-4">Bán Hàng Trực Tiếp</h2>
+    <div class="container mt-4">
 
-    <!-- Tabs Giỏ -->
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item" th:each="key, iterStat : ${tatCaGio}">
-            <a class="nav-link" th:classappend="${key == cartKey} ? 'active'" th:href="@{/admin/ban-hang(cartKey=${key})}">
-                <span th:text="'Giỏ ' + ${iterStat.index + 1}"></span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-success" th:href="@{/admin/ban-hang(cartKey='gio-' + ${#numbers.sequence(tatCaGio.size() + 1, tatCaGio.size() + 1)[0]})}">
-                + Giỏ mới
-            </a>
-        </li>
-    </ul>
+        <h2 class="text-center mb-4">Bán Hàng Trực Tiếp</h2>
 
-    <!-- Form chọn sản phẩm -->
-    <div class="card p-3">
-        <form method="get" th:action="@{/admin/ban-hang}">
-            <input type="hidden" name="cartKey" th:value="${cartKey}" />
-            <div class="row">
-                <div class="col-md-8">
-                    <select class="form-select" name="idSanPham" onchange="this.form.submit()">
-                        <option value="">-- Chọn sản phẩm --</option>
-                        <option th:each="sp : ${dsSanPham}" th:value="${sp.id}" th:selected="${sp.id == sanPhamDaChon}" th:text="${sp.ten}"></option>
-                    </select>
+        <!-- Tabs Giỏ hàng -->
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item" th:each="key, iterStat : ${tatCaGio}">
+                <a class="nav-link" th:classappend="${key == cartKey} ? 'active'" th:href="@{/admin/ban-hang(cartKey=${key})}">
+                    <span th:text="'Giỏ ' + ${iterStat.index + 1}">Giỏ</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-success"
+                   th:href="@{/admin/ban-hang(cartKey='gio-' + ${tatCaGio.size() + 1})}">
+                    + Giỏ mới
+                </a>
+            </li>
+        </ul>
+
+        <!-- Chọn sản phẩm -->
+        <div class="card p-3">
+            <form method="get" th:action="@{/admin/ban-hang}">
+                <input type="hidden" name="cartKey" th:value="${cartKey}"/>
+                <div class="row">
+                    <div class="col-md-8">
+                        <select class="form-select" name="idSanPham" onchange="this.form.submit()">
+                            <option value="">-- Chọn sản phẩm --</option>
+                            <option th:each="sp : ${dsSanPham}" th:value="${sp.id}"
+                                    th:selected="${sp.id == sanPhamDaChon}" th:text="${sp.ten}"></option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
 
-    <!-- Form chọn chi tiết sản phẩm -->
-    <div class="card p-3" th:if="${dsChiTietSanPham != null and !dsChiTietSanPham.isEmpty()}">
-        <form method="post" th:action="@{/admin/ban-hang/them-gio}">
-            <input type="hidden" name="cartKey" th:value="${cartKey}" />
+        <!-- Chọn chi tiết sản phẩm -->
+        <div class="card p-3" th:if="${dsChiTietSanPham != null and !dsChiTietSanPham.isEmpty()}">
+            <form method="post" th:action="@{/admin/ban-hang/them-gio}">
+                <input type="hidden" name="cartKey" th:value="${cartKey}" />
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <select class="form-select" name="idChiTietSp" required>
+                            <option value="">-- Chọn màu / size --</option>
+                            <option th:each="ct : ${dsChiTietSanPham}"
+                                    th:if="${ct.soLuong > 0}"
+                                    th:value="${ct.id}"
+                                    th:text="${ct.mauSac.ten + ' / ' + ct.size.ten + ' - SL: ' + ct.soLuong + ' - Giá: ' + ct.giaBan}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" name="soLuong" class="form-control" min="1" value="1" required />
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary w-100" type="submit">Thêm vào giỏ</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Giỏ hàng -->
+        <div class="card p-3">
+            <h4>Giỏ hàng</h4>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${gioHang}">
+                    <td th:text="${item.tenCtsp}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.giaSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></td>
+                    <td th:text="${item.soLuong}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.giaSauGiam * item.soLuong, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></td>
+                </tr>
+                <tr th:if="${gioHang.isEmpty()}">
+                    <td colspan="4" class="text-center text-muted">Chưa có sản phẩm nào</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <form method="post" th:action="@{/admin/ban-hang/xoa-gio}">
+                <input type="hidden" name="cartKey" th:value="${cartKey}" />
+                <button class="btn btn-danger">Xóa giỏ hàng</button>
+            </form>
+        </div>
+
+        <!-- Địa chỉ giao hàng -->
+        <div class="card p-3">
+            <h5>Địa chỉ giao hàng</h5>
             <div class="row g-2">
-                <div class="col-md-6">
-                    <select class="form-select" name="idChiTietSp" required>
-                        <option value="">-- Chọn màu / size --</option>
-                        <option th:each="ct : ${dsChiTietSanPham}" th:if="${ct.soLuong > 0}" th:value="${ct.id}"
-                                th:text="${ct.mauSac.ten + ' / ' + ct.size.ten + ' - SL: ' + ct.soLuong + ' - Giá: ' + ct.giaBan}">
-                        </option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="number" name="soLuong" class="form-control" min="1" value="1" required>
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-primary w-100" type="submit">Thêm vào giỏ</button>
-                </div>
+                <div class="col-md-4"><select id="province" class="form-select"></select></div>
+                <div class="col-md-4"><select id="district" class="form-select"></select></div>
+                <div class="col-md-4"><select id="ward" class="form-select"></select></div>
             </div>
-        </form>
-    </div>
+        </div>
 
-    <!-- Giỏ hàng -->
-    <div class="card p-3">
-        <h4>Giỏ hàng</h4>
-        <table class="table table-bordered">
-            <thead class="table-light">
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Giá</th>
-                <th>Số lượng</th>
-                <th>Thành tiền</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="item : ${gioHang}">
-                <td th:text="${item.chiTietSanPham.tenCt}"></td>
-                <td th:text="${#numbers.formatDecimal(item.giaSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></td>
-                <td th:text="${item.soLuong}"></td>
-                <td th:text="${#numbers.formatDecimal(item.giaSauGiam * item.soLuong, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></td>
-            </tr>
-            <tr th:if="${gioHang.isEmpty()}">
-                <td colspan="4" class="text-center text-muted">Chưa có sản phẩm nào</td>
-            </tr>
-            </tbody>
-        </table>
+        <!-- Mã giảm giá & tổng tiền -->
+        <div class="card p-3">
+            <form method="get" th:action="@{/admin/ban-hang/ap-dung-ma}">
+                <input type="hidden" name="cartKey" th:value="${cartKey}" />
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <select class="form-select" name="maGiamGia">
+                            <option value="">-- Mã giảm giá --</option>
+                            <option th:each="p : ${dsPhieuGiamGia}" th:value="${p.ma}" th:text="${p.ma}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-secondary" type="submit">Áp dụng mã</button>
+                    </div>
+                </div>
+            </form>
 
-        <form method="post" th:action="@{/admin/ban-hang/xoa-gio}">
-            <input type="hidden" name="cartKey" th:value="${cartKey}" />
-            <button class="btn btn-danger">Xóa giỏ hàng</button>
-        </form>
-    </div>
+            <div>
+                <p>Phí vận chuyển: <strong id="shippingFee" th:text="${#numbers.formatDecimal(phiVanChuyen, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></strong></p>
+                <p>Tổng tiền: <span class="total" th:text="${#numbers.formatDecimal(tongTien, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
+                <p>Thành tiền sau giảm: <span class="total" th:text="${#numbers.formatDecimal(tongTienSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
+            </div>
 
-    <!-- Địa chỉ GHN -->
-    <div class="card p-3">
-        <h5>Địa chỉ giao hàng</h5>
-        <div class="row g-2">
-            <div class="col-md-4">
-                <select id="province" class="form-select"></select>
-            </div>
-            <div class="col-md-4">
-                <select id="district" class="form-select"></select>
-            </div>
-            <div class="col-md-4">
-                <select id="ward" class="form-select"></select>
-            </div>
+            <form method="post" th:action="@{/admin/ban-hang/thanh-toan}">
+                <input type="hidden" name="cartKey" th:value="${cartKey}" />
+                <button class="btn btn-success w-100 mt-2">Thanh toán</button>
+            </form>
         </div>
     </div>
 
-    <!-- Mã giảm giá + Tổng tiền -->
-    <div class="card p-3">
-        <form method="get" th:action="@{/admin/ban-hang/ap-dung-ma}">
-            <input type="hidden" name="cartKey" th:value="${cartKey}" />
-            <div class="row g-2 mb-2">
-                <div class="col-md-6">
-                    <select class="form-select" name="maGiamGia">
-                        <option value="">-- Mã giảm giá --</option>
-                        <option th:each="p : ${dsPhieuGiamGia}" th:value="${p.ma}" th:text="${p.ma}"></option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-secondary" type="submit">Áp dụng mã</button>
-                </div>
-            </div>
-        </form>
+    <script th:inline="javascript">
+        const formatCurrency = (vnd) => vnd.toLocaleString("vi-VN") + " ₫";
 
-        <div>
-            <div class="mt-2">Phí vận chuyển: <strong id="shippingFee" th:text="${#numbers.formatDecimal(phiVanChuyen, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></strong></div>
-            <p>Tổng tiền: <span class="total" th:text="${#numbers.formatDecimal(tongTien, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
-            <p>Thành tiền sau giảm: <span class="total" th:text="${#numbers.formatDecimal(tongTienSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
-        </div>
+        async function loadProvinces() {
+            const res = await fetch("/admin/ban-hang/dia-chi/tinh");
+            const data = await res.json();
+            const select = document.getElementById("province");
+            select.innerHTML = '<option value="">-- Chọn Tỉnh/Thành --</option>';
+            data.forEach(p => select.add(new Option(p.ProvinceName, p.ProvinceID)));
+        }
 
-        <form method="post" th:action="@{/admin/ban-hang/thanh-toan}">
-            <input type="hidden" name="cartKey" th:value="${cartKey}" />
-            <button class="btn btn-success w-100 mt-2">Thanh toán</button>
-        </form>
-    </div>
-</div>
+        async function loadDistricts() {
+            const provinceId = document.getElementById("province").value;
+            const res = await fetch("/admin/ban-hang/dia-chi/huyen?provinceId=" + provinceId);
+            const data = await res.json();
+            const select = document.getElementById("district");
+            select.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+            data.forEach(d => select.add(new Option(d.DistrictName, d.DistrictID)));
+        }
 
-<!-- JS Tính phí ship và GHN -->
-<script th:inline="javascript">
-    const formatCurrency = (vnd) => vnd.toLocaleString("vi-VN") + " ₫";
+        async function loadWards() {
+            const districtId = document.getElementById("district").value;
+            const res = await fetch("/admin/ban-hang/dia-chi/xa?districtId=" + districtId);
+            const data = await res.json();
+            const select = document.getElementById("ward");
+            select.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+            data.forEach(w => select.add(new Option(w.WardName, w.WardCode)));
+        }
 
-    async function loadProvinces() {
-        const res = await fetch("/admin/ban-hang/dia-chi/tinh");
-        const data = await res.json();
-        const select = document.getElementById("province");
-        select.innerHTML = '<option value="">-- Chọn Tỉnh/Thành --</option>';
-        data.forEach(p => select.add(new Option(p.ProvinceName, p.ProvinceID)));
-    }
+        async function calculateShipping() {
+            const districtId = document.getElementById("district").value;
+            const wardCode = document.getElementById("ward").value;
+            const res = await fetch(`/admin/ban-hang/phi-ship?toDistrictId=${districtId}&wardCode=${wardCode}`);
+            const fee = await res.json();
+            document.getElementById("shippingFee").innerText = formatCurrency(fee);
+            window.location.reload(); // cập nhật tổng tiền
+        }
 
-    async function loadDistricts() {
-        const provinceId = document.getElementById("province").value;
-        const res = await fetch("/admin/ban-hang/dia-chi/huyen?provinceId=" + provinceId);
-        const data = await res.json();
-        const select = document.getElementById("district");
-        select.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
-        data.forEach(d => select.add(new Option(d.DistrictName, d.DistrictID)));
-    }
-
-    async function loadWards() {
-        const districtId = document.getElementById("district").value;
-        const res = await fetch("/admin/ban-hang/dia-chi/xa?districtId=" + districtId);
-        const data = await res.json();
-        const select = document.getElementById("ward");
-        select.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
-        data.forEach(w => select.add(new Option(w.WardName, w.WardCode)));
-    }
-
-    async function calculateShipping() {
-        const districtId = document.getElementById("district").value;
-        const wardCode = document.getElementById("ward").value;
-        const res = await fetch(`/admin/ban-hang/phi-ship?toDistrictId=${districtId}&wardCode=${wardCode}`);
-        const fee = await res.json();
-        document.getElementById("shippingFee").innerText = formatCurrency(fee);
-        window.location.reload(); // reload để cập nhật lại tổng tiền có phí ship
-    }
-
-    window.onload = function () {
-        const province = document.getElementById("province");
-        if (province) {
+        window.onload = function () {
             loadProvinces();
-            province.addEventListener("change", loadDistricts);
+            document.getElementById("province").addEventListener("change", loadDistricts);
             document.getElementById("district").addEventListener("change", loadWards);
             document.getElementById("ward").addEventListener("change", calculateShipping);
-        }
-    };
-</script>
+        };
+    </script>
 </section>
 </body>
 </html>

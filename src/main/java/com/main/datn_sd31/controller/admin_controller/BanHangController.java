@@ -12,6 +12,7 @@ import com.main.datn_sd31.repository.Chitiethoadonrepository;
 import com.main.datn_sd31.repository.Chitietsanphamrepository;
 import com.main.datn_sd31.repository.HoaDonRepository;
 import com.main.datn_sd31.repository.KhachHangRepository;
+import com.main.datn_sd31.repository.LichSuHoaDonRepository;
 import com.main.datn_sd31.repository.NhanVienRepository;
 import com.main.datn_sd31.repository.PhieuGiamGiaRepository;
 import com.main.datn_sd31.repository.SanPhamRepository;
@@ -40,6 +41,7 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/admin/ban-hang")
 @RequiredArgsConstructor
+@Transactional
 public class BanHangController {
 
     private final Chitietsanphamrepository chiTietSanPhamRepository;
@@ -50,6 +52,7 @@ public class BanHangController {
     private final SanPhamRepository sanphamrepository;
     private final PhieuGiamGiaRepository phieugiamgiarepository;
     private final GHNService ghnService;
+    private final LichSuHoaDonRepository lichSuHoaDonRepository;
 
     private List<HoaDonChiTiet> getCart(String cartKey, HttpSession session) {
         Map<String, List<HoaDonChiTiet>> carts = (Map<String, List<HoaDonChiTiet>>) session.getAttribute("tatCaGio");
@@ -196,25 +199,35 @@ public class BanHangController {
         HoaDon hd = new HoaDon();
         hd.setMa("HD" + System.currentTimeMillis());
         hd.setNgayTao(LocalDateTime.now());
+        hd.setNgayMua(LocalDateTime.now());
+        hd.setNgaySua(LocalDateTime.now());
+        hd.setTenNguoiNhan("trực tiếp");
         hd.setLoaihoadon("Trực tiếp");
         hd.setKhachHang(khachHangRepository.findById(1).orElse(null));
         hd.setNhanVien(nhanVienRepository.findById(1).orElse(null));
-        hd.setTrangThai(false);               // Chưa thanh toán hoặc đã? tùy logic
+        hd.setTrangThai(true);               // Chưa thanh toán hoặc đã? tùy logic
         hd.setPhuongThuc("Tiền mặt");
+        hd.setNhanVien(nhanVienRepository.find(1));
         hd.setGiaGoc(tongTien);
         hd.setGiaGiamGia(tienGiam);
         hd.setPhiVanChuyen(phiShip);
         hd.setThanhTien(tongTien.subtract(tienGiam).add(phiShip));
-        hd.setTenNguoiNhan(null);
 
         hoaDonRepository.save(hd);
 
         // 3. Lưu chi tiết + cập nhật tồn kho
         for (HoaDonChiTiet ct : gio) {
+            ChiTietSanPham sp = ct.getChiTietSanPham();
+
+            String tenSp = sp.getSanPham().getTen();
+            String mau = sp.getMauSac().getTen();
+            String size = sp.getSize().getTen();
+            String tenCt = tenSp + " - " + mau + " / " + size;
+
             ct.setHoaDon(hd);
+            ct.setTenCtsp(tenCt);
             hoaDonChiTietRepository.save(ct);
 
-            ChiTietSanPham sp = ct.getChiTietSanPham();
             sp.setSoLuong(sp.getSoLuong() - ct.getSoLuong());
             chiTietSanPhamRepository.save(sp);
         }
@@ -223,16 +236,21 @@ public class BanHangController {
         LichSuHoaDon ls = new LichSuHoaDon();
         ls.setHoaDon(hd);
         ls.setNgayTao(LocalDateTime.now());
+        ls.setNgaySua(LocalDateTime.now());
+        ls.setNguoiTao(1); // hoặc 1 nếu đang dùng mặc định
+        ls.setNguoiTao(1); // tương tự
 
         if (hd.getDiaChi() != null && !hd.getDiaChi().trim().isEmpty()) {
             // Có địa chỉ ⇒ đơn online ⇒ chờ giao hàng
-            ls.setTrangThai(3);
+            ls.setTrangThai(TrangThaiLichSuHoaDon.CHO_GIAO_HANG.getValue());
             ls.setGhiChu("Đơn hàng đang chờ giao đến khách");
         } else {
             // Không có địa chỉ ⇒ đơn tại quầy
-            ls.setTrangThai(6);
+            ls.setTrangThai(TrangThaiLichSuHoaDon.HOAN_THANH.getValue());
             ls.setGhiChu("Thanh toán trực tiếp tại quầy");
         }
+
+        lichSuHoaDonRepository.save(ls);
         /* --------------------------------------------- */
 
         // 4. Xoá session & giỏ

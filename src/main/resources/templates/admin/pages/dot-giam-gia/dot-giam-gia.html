@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<!--Cấu hình layout cho Thymleaf-->
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Quản lý Chất Liệu</title>
+    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"-->
+    <!--          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">-->
+
+    <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">-->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 40px;
+            color: #2d3436;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 800;
+            color: red;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            max-width: 100%;
+            width: 100%;
+            margin: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #2c3e50;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        select {
+            padding: 12px 14px;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: #f9f9f9;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #0984e3;
+            background-color: #fff;
+            outline: none;
+        }
+
+        input[readonly] {
+            background-color: #f1f2f6;
+            color: #636e72;
+        }
+
+        p {
+            color: #d63031;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        button {
+            margin-top: 30px;
+            padding: 14px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            margin-top: 60px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #2d3436;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f2f6;
+        }
+
+        .status-0, .status-1, .status-2 {
+            padding: 6px 10px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-0 { background-color: #fdcb6e; }
+        .status-1 { background-color: #00b894; }
+        .status-2 { background-color: #d63031; }
+
+        a {
+            color: #0984e3;
+            text-decoration: none;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media screen and (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+        .active-page a {
+            font-weight: bold;
+            color: red;
+            text-decoration: underline;
+        }
+
+        a {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+
+<section layout:fragment="content">
+    <div class="container mt-4">
+        <h1  th:text="${dotGiamGia.id == null} ? 'Thêm Đợt Giảm Giá' : 'Cập nhật Đợt Giảm Giá'"></h1>
+
+        <form th:action="@{/admin/dot-giam-gia/save}" th:object="${dotGiamGia}" method="post">
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Mã:</label>
+                    <input type="text" th:field="*{ma}" placeholder="Nhập mã giảm giá"/>
+                    <p th:if="${#fields.hasErrors('ma')}" th:errors="*{ma}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Tên:</label>
+                    <input type="text" th:field="*{ten}" placeholder="Nhập tên chương trình"/>
+                    <p th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Giá trị giảm:</label>
+                    <input type="number" step="0.01" th:field="*{giaTriDotGiamGia}" placeholder="VD: 10 hoặc 50000"/>
+                    <p th:if="${#fields.hasErrors('giaTriDotGiamGia')}" th:errors="*{giaTriDotGiamGia}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Loại giảm giá:</label>
+                    <select th:field="*{loai}">
+                        <option value="phan_tram">Phần trăm (%)</option>
+                        <option value="tien_mat">Tiền mặt (VNĐ)</option>
+                    </select>
+                    <p th:if="${#fields.hasErrors('loai')}" th:errors="*{loai}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Ngày bắt đầu:</label>
+                    <input type="datetime-local" th:field="*{ngayBatDau}"/>
+                    <p th:if="${#fields.hasErrors('ngayBatDau')}" th:errors="*{ngayBatDau}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Ngày kết thúc:</label>
+                    <input type="datetime-local" th:field="*{ngayKetThuc}"/>
+                    <p th:if="${#fields.hasErrors('ngayKetThuc')}" th:errors="*{ngayKetThuc}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Ngày tạo:</label>
+                    <input type="text" th:value="${#temporals.format(dotGiamGia.ngayTao, 'dd/MM/yyyy HH:mm')}" readonly/>
+                </div>
+
+                <div class="form-group">
+                    <label>Ngày sửa:</label>
+                    <input type="text" th:value="${#temporals.format(dotGiamGia.ngaySua, 'dd/MM/yyyy HH:mm')}" readonly/>
+                </div>
+            </div>
+
+            <button type="submit" th:text="${dotGiamGia.id == null} ? 'Thêm mới' : 'Cập nhật'"></button>
+        </form>
+
+        <h2>Danh sách Đợt Giảm Giá</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Mã</th>
+                <th>Tên</th>
+                <th>Giá trị</th>
+                <th>Loại</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${dotGiamGias}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.ma}"></td>
+                <td th:text="${item.ten}"></td>
+                <td th:text="${item.giaTriDotGiamGia}"></td>
+                <td th:text="${item.loai == 'phan_tram' ? 'Phần trăm' : 'Tiền mặt'}"></td>
+                <td th:text="${#temporals.format(item.ngayBatDau, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${#temporals.format(item.ngayKetThuc, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+            <span th:switch="${item.trangThai}">
+                <span th:case="0" class="status-0">Chuẩn bị hoạt động</span>
+                <span th:case="1" class="status-1">Đang hoạt động</span>
+                <span th:case="2" class="status-2">Ngừng hoạt động</span>
+                <span th:case="*">?</span>
+            </span>
+                </td>
+                <td>
+                    <a th:href="@{'/admin/dot-giam-gia/edit/' + ${item.id}}">Sửa</a>
+                    <a th:href="@{'/admin/dot-giam-gia/delete/' + ${item.id}}" onclick="return confirm('Bạn chắc chắn xoá?')">Xoá</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${totalPages > 1}">
+            <div style="margin-top: 20px;">
+        <span th:if="${currentPage > 0}">
+            <a th:href="@{/admin/dot-giam-gia(page=${currentPage - 1})}">« Trước</a>
+        </span>
+
+                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                      th:classappend="${i == currentPage} ? 'active-page'">
+            <a th:href="@{/admin/dot-giam-gia(page=${i})}"
+               th:text="${i + 1}">1</a>
+        </span>
+
+                <span th:if="${currentPage < totalPages - 1}">
+            <a th:href="@{/admin/dot-giam-gia(page=${currentPage + 1})}">Sau »</a>
+        </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

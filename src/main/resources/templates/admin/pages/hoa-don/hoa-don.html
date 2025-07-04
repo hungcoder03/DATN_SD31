@@ -58,32 +58,24 @@
             color: red;
         }
 
+        table td, table th {
+            white-space: nowrap;
+            overflow: hidden;
+            max-width: 150px;
+        }
+
     </style>
 </head>
 <body>
 
 <section layout:fragment="content">
-    <div>
-        <h2 class="mb-4 text-center">Quản Lý Hóa Đơn</h2>
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">Danh Sách Hóa Đơn</h2>
 
         <!-- Filter Section -->
         <div class="filter-section">
-            <div class="filter-buttons mb-3">
-                <button class="btn btn-outline-primary">
-                    <a th:href="@{/admin/hoa-don}">Tất cả</a>
-                </button>
-                <button th:each="status : ${T(com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon).values()}"
-                        class="btn btn-outline-primary position-relative">
-                    <a th:href="@{/admin/hoa-don(trang-thai=${status.value})}" th:text="${status.moTa}"></a>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          th:if="${trangThaiCount[status.moTa] != null and trangThaiCount[status.moTa] != 0}"
-                          th:text="${trangThaiCount[status.moTa]}">
-                    </span>
-                </button>
-            </div>
-
             <form method="get" th:action="@{/admin/hoa-don}">
-                <div class="row g-3 align-items-end">
+                <div class="row g-3 align-items-end mb-4">
                     <div class="col-md-3">
                         <label for="startDate" class="form-label">Ngày bắt đầu</label>
                         <input type="date" class="form-control" id="startDate" name="startDate"
@@ -102,11 +94,6 @@
                     </div>
                 </div>
             </form>
-
-        </div>
-
-        <!-- Table Section -->
-        <div class="table-section">
             <div class="row mb-3 align-items-center">
                 <div class="col-md-2">
                     <label for="entries" class="form-label">Hiển thị</label>
@@ -129,6 +116,23 @@
                     </form>
                 </div>
             </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-section" style="width: fit-content;">
+            <div class="filter-buttons mb-3">
+                <button class="btn btn-outline-primary">
+                    <a th:href="@{/admin/hoa-don}">Tất cả</a>
+                </button>
+                <button th:each="status : ${T(com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon).values()}"
+                        class="btn btn-outline-primary position-relative">
+                    <a th:href="@{/admin/hoa-don(trang-thai=${status.name()})}" th:text="${status.moTa}"></a>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          th:if="${trangThaiCount[status.moTa] != null and trangThaiCount[status.moTa] != 0}"
+                          th:text="${trangThaiCount[status.moTa]}">
+                    </span>
+                </button>
+            </div>
 
             <table class="table table-bordered">
                 <thead>
@@ -137,7 +141,7 @@
                     <th>Mã</th>
                     <th>Khách hàng</th>
                     <th>Trạng Thái</th>
-                    <th>Thành Tiền (VNĐ)</th>
+                    <th>Thành Tiền</th>
                     <th>Ngày tạo</th>
                     <th>Thanh toán</th>
                     <th>Thao Tác</th>
@@ -148,8 +152,8 @@
                     <td th:text="${index.count}"></td>
                     <td th:text="${hoaDon.ma}"></td>
                     <td th:text="${hoaDon.tenKH != null ? hoaDon.tenKH : 'Khách lẻ' }"></td>
-                    <td th:text="${hoaDon.getTrangThaiLichSuHoaDon}"></td>
-                    <td th:text="${@utils.formatCurrency(hoaDon.thanhTien)}"></td>
+                    <td th:text="${hoaDon.trangThaiLichSuHoaDonMoTa}"></td>
+                    <td th:text="${@utils.formatCurrency(hoaDon.thanhTien) + ' đ'}"></td>
                     <td th:text="${hoaDon.ngayTao}"></td>
                     <td th:text="${hoaDon.trangThaiHoaDon}"></td>
                     <td>
@@ -161,6 +165,9 @@
                                 data-bs-target="#hoaDonDetailModal"
                                 th:attr="data-ma=${hoaDon.ma}">
                             <i class="fa-solid fa-circle-info"></i>
+                        </button>
+                        <button class="action-btn cancel">
+                            <a th:href="@{/admin/hoa-don/detail1(ma-hoa-don=${hoaDon.ma})}">...</a>
                         </button>
                     </td>
                 </tr>

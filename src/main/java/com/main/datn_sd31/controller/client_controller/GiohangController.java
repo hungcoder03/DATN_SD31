@@ -386,7 +386,7 @@ public class GiohangController {
         }
 
         model.addAttribute("maHoaDon", hoaDon.getMa());
-        return "view/khachhang/thanhcong";
+        return "view/giohang/thanhcong";
     }
 
     @GetMapping("/thanh-toan/vnpay-return")
@@ -417,7 +417,7 @@ public class GiohangController {
             model.addAttribute("message", "Thanh toán thất bại hoặc bị hủy!");
         }
 
-        return "view/khachhang/thanhcong";
+        return "view/giohang/thanhcong";
     }
 
     @GetMapping("/phieu-giam-gia/tien-giam")
