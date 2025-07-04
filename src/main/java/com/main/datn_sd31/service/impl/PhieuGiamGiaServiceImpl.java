@@ -7,6 +7,8 @@ import com.main.datn_sd31.service.PhieuGiamGiaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,42 +20,35 @@ public class PhieuGiamGiaServiceImpl implements PhieuGiamGiaService {
     private final PhieuGiamGiaRepository repository;
 
     @Override
-    public List<PhieuGiamGiaDto> findAll() {
+    public List<PhieuGiamGia> findAll() {
         List<PhieuGiamGia> entities = repository.findAll();
-        List<PhieuGiamGiaDto> dtos = entities.stream()
-            .map(entity -> new PhieuGiamGiaDto(
-                entity.getId(),
-                entity.getMa(),
-                entity.getTen(),
-                entity.getLoaiPhieuGiamGia(),
-                entity.getNgayBatDau(),
-                entity.getNgayKetThuc(),
-                entity.getMucDo(),
-                entity.getGiamToiDa(),
-                entity.getDieuKien(),
-                entity.getSoLuongTon()
-            ))
-            .collect(Collectors.toList());
-
-        return dtos;
+        return entities.isEmpty() ? List.of() : entities;
     }
 
     @Override
-    public PhieuGiamGiaDto findDtoById(Integer id) {
-        Optional<PhieuGiamGia> optional = repository.findById(id);
-        return optional.map(entity -> new PhieuGiamGiaDto(
-                entity.getId(),
-                entity.getMa(),
-                entity.getTen(),
-                entity.getLoaiPhieuGiamGia(),
-                entity.getNgayBatDau(),
-                entity.getNgayKetThuc(),
-                entity.getMucDo(),
-                entity.getGiamToiDa(),
-                entity.getDieuKien(),
-                entity.getSoLuongTon()
-            ))
-            .orElse(null);
+    public List<PhieuGiamGia> findByFilter(LocalDate startDate, LocalDate endDate, String status) {
+        List<PhieuGiamGia> all = repository.findAll();
+
+        return all.stream()
+                .filter(p -> startDate == null || (p.getNgayBatDau() != null && !p.getNgayBatDau().isBefore(startDate)))
+                .filter(p -> endDate == null || (p.getNgayKetThuc() != null && !p.getNgayKetThuc().isAfter(endDate)))
+                .filter(p -> {
+                    if (status == null || status.isEmpty()) return true;
+                    LocalDate now = LocalDate.now();
+                    if ("hoatdong".equals(status)) {
+                        return (p.getNgayBatDau() != null && p.getNgayKetThuc() != null)
+                                && (!now.isBefore(p.getNgayBatDau()) && !now.isAfter(p.getNgayKetThuc()))
+                                && (p.getSoLuongTon() != null && p.getSoLuongTon() > 0);
+                    } else if ("chuabatdau".equals(status)) {
+                        return p.getNgayBatDau() != null && now.isBefore(p.getNgayBatDau());
+                    } else if ("ketthuc".equals(status)) {
+                        return p.getNgayKetThuc() != null && now.isAfter(p.getNgayKetThuc());
+                    } else if ("hethang".equals(status)) {
+                        return p.getSoLuongTon() != null && p.getSoLuongTon() == 0;
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override

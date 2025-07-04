@@ -42,146 +42,16 @@
 <div th:fragment="page">
   <div class="container mt-4">
     <h2 class="mb-4 text-center">Quản Lý Phiếu giảm giá</h2>
-    <button
-            class="btn btn-success mb-3"
-            onclick="resetForm()"
-    >
+    <a th:href="@{/admin/phieu-giam-gia/create}" class="btn btn-success mb-3">
       + Thêm mới
-    </button>
-    <div
-            class="modal fade"
-            id="createModal"
-            tabindex="-1"
-            aria-labelledby="createModalLabel"
-            aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <form
-                id="phieuGiamGiaForm"
-                th:action="@{/admin/phieu-giam-gia/create}"
-                th:object="${phieuGiamGia}"
-                method="post"
-                class="modal-content"
-        >
-          <div class="modal-header">
-            <h5
-                    class="modal-title"
-                    id="createModalLabel"
-                    th:text="${phieuGiamGia.id != null} ? 'Cập nhật Phiếu Giảm Giá' : 'Thêm Mới Phiếu Giảm Giá'"
-            ></h5>
-            <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Đóng"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <input
-                    type="hidden"
-                    th:field="*{id}"
-            />
-            <div class="mb-3">
-              <label>Tên</label>
-              <input
-                      type="text"
-                      class="form-control"
-                      th:field="*{ten}"
-                      required
-              />
-            </div>
-            <div class="mb-3">
-              <label>Mã</label>
-              <input
-                      type="text"
-                      class="form-control"
-                      th:field="*{ma}"
-                      required
-              />
-            </div>
-            <div class="mb-3">
-              <label>Loại Phiếu</label>
-              <select
-                      class="form-select"
-                      th:field="*{loaiPhieuGiamGia}"
-                      id="loaiPhieuGiamGia"
-                      required
-              >
-                <option value="">-- Chọn loại phiếu --</option>
-                <option value="GIAM_PERCENT">Giảm %</option>
-                <option value="GIAM_TIEN">Giảm tiền</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label>Ngày bắt đầu</label>
-              <input
-                      type="date"
-                      class="form-control"
-                      th:field="*{ngayBatDau}"
-              />
-            </div>
-            <div class="mb-3">
-              <label>Ngày kết thúc</label>
-              <input
-                      type="date"
-                      class="form-control"
-                      th:field="*{ngayKetThuc}"
-              />
-            </div>
-            <div class="mb-3">
-              <label>Mức giảm</label>
-              <input
-                      type="number"
-                      class="form-control"
-                      th:field="*{mucDo}"
-                      required
-              />
-            </div>
-            <div class="mb-3" id="divGiamToiDa">
-              <label>Giảm tối đa</label>
-              <input
-                      type="number"
-                      class="form-control"
-                      th:field="*{giamToiDa}"
-                      id="giamToiDa"
-                      required
-              />
-            </div>
-            <div class="mb-3">
-              <label>Điều kiện</label>
-              <input
-                      min="0"
-                      type="number"
-                      class="form-control"
-                      th:field="*{dieuKien}"
-                      required
-              />
-            </div>
-            <div class="mb-3">
-              <label>Số lượng</label>
-              <input
-                      type="number"
-                      class="form-control"
-                      th:field="*{soLuongTon}"
-                      required
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Lưu</button>
-            <button
-                    type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal"
-            >
-              Hủy
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    </a>
+
     <!-- Filter Section -->
-    <div class="filter-section">
+    <form
+            th:action="@{/admin/phieu-giam-gia}"
+            method="get"
+            class="filter-section"
+    >
       <div class="row g-3 align-items-end">
         <div class="col-md-3">
           <label for="startDate" class="form-label">Ngày bắt đầu</label>
@@ -189,6 +59,7 @@
                   type="date"
                   class="form-control"
                   id="startDate"
+                  name="startDate"
                   th:value="${startDate}"
           />
         </div>
@@ -198,17 +69,38 @@
                   type="date"
                   class="form-control"
                   id="endDate"
+                  name="endDate"
                   th:value="${endDate}"
           />
         </div>
         <div class="col-md-3">
-          <button class="btn btn-primary w-100">Tìm kiếm</button>
+          <label for="status" class="form-label">Trạng thái</label>
+          <select class="form-select" id="status" name="status">
+            <option value="">-- Tất cả --</option>
+            <option value="hoatdong" th:selected="${status == 'hoatdong'}">
+              Đang hoạt động
+            </option>
+            <option value="chuabatdau" th:selected="${status == 'chuabatdau'}">
+              Đang chờ
+            </option>
+            <option value="ketthuc" th:selected="${status == 'ketthuc'}">
+              Kết thúc
+            </option>
+            <option value="hethang" th:selected="${status == 'hethang'}">
+              Sử dụng hết
+            </option>
+          </select>
         </div>
-        <div class="col-md-3">
-          <button class="btn btn-outline-secondary w-100">Làm mới</button>
+        <div class="col-md-3 d-flex gap-2">
+          <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+          <a
+                  th:href="@{/admin/phieu-giam-gia}"
+                  class="btn btn-outline-secondary w-100"
+          >Làm mới</a
+          >
         </div>
       </div>
-    </div>
+    </form>
 
     <!-- Table Section -->
     <div class="table-section">
@@ -227,9 +119,9 @@
             <th>Mức giảm</th>
             <th>Giảm tối đa</th>
             <th>Số lượng</th>
-            <th>Điều kiện</th>
             <th>Ngày bắt đầu</th>
             <th>Ngày kết thúc</th>
+            <th>Trạng thái</th>
             <th>Thao Tác</th>
           </tr>
           </thead>
@@ -238,29 +130,47 @@
             <td th:text="${iterStat.index + 1}"></td>
             <td th:text="${item.ten}"></td>
             <td th:text="${item.ma}"></td>
-            <td th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? 'Giảm %' : 'Giảm tiền'}"></td>
             <td
-                    th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? item.mucDo.stripTrailingZeros().toPlainString() + '%' : item.mucDo.stripTrailingZeros().toPlainString() + ' đ'}"
+                    th:text="${item.loaiPhieuGiamGia == 1 ? 'Giảm %' : 'Giảm tiền'}"
             ></td>
             <td
-                    th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? item.giamToiDa.stripTrailingZeros().toPlainString() + ' đ':0}"
+                    th:text="${item.loaiPhieuGiamGia == 1 ? item.mucDo.stripTrailingZeros().toPlainString() + '%' : item.mucDo.stripTrailingZeros().toPlainString() + ' đ'}"
+            ></td>
+            <td
+                    th:text="${item.loaiPhieuGiamGia == 1 ? 0 : item.giamToiDa.stripTrailingZeros().toPlainString() + ' đ'}"
             ></td>
             <td
                     th:text="${item.soLuongTon != null ? item.soLuongTon : 0}"
             ></td>
-            <td
-                    th:text="${item.loaiPhieuGiamGia == 'GIAM_PERCENT' ? item.dieuKien.stripTrailingZeros().toPlainString() + ' đ' : 0}"
-            ></td>s
             <td th:text="${item.ngayBatDau}"></td>
-
             <td th:text="${item.ngayKetThuc}"></td>
             <td>
-              <a
-                      href="#"
-                      class="btn btn-primary btn-edit btn-sm"
-                      th:data-id="${item.id}"
-              >Sửa</a
+                <span th:if="${item.soLuongTon == 0}" class="badge bg-secondary"
+                >Sử dụng hết</span
+                >
+              <span
+                      th:if="${item.ngayBatDau > T(java.time.LocalDate).now() and item.soLuongTon > 0}"
+                      class="badge bg-warning text-dark"
+              >Đang chờ</span
               >
+              <span
+                      th:if="${item.ngayKetThuc < T(java.time.LocalDate).now() and item.soLuongTon > 0}"
+                      class="badge bg-danger"
+              >Kết thúc</span
+              >
+              <span
+                      th:if="${item.ngayBatDau <= T(java.time.LocalDate).now() and item.ngayKetThuc >= T(java.time.LocalDate).now() and item.soLuongTon > 0}"
+                      class="badge bg-success"
+              >Đang hoạt động</span
+              >
+            </td>
+            <td>
+              <a
+                      th:href="@{/admin/phieu-giam-gia/edit/{id}(id=${item.id})}"
+                      class="btn btn-primary btn-sm"
+              >
+                Sửa
+              </a>
               <a
                       th:href="@{'/admin/phieu-giam-gia/delete/' + ${item.id}}"
                       onclick="return confirm('Bạn có chắc muốn xóa phiếu này không?')"
@@ -286,81 +196,5 @@
       pageLength: 10,
       lengthMenu: [10, 25, 50, 100],
     });
-
-    $("#phieuGiamGiaForm").on("submit", function (e) {
-      e.preventDefault();
-      const form = $(this);
-      $.ajax({
-        type: "POST",
-        url: form.attr("action"),
-        data: form.serialize(),
-        success: function (response) {
-          if (response.success) {
-            alert("Lưu thành công!");
-            location.reload();
-          } else {
-            alert("Có lỗi xảy ra: " + response.message);
-          }
-        },
-        error: function () {
-          alert("Có lỗi xảy ra khi lưu dữ liệu.");
-        },
-      });
-    });
-
-    $("table .btn-edit").on("click", function (e) {
-      e.preventDefault();
-      const id = $(this).data("id");
-      $.ajax({
-        url: "/admin/phieu-giam-gia/get/" + id,
-        method: "GET",
-        success: function (data) {
-          $("#phieuGiamGiaForm").attr("action", "/admin/phieu-giam-gia/update");
-          $("#createModalLabel").text("Cập nhật Phiếu Giảm Giá");
-          $("#phieuGiamGiaForm")
-                  .find("input, select")
-                  .each(function () {
-                    const field = $(this).attr("name");
-                    $(this).val(data[field]);
-                  });
-          $("#loaiPhieuGiamGia").change();
-          $("#createModal").modal("show");
-        },
-        error: function () {
-          alert("Không thể lấy dữ liệu phiếu giảm giá.");từ
-        },
-      });
-    });
-
-    $("#loaiPhieuGiamGia").on("change", function () {
-      const selectedValue = $(this).val();
-      if (selectedValue === "GIAM_PERCENT") {
-        $("#mucDo").attr("placeholder", "Nhập phần trăm giảm giá");
-        $("#divGiamToiDa").show();
-        $("#giamToiDa").attr("required", true).val(0);
-      } else if (selectedValue === "GIAM_TIEN") {
-        $("#mucDo").attr("placeholder", "Nhập số tiền giảm");
-        $("#divGiamToiDa").hide();
-        $("#giamToiDa").removeAttr("required").val(0);
-
-      }
-    });
   });
-
-  function resetForm() {
-    const form = $("#phieuGiamGiaForm").get(0);
-    if (form && typeof form.reset === "function") {
-      form.reset();
-    }
-    const hiddenId = $("input[name='id']");
-    if (hiddenId) hiddenId.val("");
-    $("#createModal").modal("show");
-  }
-</script>
-
-<script th:if="${showCreateModal}" th:inline="javascript">
-  const createModal = new bootstrap.Modal(
-          document.getElementById("createModal")
-  );
-  createModal.show();
 </script>

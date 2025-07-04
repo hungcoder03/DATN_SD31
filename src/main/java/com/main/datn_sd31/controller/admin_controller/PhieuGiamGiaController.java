@@ -1,98 +1,95 @@
 package com.main.datn_sd31.controller.admin_controller;
 
 import com.main.datn_sd31.entity.PhieuGiamGia;
-import com.main.datn_sd31.dto.phieu_giam_gia.PhieuGiamGiaDto;
 import com.main.datn_sd31.service.PhieuGiamGiaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/phieu-giam-gia")
 @RequiredArgsConstructor
 public class PhieuGiamGiaController {
+
     private final PhieuGiamGiaService phieuGiamGiaService;
 
     @GetMapping
-    public String index(Model model) {
-        List<PhieuGiamGiaDto> list = phieuGiamGiaService.findAll();
-        model.addAttribute("page", "admin/PhieuGiamGia/index");
+    public String index(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String status,
+            Model model) {
+
+        List<PhieuGiamGia> list;
+
+        if (startDate == null && endDate == null && (status == null || status.isEmpty())) {
+            list = phieuGiamGiaService.findAll();
+        } else {
+            list = phieuGiamGiaService.findByFilter(startDate, endDate, status);
+        }
+
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("status", status);
         model.addAttribute("listData", list);
+        model.addAttribute("page", "admin/PhieuGiamGia/index");
+
+        return "admin/index";
+    }
+
+    @GetMapping("/create")
+    public String showCreateForm(Model model) {
+        model.addAttribute("page", "admin/PhieuGiamGia/create");
         model.addAttribute("phieuGiamGia", new PhieuGiamGia());
         return "admin/index";
     }
 
     @PostMapping("/create")
-    @ResponseBody
-    public ResponseEntity<?> create(
-            @Valid @ModelAttribute("phieuGiamGia") PhieuGiamGia dto,
-            BindingResult result,
-            Model model
-    ) {
-        if (result.hasErrors()) {
-            String errorMessage = result.getAllErrors().get(0).getDefaultMessage();
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", errorMessage
-            ));
+    public String create(@Valid @ModelAttribute("phieuGiamGia") PhieuGiamGia phieuGiamGia,
+                         BindingResult bindingResult,
+                         Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("page", "admin/PhieuGiamGia/create");
+            return "admin/index";
         }
 
-        dto.setNgayTao(LocalDate.now());
-        phieuGiamGiaService.save(dto);
-
-        return ResponseEntity.ok(Map.of(
-                "success", true
-        ));
+        phieuGiamGia.setNgayTao(LocalDate.now());
+        phieuGiamGia.setNgaySua(LocalDate.now());
+        phieuGiamGiaService.save(phieuGiamGia);
+        return "redirect:/admin/phieu-giam-gia";
     }
 
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Integer id, Model model) {
+        PhieuGiamGia entity = phieuGiamGiaService.findById(id);
+        if (entity == null) {
+            return "redirect:/admin/phieu-giam-gia";
+        }
 
-    @GetMapping("/get/{id}")
-    @ResponseBody
-    public ResponseEntity<PhieuGiamGiaDto> getPhieuGiamGia(@PathVariable Integer id) {
-        return ResponseEntity.ok(phieuGiamGiaService.findDtoById(id));
+        model.addAttribute("phieuGiamGia", entity);
+        model.addAttribute("page", "admin/PhieuGiamGia/edit");
+        return "admin/index";
     }
 
     @PostMapping("/update")
-    @ResponseBody
-    public ResponseEntity<?> update(@ModelAttribute("phieuGiamGia") @Valid PhieuGiamGia pg,
-                                    BindingResult result) {
+    public String update(@Valid @ModelAttribute("phieuGiamGia") PhieuGiamGia pg,
+                         BindingResult result, Model model) {
         if (result.hasErrors()) {
-            String errorMessages = result.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .collect(Collectors.joining(", "));
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", errorMessages
-            ));
+            model.addAttribute("page", "admin/PhieuGiamGia/form");
+            return "admin/index";
         }
 
-        try {
-            pg.setNgaySua(LocalDate.now());
-            phieuGiamGiaService.save(pg);
-            return ResponseEntity.ok(Map.of(
-                    "success", true
-            ));
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", ex.getMessage()
-            ));
-        }
+        pg.setNgaySua(LocalDate.now());
+        phieuGiamGiaService.save(pg);
+        return "redirect:/admin/phieu-giam-gia";
     }
 
     @GetMapping("/delete/{id}")

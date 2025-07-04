@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
 
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -16,12 +17,15 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.main.datn_sd31.validator.ValidDateRange;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
+@ValidDateRange(message = "Ngày bắt đầu không được lớn hơn ngày kết thúc")
 @Table(name = "phieu_giam_gia")
 public class PhieuGiamGia {
     @Id
@@ -61,12 +65,9 @@ public class PhieuGiamGia {
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = false;
 
-    @Size(max = 50)
-    @NotNull
-    @Nationalized
-    @NotBlank(message = "Loại phiếu không được để trống")
-    @Column(name = "loai_phieu_giam_gia", nullable = false, length = 50)
-    private String loaiPhieuGiamGia;
+    @NotNull(message = "Chọn loại phiếu giảm giá")
+    @Column(name = "loai_phieu_giam_gia", nullable = false)
+    private Integer loaiPhieuGiamGia;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull(message = "Ngày bắt đầu không được để trống")
@@ -78,6 +79,14 @@ public class PhieuGiamGia {
     @NotNull(message = "Ngày bắt đầu không được để trống")
     private LocalDate ngayKetThuc;
 
+    public void setNgayBatDau(LocalDate ngayBatDau) {
+        this.ngayBatDau = ngayBatDau;
+    }
+
+    public void setKetThuc(LocalDate ngayKetThuc) {
+        this.ngayKetThuc = ngayKetThuc;
+    }
+
     @NotNull(message = "Mức giảm không được để trống")
     @DecimalMin(value = "0", inclusive = true, message = "Mức giảm phải lớn hơn hoặc bằng 0")
     @Column(name = "muc_do", nullable = false, precision = 18, scale = 2)
@@ -85,6 +94,7 @@ public class PhieuGiamGia {
 
     @NotNull(message = "Giảm tối đa không được để trống")
     @Column(name = "giam_toi_da", nullable = false, precision = 18, scale = 2)
+    @Min(value = 0, message = "Giảm tối đa phải lớn hơn hoặc bằng 0")
     private BigDecimal giamToiDa;
 
     @NotNull(message = "Điều kiện không được để trống")
