@@ -90,13 +90,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{#}">
+                    <a class="nav-link" th:href="@{/admin/ban-hang}">
                         <i class="menu-icon mdi mdi-television"></i>
                         <span class="menu-title">Bán hàng</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{admin/hoa-don}">
+                    <a class="nav-link" th:href="@{/admin/hoa-don}">
                         <i class="menu-icon mdi mdi-television"></i>
                         <span class="menu-title">Hoá đơn</span>
                     </a>
@@ -109,6 +109,9 @@
                     </a>
                     <div class="collapse" id="ui-basic">
                         <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" th:href="@{/admin/san-pham/hien_thi}">Sản phẩm</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#">Hình ảnh</a>
                             </li>
@@ -140,19 +143,19 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{admin/phieu-giam-gia}">
+                    <a class="nav-link" th:href="@{/admin/phieu-giam-gia}">
                         <i class="menu-icon mdi mdi-backup-restore"></i>
                         <span class="menu-title">Phiếu giảm giá</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{admin/quan-ly-tai-khoan}">
+                    <a class="nav-link" th:href="@{/admin/quanlytaikhoan/nhanvien}">
                         <i class="menu-icon mdi mdi-backup-restore"></i>
                         <span class="menu-title">Nhân viên</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{admin/quan-ly-tai-khoan}">
+                    <a class="nav-link" th:href="@{/admin/quanlytaikhoan/khachhang}">
                         <i class="menu-icon mdi mdi-backup-restore"></i>
                         <span class="menu-title">Khách hàng</span>
                     </a>
@@ -164,7 +167,7 @@
         <div class="main-panel">
 <!--            Các màn sẽ được đặt ở đây-->
             <div class="content-wrapper" layout:fragment="content">
-                Content is Here!
+                <!-- Nội dung từ các trang con sẽ được nhúng vào đây -->
             </div>
             <!-- content-wrapper ends -->
 
@@ -187,7 +190,7 @@
     <!-- page-body-wrapper ends -->
 </div>
 <!-- container-scroller -->
-
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <!-- plugins:js -->
 <script th:src="@{/vendors/js/vendor.bundle.base.js}"></script>
 <script th:src="@{/vendors/js/vendor.bundle.addons.js}"></script>

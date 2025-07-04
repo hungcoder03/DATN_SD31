@@ -6,12 +6,12 @@
       var data = {
         labels: ["2013", "2014", "2014", "2015", "2016", "2017"],
         datasets: [{
-            label: 'Product',
-            data: [0, 11, 6, 10, 8, 0],
-            backgroundColor: 'rgba(0, 128, 207, 0.4)',
-            borderWidth: 1,
-            fill: true
-          },
+          label: 'Product',
+          data: [0, 11, 6, 10, 8, 0],
+          backgroundColor: 'rgba(0, 128, 207, 0.4)',
+          borderWidth: 1,
+          fill: true
+        },
           {
             label: 'Product',
             data: [0, 7, 11, 8, 11, 0],

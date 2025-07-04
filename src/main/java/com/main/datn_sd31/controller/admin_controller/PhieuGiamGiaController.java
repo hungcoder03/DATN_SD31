@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,26 +39,21 @@ public class PhieuGiamGiaController {
     }
 
     @PostMapping("/create")
-    @ResponseBody
-    public ResponseEntity<?> create(
+    public String create(
             @Valid @ModelAttribute("phieuGiamGia") PhieuGiamGia dto,
             BindingResult result,
-            Model model
+            RedirectAttributes redirectAttributes
     ) {
         if (result.hasErrors()) {
-            String errorMessage = result.getAllErrors().get(0).getDefaultMessage();
-            return ResponseEntity.badRequest().body(Map.of(
-                    "success", false,
-                    "message", errorMessage
-            ));
+            redirectAttributes.addFlashAttribute("showCreateModal", true);
+            redirectAttributes.addFlashAttribute("phieuGiamGia", dto);
+            return "redirect:/admin/phieu-giam-gia";
         }
-
+        dto.setTrangThai(true);
         dto.setNgayTao(LocalDateTime.now());
         phieuGiamGiaService.save(dto);
 
-        return ResponseEntity.ok(Map.of(
-                "success", true
-        ));
+        return "redirect:/admin/phieu-giam-gia"; // ✅ chuyển hướng trang
     }
 
 

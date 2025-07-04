@@ -1,5 +1,6 @@
 package com.main.datn_sd31.service.impl;
 
+import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
 import com.main.datn_sd31.dto.Pagination;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonDTO;
 import com.main.datn_sd31.entity.HoaDon;
@@ -9,6 +10,7 @@ import com.main.datn_sd31.repository.LichSuHoaDonRepository;
 import com.main.datn_sd31.service.HoaDonService;
 import com.main.datn_sd31.util.DateTimeUtils;
 import com.main.datn_sd31.util.SearchUtils;
+import com.main.datn_sd31.util.ThymleafHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,8 +32,10 @@ public class HoaDonServiceIpml implements HoaDonService {
     private final HoaDonRepository hoaDonRepository;
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
 
+
     private HoaDonDTO mapToDTO(HoaDon hoaDon) {
         HoaDonDTO dto = new HoaDonDTO();
+
         dto.setMa(hoaDon.getMa());
 
         if (hoaDon.getKhachHang() != null) {
@@ -59,18 +63,21 @@ public class HoaDonServiceIpml implements HoaDonService {
         if (lichSuMoiNhat != null) {
             dto.setTrangThaiLichSuHoaDon(lichSuMoiNhat.getTrangThai());
         } else {
-            dto.setTrangThaiLichSuHoaDon(9);
+            dto.setTrangThaiLichSuHoaDon(10);
         }
 
         dto.setPhuongThuc(hoaDon.getPhuongThuc());
 
         dto.setGiaGoc(hoaDon.getGiaGoc());
 
-        if (hoaDon.getPhieuGiamGia().getMa() != null) {
+        if (hoaDon.getPhieuGiamGia() != null && hoaDon.getPhieuGiamGia().getMa() != null) {
             dto.setMaGiamGia(hoaDon.getPhieuGiamGia().getMa());
+            dto.setGiamGia((ThymleafHelper.formatCurrency(hoaDon.getPhieuGiamGia().getMucDo())) +
+                    (hoaDon.getPhieuGiamGia().getLoaiPhieuGiamGia() == 1 ? " %" : " đ"));
             dto.setGiaGiamGia(hoaDon.getGiaGiamGia());
         } else {
             dto.setMaGiamGia(null);
+            dto.setGiamGia(null);
             dto.setGiaGiamGia(BigDecimal.valueOf(0));
         }
 
@@ -117,7 +124,7 @@ public class HoaDonServiceIpml implements HoaDonService {
             if (lichSuMoiNhat != null) {
                 hoaDonDTO.setTrangThaiLichSuHoaDon(lichSuMoiNhat.getTrangThai());
             } else {
-                hoaDonDTO.setTrangThaiLichSuHoaDon(9);
+                hoaDonDTO.setTrangThaiLichSuHoaDon(10);
             }
 
             hoaDonDTO.setThanhTien(hoaDon.getThanhTien());
@@ -130,17 +137,18 @@ public class HoaDonServiceIpml implements HoaDonService {
     @Override
     public Map<String, Long> getTrangThaiCount() {
         return getAllHoaDon().stream()
-                .collect(Collectors.groupingBy(HoaDonDTO::getTrangThaiLichSuHoaDon, Collectors.counting()));
+                .collect(Collectors.groupingBy(HoaDonDTO::getTrangThaiLichSuHoaDonMoTa, Collectors.counting()));
     }
 
     @Override
-    public Pagination<HoaDonDTO> getAllHoaDonByStatus(Integer status, int pageNo, int pageSize) {
+    public Pagination<HoaDonDTO> getAllHoaDonByStatus(TrangThaiLichSuHoaDon status, int pageNo, int pageSize) {
         List<HoaDonDTO> all = getAll(
                 0,
                 Integer.MAX_VALUE,
                 LocalDate.of(2020, 1, 1),
                 LocalDate.of(2030, 1, 1)
         ).getContent();
+
         List<HoaDonDTO> filtered = all.stream()
                 .filter(hd -> Objects.equals(hd.getTrangThaiLichSuHoaDon(), status))
                 .toList();
@@ -179,7 +187,7 @@ public class HoaDonServiceIpml implements HoaDonService {
     @Override
     public HoaDonDTO getHoaDonByMa(String ma) {
         List<HoaDon> hoaDon = hoaDonRepository.findByMaContainingIgnoreCase(ma);
-        return mapToDTO(hoaDon.isEmpty() ? null : hoaDon.get(0));
+        return mapToDTO(hoaDon.get(0));
     }
 
 

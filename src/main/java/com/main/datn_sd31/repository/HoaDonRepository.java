@@ -1,5 +1,6 @@
 package com.main.datn_sd31.repository;
 
+import com.main.datn_sd31.entity.GioHangChiTiet;
 import com.main.datn_sd31.entity.HoaDon;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,4 +30,21 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
     WHERE LOWER(hd.ma) LIKE LOWER(CONCAT('%', :ma, '%'))
 """)
     List<HoaDon> findByMaContainingIgnoreCase(@Param("ma") String ma);
+
+    @Query("select n from GioHangChiTiet n where n.id=:id")
+    GioHangChiTiet find(Integer id);
+
+    @Query("select n from GioHangChiTiet n where n.khachHang.id = :username and n.id IN :selectedId ")
+    List<GioHangChiTiet> laySanPhamTheoIds(
+            @Param("username") Integer username,
+            @Param("selectedId") List<Integer> selectedId
+
+    );
+    @Query("select n from HoaDon n where n.khachHang.id = :id ")
+    List<HoaDon> findbyidkhachhang(
+            @Param("id") Integer id
+    );
+
+    @Query("SELECT n FROM HoaDon n WHERE n.ma = :orderCode")
+    HoaDon findByMa(@Param("orderCode") String orderCode);
 }

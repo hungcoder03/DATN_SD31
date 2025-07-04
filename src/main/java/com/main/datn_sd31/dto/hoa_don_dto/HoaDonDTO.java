@@ -28,11 +28,13 @@ public class HoaDonDTO {
 
     private String tenNhanVien;
 
-    private Integer trangThaiLichSuHoaDon;
+    private TrangThaiLichSuHoaDon trangThaiLichSuHoaDon;
 
     private String phuongThuc;
 
     private String maGiamGia;
+
+    private String giamGia;
 
     private BigDecimal giaGoc;
 
@@ -48,9 +50,14 @@ public class HoaDonDTO {
 
     private String ghiChu;
 
-    public String getTrangThaiLichSuHoaDon() {
-        TrangThaiLichSuHoaDon tt = TrangThaiLichSuHoaDon.fromValue(this.trangThaiLichSuHoaDon);
-        return tt != null ? tt.getMoTa() : "Không rõ";
+    public String getTrangThaiLichSuHoaDonMoTa() {
+        return trangThaiLichSuHoaDon != null ? trangThaiLichSuHoaDon.getMoTa() : "Không rõ";
     }
+
+    // Overload setter theo value
+    public void setTrangThaiLichSuHoaDon(int value) {
+        this.trangThaiLichSuHoaDon = TrangThaiLichSuHoaDon.fromValue(value);
+    }
+
 
 }

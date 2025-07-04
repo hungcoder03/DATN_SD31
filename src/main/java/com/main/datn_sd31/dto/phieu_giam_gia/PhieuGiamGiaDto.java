@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -15,9 +16,9 @@ public class PhieuGiamGiaDto {
     private Integer id;
     private String ma;
     private String ten;
-    private String loaiPhieuGiamGia;
-    private LocalDateTime ngayBatDau;
-    private LocalDateTime ngayKetThuc;
+    private Integer loaiPhieuGiamGia;
+    private LocalDate ngayBatDau;
+    private LocalDate ngayKetThuc;
     private BigDecimal mucDo;
     private BigDecimal giamToiDa;
     private BigDecimal dieuKien;

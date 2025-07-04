@@ -1,5 +1,6 @@
 package com.main.datn_sd31.service;
 
+import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
 import com.main.datn_sd31.dto.Pagination;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonDTO;
 import com.main.datn_sd31.entity.HoaDon;
@@ -19,7 +20,7 @@ public interface HoaDonService {
 
     Map<String, Long> getTrangThaiCount();
 
-    Pagination<HoaDonDTO> getAllHoaDonByStatus(Integer status, int pageNo, int pageSize);
+    Pagination<HoaDonDTO> getAllHoaDonByStatus(TrangThaiLichSuHoaDon status, int pageNo, int pageSize);
 
     Pagination<HoaDonDTO> searchByKeyword(String keyword, int pageNo, int pageSize);
 

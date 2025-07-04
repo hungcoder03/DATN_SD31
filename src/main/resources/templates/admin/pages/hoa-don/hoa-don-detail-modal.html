@@ -1,0 +1,58 @@
+<div th:fragment="detail">
+    <div class="row">
+        <!-- Cột trái: Thông tin chung -->
+        <div class="col-md-6">
+            <p><strong>Mã hóa đơn:</strong> <span th:text="${hoaDonDetail.ma}"></span></p>
+            <p><strong>Khách hàng:</strong> <span th:text="${hoaDonDetail.tenKH}"></span></p>
+            <p><strong>Email:</strong> <span th:text="${hoaDonDetail.email}"></span></p>
+            <p><strong>Địa chỉ:</strong> <span th:text="${hoaDonDetail.diaChi}"></span></p>
+            <p><strong>Nhân viên:</strong> <span th:text="${hoaDonDetail.tenNhanVien}"></span></p>
+            <p><strong>Trạng thái:</strong> <span th:text="${hoaDonDetail.getTrangThaiLichSuHoaDonMoTa()}"></span></p>
+            <p><strong>Ghi chú:</strong> <span th:text="${hoaDonDetail.ghiChu}"></span></p>
+        </div>
+
+        <!-- Cột phải: Thông tin giá -->
+        <div class="col-md-6">
+            <p><strong>Giá gốc:</strong> <span th:text="${@utils.formatCurrency(hoaDonDetail.giaGoc)}"></span></p>
+            <p><strong>Giá giảm:</strong> <span th:text="${@utils.formatCurrency(hoaDonDetail.giaGiamGia)}"></span></p>
+            <p><strong>Phí vận chuyển:</strong> <span th:text="${@utils.formatCurrency(hoaDonDetail.phiVanChuyen)}"></span></p>
+            <p><strong>Thành tiền:</strong> <span th:text="${@utils.formatCurrency(hoaDonDetail.thanhTien)}"></span></p>
+            <p><strong>Ngày tạo:</strong> <span th:text="${hoaDonDetail.ngayTao}"></span></p>
+            <p><strong>Thanh toán:</strong> <span th:text="${hoaDonDetail.trangThaiHoaDon}"></span></p>
+        </div>
+    </div>
+    <div>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên sản phẩm</th>
+                <th>Giá gốc</th>
+                <th>Giá giảm</th>
+                <th>Giá sau giảm</th>
+                <th>Số lượng</th>
+                <th>Tổng tiền</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="hdct, index : ${hdctList}">
+                <td th:text="${index.count}"></td>
+                <td th:text="${hdct.tenCTSP}"></td>
+                <td th:text="${@utils.formatCurrency(hdct.giaGoc)}"></td>
+                <td th:text="${@utils.formatCurrency(hdct.giaGiam)}"></td>
+                <td th:text="${@utils.formatCurrency(hdct.giaSauGiam)}"></td>
+                <td th:text="${@utils.formatCurrency(hdct.soLuong)}"></td>
+                <td th:text="${@utils.formatCurrency(hdct.tongTien)}"></td>
+                <!--        <td>-->
+                <!--          <button class="action-btn accept">✔</button>-->
+                <!--          <button class="action-btn cancel">✖</button>-->
+                <!--          <button class="action-btn cancel btn-detail" type="button" th:attr="data-ma=${hoaDon.ma}" >-->
+                <!--            <i class="fa-solid fa-circle-info"></i>-->
+                <!--          </button>-->
+                <!--        </td>-->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

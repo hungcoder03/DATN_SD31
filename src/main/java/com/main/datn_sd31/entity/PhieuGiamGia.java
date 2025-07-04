@@ -6,8 +6,10 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -37,11 +39,9 @@ public class PhieuGiamGia {
     @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 
@@ -55,17 +55,18 @@ public class PhieuGiamGia {
     @Column(name = "trang_thai", nullable = false)
     private Boolean trangThai = false;
 
-    @Size(max = 50)
     @NotNull
     @Nationalized
     @Column(name = "loai_phieu_giam_gia", nullable = false, length = 50)
-    private String loaiPhieuGiamGia;
+    private Integer loaiPhieuGiamGia;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(name = "ngay_bat_dau")
-    private LocalDateTime ngayBatDau;
+    private LocalDate ngayBatDau;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "ngay_ket_thuc")
-    private LocalDateTime ngayKetThuc;
+    private LocalDate ngayKetThuc;
 
     @NotNull
     @Column(name = "muc_do", nullable = false, precision = 18, scale = 2)

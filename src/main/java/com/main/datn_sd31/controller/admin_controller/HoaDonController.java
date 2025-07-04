@@ -1,5 +1,6 @@
 package com.main.datn_sd31.controller.admin_controller;
 
+import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
 import com.main.datn_sd31.dto.Pagination;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonDTO;
 import com.main.datn_sd31.service.HoaDonChiTietService;
@@ -25,7 +26,7 @@ public class HoaDonController {
     @GetMapping("")
     public String hoaDon(
             Model model,
-            @RequestParam(name = "trang-thai", required = false) Integer trangThai,
+            @RequestParam(name = "trang-thai", required = false) TrangThaiLichSuHoaDon trangThai,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
@@ -78,7 +79,7 @@ public class HoaDonController {
     ) {
         model.addAttribute("hoaDonDetail", hoaDonService.getHoaDonByMa(ma));
         model.addAttribute("hdctList", hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(ma));
-        return "admin/pages/hoa-don/hoa-don-detail";
+        return "/admin/pages/hoa-don/hoa-don-detail-modal";
     }
 
 }

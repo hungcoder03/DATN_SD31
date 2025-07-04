@@ -134,7 +134,7 @@
 <div class="sidebar" id="sidebar">
     <ul class="nav flex-column">
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/admin}" th:classappend="${activePage == 'banhang'} ? 'active' : ''">
+            <a class="nav-link" th:href="@{/admin/ban-hang}" th:classappend="${activePage == 'banhang'} ? 'active' : ''">
                 <i class="bi bi-cart"></i> Bán Hàng
             </a>
         </li>
@@ -149,12 +149,12 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/khachhang}" th:classappend="${activePage == 'khachhang'} ? 'active' : ''">
+            <a class="nav-link" th:href="@{/admin/quanlytaikhoan/khachhang}" th:classappend="${activePage == 'khachhang'} ? 'active' : ''">
                 <i class="bi bi-person"></i> Khách Hàng
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/nhanvien}" th:classappend="${activePage == 'nhanvien'} ? 'active' : ''">
+            <a class="nav-link" th:href="@{/admin/quanlytaikhoan/nhanvien}" th:classappend="${activePage == 'nhanvien'} ? 'active' : ''">
                 <i class="bi bi-people"></i> Nhân Viên
             </a>
         </li>

@@ -39,11 +39,9 @@ public class ChatLieu {
     @Column(name = "nguoi_sua")
     private Integer nguoiSua;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 

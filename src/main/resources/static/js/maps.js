@@ -14,12 +14,12 @@ if ($('#map').length) {
       zoom: MapZoom,
       center: MapLocation,
       styles: [{
-          "featureType": "landscape.man_made",
-          "elementType": "geometry",
-          "stylers": [{
-            "color": "#f7f1df"
-          }]
-        },
+        "featureType": "landscape.man_made",
+        "elementType": "geometry",
+        "stylers": [{
+          "color": "#f7f1df"
+        }]
+      },
         {
           "featureType": "landscape.natural",
           "elementType": "geometry",

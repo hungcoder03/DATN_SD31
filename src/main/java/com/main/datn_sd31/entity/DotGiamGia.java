@@ -37,11 +37,9 @@ public class DotGiamGia {
     @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 

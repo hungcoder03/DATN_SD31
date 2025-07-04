@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -36,10 +37,12 @@ public class SanPham {
     @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;

@@ -32,12 +32,10 @@ public class HoaDon {
     private String ma;
 
     @NotNull
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao", nullable = false)
     private LocalDateTime ngayTao;
 
     @NotNull
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua", nullable = false)
     private LocalDateTime ngaySua;
 
@@ -49,6 +47,9 @@ public class HoaDon {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "khach_hang_id", nullable = false)
     private KhachHang khachHang;
+
+    @Column(name = "loai_hoa_don", nullable = false)
+    private String loaihoadon;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

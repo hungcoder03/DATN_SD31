@@ -40,11 +40,9 @@ public class HinhAnh {
     @Column(name = "nguoi_sua")
     private Integer nguoiSua;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
     private LocalDateTime ngaySua;
 
@@ -63,4 +61,6 @@ public class HinhAnh {
     @Column(name = "url", nullable = false)
     private String url;
 
+    @Column(name = "loai_anh")
+    private Integer loaiAnh;
 }

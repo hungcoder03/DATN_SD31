@@ -25,7 +25,6 @@ public class ChiTietSanPham {
     private Integer id;
 
     @Size(max = 200)
-    @NotNull
     @Nationalized
     @Column(name = "ten_ct", nullable = false, length = 200)
     private String tenCt;
@@ -34,6 +33,9 @@ public class ChiTietSanPham {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "san_pham_id", nullable = false)
     private SanPham sanPham;
+
+    @Column(name = "gia_goc")
+    private BigDecimal giaGoc;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dot_giam_gia_id")

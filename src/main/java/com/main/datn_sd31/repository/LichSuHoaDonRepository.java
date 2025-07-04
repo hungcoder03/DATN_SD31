@@ -17,4 +17,8 @@ public interface LichSuHoaDonRepository extends JpaRepository<LichSuHoaDon, Inte
 
     LichSuHoaDon findTopByHoaDonOrderByIdDesc(HoaDon hoaDon);
 
+    List<LichSuHoaDon> findLichSuHoaDonsByHoaDon(HoaDon hoaDon);
+
 }
+
+

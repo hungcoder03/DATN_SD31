@@ -17,22 +17,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/css/**", "/js/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/admin", true)
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-            );
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/", "/login",
+                                "/uploads/**",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**",
+                                "/vendors/**",
+                                "/webjars/**",
+                                "/static/**",
+                                "/favicon.ico",
+                                "/khach-hang/**"
+                        ).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/admin", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/")
+                );
 
         return http.build();
     }
+
+
+
+
 
     @Bean
     public UserDetailsService userDetailsService() {

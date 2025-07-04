@@ -1,58 +1,386 @@
-<div th:fragment="detail">
-  <div class="row">
-    <!-- Cột trái: Thông tin chung -->
-    <div class="col-md-6">
-      <p><strong>Mã hóa đơn:</strong> <span th:text="${hoaDonDetail.ma}"></span></p>
-      <p><strong>Khách hàng:</strong> <span th:text="${hoaDonDetail.tenKH}"></span></p>
-      <p><strong>Email:</strong> <span th:text="${hoaDonDetail.email}"></span></p>
-      <p><strong>Địa chỉ:</strong> <span th:text="${hoaDonDetail.diaChi}"></span></p>
-      <p><strong>Nhân viên:</strong> <span th:text="${hoaDonDetail.tenNhanVien}"></span></p>
-      <p><strong>Trạng thái:</strong> <span th:text="${hoaDonDetail.getTrangThaiLichSuHoaDon()}"></span></p>
-      <p><strong>Ghi chú:</strong> <span th:text="${hoaDonDetail.ghiChu}"></span></p>
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+  <title>Chi tiết Hóa đơn</title>
+  <meta charset="UTF-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+
+    h2, h3 {
+      color: #343a40;
+    }
+
+    table th {
+      background-color: #dee2e6;
+    }
+
+    table td, table th {
+      vertical-align: middle !important;
+    }
+
+    strong {
+      color: #495057;
+    }
+
+    .label-info {
+      font-weight: bold;
+      color: #6c757d;
+    }
+
+    .timeline-container {
+      position: relative;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 20px 0;
+      /* Scrollbar styling */
+      scrollbar-width: thin;
+      scrollbar-color: #ccc transparent;
+    }
+
+    .timeline-container::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .timeline-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .timeline-container::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+
+    .timeline-container::-webkit-scrollbar-thumb:hover {
+      background: #999;
+    }
+
+    .timeline {
+      display: flex;
+      position: relative;
+      min-width: max-content;
+      padding: 20px 0;
+    }
+
+    .timeline-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      min-width: 200px;
+      padding: 0 15px;
+    }
+
+    .timeline-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 25px;
+      right: -15px;
+      width: 30px;
+      height: 4px;
+      background: #e0e0e0;
+      z-index: 1;
+    }
+
+    .timeline-step.step-success:not(:last-child)::after {
+      background: #28a745;
+    }
+
+    .timeline-step.step-warning:not(:last-child)::after {
+      background: #ffc107;
+    }
+
+    .timeline-step.step-cancelled:not(:last-child)::after {
+      background: #dc3545;
+    }
+
+    .icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #6c757d;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      font-size: 20px;
+      z-index: 2;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: all 0.3s ease;
+    }
+
+    .step-warning .icon {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .step-success .icon {
+      background: #28a745;
+    }
+
+    .step-cancelled .icon {
+      background: #dc3545;
+    }
+
+    .timeline-step:hover .icon {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .label {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .date-label {
+      font-size: 12px;
+      color: #6c757d;
+      font-weight: normal;
+    }
+
+    .scroll-hint {
+      text-align: center;
+      color: #6c757d;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .timeline-step {
+        min-width: 150px;
+        padding: 0 10px;
+      }
+
+      .icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+
+      .label {
+        font-size: 12px;
+      }
+
+      .date-label {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<section layout:fragment="content">
+
+  <!-- Tiêu đề -->
+  <div class="container mt-4 text-center">
+    <h2 class="mb-4">
+      <a th:href="@{/admin/hoa-don}" class="text-decoration-none">Danh Sách Hóa Đơn</a>
+      <span class="mx-2 text-muted">/</span>
+      <span th:text="'Hóa đơn ' + ${maHoaDon}"></span>
+    </h2>
+  </div>
+
+  <div class="container mt-4">
+    <div class="timeline-container" id="timelineContainer">
+      <div class="timeline">
+        <div th:each="ls : ${lichSuList}" class="timeline-step"
+             th:classappend="${ls.trangThai == 3 ? 'step-warning' : (ls.trangThai == 9 ? 'step-cancelled' : (ls.trangThai == 5 ? 'step-info' : (ls.ngayTao != null ? 'step-success' : '')))}">
+          <div class="icon">
+            <i th:class="${ls.iconTrangThai}"></i>
+          </div>
+          <div class="label" th:text="${ls.trangThaiMoTa}"></div>
+          <div class="date-label">
+            <span th:text="${ls.ngayTao != null ? @utils_date.format(ls.ngayTao) : '--/--/----'}"></span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Cột phải: Thông tin giá -->
-    <div class="col-md-6">
-      <p><strong>Giá gốc:</strong> <span th:text="${@utils.formatCurrency(hoaDonDetail.giaGoc)}"></span></p>
-      <p><strong>Giá giảm:</strong> <span th:text="${@utils.formatCurrency(hoaDonDetail.giaGiamGia)}"></span></p>
-      <p><strong>Phí vận chuyển:</strong> <span th:text="${@utils.formatCurrency(hoaDonDetail.phiVanChuyen)}"></span></p>
-      <p><strong>Thành tiền:</strong> <span th:text="${@utils.formatCurrency(hoaDonDetail.thanhTien)}"></span></p>
-      <p><strong>Ngày tạo:</strong> <span th:text="${hoaDonDetail.ngayTao}"></span></p>
-      <p><strong>Thanh toán:</strong> <span th:text="${hoaDonDetail.trangThaiHoaDon}"></span></p>
+    <div class="scroll-hint" th:if="${#lists.size(lichSuList) > 6}">
+      ← Vuốt hoặc kéo để xem thêm →
+    </div>
+
+    <div class="row mb-4">
+      <!-- Nút mở modal -->
+      <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalCapNhatTrangThai">
+        Cập nhật trạng thái
+      </button>
     </div>
   </div>
-  <div>
-    <table class="table table-bordered">
-      <thead>
-      <tr>
-        <th>STT</th>
-        <th>Tên sản phẩm</th>
-        <th>Giá gốc</th>
-        <th>Giá giảm</th>
-        <th>Giá sau giảm</th>
-        <th>Số lượng</th>
-        <th>Tổng tiền</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="hdct, index : ${hdctList}">
-        <td th:text="${index.count}"></td>
-        <td th:text="${hdct.tenCTSP}"></td>
-        <td th:text="${@utils.formatCurrency(hdct.giaGoc)}"></td>
-        <td th:text="${@utils.formatCurrency(hdct.giaGiam)}"></td>
-        <td th:text="${@utils.formatCurrency(hdct.giaSauGiam)}"></td>
-        <td th:text="${@utils.formatCurrency(hdct.soLuong)}"></td>
-        <td th:text="${@utils.formatCurrency(hdct.tongTien)}"></td>
-        <!--        <td>-->
-        <!--          <button class="action-btn accept">✔</button>-->
-        <!--          <button class="action-btn cancel">✖</button>-->
-        <!--          <button class="action-btn cancel btn-detail" type="button" th:attr="data-ma=${hoaDon.ma}" >-->
-        <!--            <i class="fa-solid fa-circle-info"></i>-->
-        <!--          </button>-->
-        <!--        </td>-->
-      </tr>
-      </tbody>
-    </table>
+
+  <!-- Modal -->
+  <div class="modal fade" id="modalCapNhatTrangThai" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form th:action="@{/admin/hoa-don/detail1/cap-nhat-trang-thai}" method="post">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">Cập nhật trạng thái đơn hàng</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="ma-hoa-don" th:value="${hoaDon.ma}"/>
+
+            <div class="mb-3">
+              <label for="trangThaiMoi" class="form-label">Chọn trạng thái mới:</label>
+              <select name="trangThaiMoi" id="trangThaiMoi" class="form-select">
+                <option th:each="tt : ${T(com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon).values()}"
+                        th:value="${tt.value}"
+                        th:text="${tt.moTa}"></option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="ghiChu" class="form-label">Ghi chú</label>
+              <textarea class="form-control" id="ghiChu" name="ghiChu" rows="3" placeholder="Nhập ghi chú..."></textarea>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="quayLui" id="quayLui" value="true">
+              <label class="form-check-label" for="quayLui">
+                Quay lại trạng thái trước đó
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button type="submit" class="btn btn-primary">Xác nhận</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 
-</div>
+  <!-- Thông tin chung -->
+  <div class="container mt-4">
+    <h3>Thông tin chung</h3>
+    <hr>
+    <div class="row mb-2">
+      <div class="col-md-6">
+        <p><strong>Mã hóa đơn:</strong> <span th:text="${hoaDon.ma}"></span></p>
+        <p><strong>Khách hàng:</strong> <span th:text="${hoaDon.tenKH}"></span></p>
+        <p><strong>Email:</strong> <span th:text="${hoaDon.email}"></span></p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>SĐT:</strong> <span th:text="${hoaDon.soDienThoai}"></span></p>
+        <p><strong>Địa chỉ:</strong> <span th:text="${hoaDon.diaChi}"></span></p>
+        <p><strong>Nhân viên:</strong> <span th:text="${hoaDon.tenNhanVien}"></span></p>
+      </div>
+    </div>
+    <p><strong>Trạng thái:</strong> <span th:text="${hoaDon.getTrangThaiLichSuHoaDonMoTa()}"></span></p>
+    <p><strong>Ghi chú:</strong> <span th:text="${hoaDon.ghiChu}"></span></p>
+  </div>
+
+  <!-- Danh sách sản phẩm -->
+  <div class="container mt-4">
+    <h3>Danh sách sản phẩm</h3>
+    <hr>
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="text-center">
+        <tr>
+          <th>STT</th>
+          <th>Tên sản phẩm</th>
+          <th>Giá gốc</th>
+          <th>Giá giảm</th>
+          <th>Giá sau giảm</th>
+          <th>Số lượng</th>
+          <th>Tổng tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="hdct, index : ${hdctList}">
+          <td th:text="${index.count}" class="text-center"></td>
+          <td th:text="${hdct.tenCTSP}"></td>
+          <td th:text="${@utils.formatCurrency(hdct.giaGoc)}" class="text-end"></td>
+          <td th:text="${@utils.formatCurrency(hdct.giaGiam)}" class="text-end"></td>
+          <td th:text="${@utils.formatCurrency(hdct.giaSauGiam)}" class="text-end"></td>
+          <td th:text="${hdct.soLuong}" class="text-center"></td>
+          <td th:text="${@utils.formatCurrency(hdct.tongTien)}" class="text-end"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tổng kết thanh toán -->
+  <div class="container mt-4">
+    <h3>Tổng kết</h3>
+    <hr>
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>Phiếu giảm giá:</strong> <span th:text="${hoaDon.maGiamGia}"></span></p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>Giảm giá:</strong> <span th:text="${hoaDon.giamGia}"></span></p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>Giá gốc:</strong> <span th:text="${@utils.formatCurrency(hoaDon.giaGoc)}"></span></p>
+        <p><strong>Giá giảm:</strong> <span th:text="${@utils.formatCurrency(hoaDon.giaGiamGia)}"></span></p>
+        <p><strong>Phí vận chuyển:</strong> <span th:text="${@utils.formatCurrency(hoaDon.phiVanChuyen)}"></span></p>
+        <p><strong>Thành tiền:</strong> <span th:text="${@utils.formatCurrency(hoaDon.thanhTien)}"></span></p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>Ngày tạo:</strong> <span th:text="${hoaDon.ngayTao}"></span></p>
+        <p><strong>Thanh toán:</strong> <span th:text="${hoaDon.trangThaiHoaDon}"></span></p>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+        crossorigin="anonymous"></script>
+
+<!-- JavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('timelineContainer');
+
+    // Smooth scroll với mouse wheel
+    if (container) {
+      container.addEventListener('wheel', function(e) {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          this.scrollLeft += e.deltaY > 0 ? 50 : -50;
+        }
+      });
+    }
+  });
+</script>
+
+<script>
+  const quayLuiCheckbox = document.getElementById("quayLui");
+  const trangThaiSelect = document.getElementById("trangThaiMoi");
+
+  quayLuiCheckbox.addEventListener("change", function () {
+    trangThaiSelect.disabled = this.checked;
+  });
+</script>
+
+
+</body>
+</html>
