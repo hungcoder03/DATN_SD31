@@ -93,24 +93,6 @@
                 </select>
             </div>
 
-            <!-- Ảnh chính -->
-            <div class="col-md-6">
-                <label class="form-label">Ảnh chính (có thể chọn lại)</label>
-                <input type="file" name="anhChinh" class="form-control">
-                <div th:if="${form.anhChinhUrl != null}" class="mt-2">
-                    <img th:src="@{${form.anhChinhUrl}}" style="height: 120px; border-radius: 8px;" alt="Ảnh hiện tại">
-                </div>
-            </div>
-
-            <!-- Ảnh phụ -->
-            <div class="col-12">
-                <label class="form-label">Ảnh phụ (có thể chọn lại)</label>
-                <input type="file" name="anhPhu" class="form-control" multiple>
-                <div class="d-flex flex-wrap mt-2 gap-2">
-                    <img th:each="anh : ${form.anhPhuUrls}" th:src="@{${anh}}" style="height: 80px; border-radius: 8px;">
-                </div>
-            </div>
-
             <!-- Nút submit -->
             <div class="col-12 d-flex justify-content-between mt-4">
                 <a th:href="@{/admin/san-pham/hien_thi}" class="btn btn-secondary">← Quay lại</a>

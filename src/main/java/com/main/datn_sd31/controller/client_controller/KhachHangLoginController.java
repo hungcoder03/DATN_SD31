@@ -1,0 +1,15 @@
+package com.main.datn_sd31.controller.client_controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/khach-hang")
+public class KhachHangLoginController {
+
+    @GetMapping("/dang-nhap")
+    public String hienThiFormLogin() {
+        return "khachhang/login";  // trỏ tới file login.html trong templates/khachhang/
+    }
+}

@@ -17,6 +17,7 @@ import com.main.datn_sd31.repository.Kieudangrepository;
 import com.main.datn_sd31.repository.Loaithurepository;
 import com.main.datn_sd31.repository.Mausacrepository;
 import com.main.datn_sd31.repository.NhanVienRepository;
+import com.main.datn_sd31.repository.SanPhamRepository;
 import com.main.datn_sd31.repository.Sizerepository;
 import com.main.datn_sd31.repository.Thuonghieurepository;
 import com.main.datn_sd31.repository.Xuatxurepository;
@@ -66,6 +67,7 @@ public class SanPhamController {
     private final Chitietsanphamrepository chitietsanphamRepo;
     private final Hinhanhrepository hinhanhrepository;
     private final Loaithurepository loaithurepository;
+    private final SanPhamRepository sanPhamRepository;
     private final Dotgiamgiarepository dotgiamgiarepository;
 
     @GetMapping("/hien_thi")
@@ -146,10 +148,24 @@ public class SanPhamController {
     }
 
     @GetMapping("/xoa/{id}")
-    public String xoa(@PathVariable("id") Integer id) {
-        sanPhamService.delete(id);
+    public String xoa(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        SanPham sp = sanPhamService.findbyid(id);
+        if (sp != null) {
+            List<ChiTietSanPham> danhSachChiTiet = chitietsanphamRepo.findBySanPhamId(id);
+
+            if (danhSachChiTiet != null && !danhSachChiTiet.isEmpty()) {
+                // Không cho phép xóa nếu còn chi tiết sản phẩm
+                redirectAttributes.addFlashAttribute("error", "Không thể xóa. Sản phẩm còn chi tiết tồn tại.");
+                return "redirect:/admin/san-pham/hien_thi";
+            }
+
+            sp.setTrangThai(false); // Ngừng hoạt động
+            sanPhamRepository.save(sp);
+        }
+
         return "redirect:/admin/san-pham/hien_thi";
     }
+
     @GetMapping("/sua/{id}")
     public String showEditForm(@PathVariable("id") Integer id, Model model) {
         SanPham sp = sanPhamService.findbyid(id);
@@ -163,6 +179,35 @@ public class SanPhamController {
         return "admin/pages/sanpham/sua-san-pham"; // HTML path
     }
 
+    @PostMapping("/admin/san-pham/sua")
+    public String suaSanPham(@ModelAttribute("sanpham") SanPham sanPham,
+                             RedirectAttributes redirectAttributes) {
+
+        SanPham spGoc = sanPhamService.findbyid(sanPham.getId());
+
+        if (spGoc == null) {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm để cập nhật.");
+            return "redirect:/admin/san-pham/hien_thi";
+        }
+
+        // Cập nhật thông tin sản phẩm
+        spGoc.setMa(sanPham.getMa());
+        spGoc.setTen(sanPham.getTen());
+        spGoc.setMoTa(sanPham.getMoTa());
+        spGoc.setTrangThai(sanPham.getTrangThai());
+        spGoc.setChatLieu(sanPham.getChatLieu());
+        spGoc.setXuatXu(sanPham.getXuatXu());
+        spGoc.setDanhMuc(sanPham.getDanhMuc());
+        spGoc.setKieuDang(sanPham.getKieuDang());
+        spGoc.setThuongHieu(sanPham.getThuongHieu());
+        spGoc.setLoaiThu(sanPham.getLoaiThu());
+
+        // Lưu lại
+        sanPhamRepository.save(spGoc);
+
+        redirectAttributes.addFlashAttribute("success", "Cập nhật sản phẩm thành công.");
+        return "redirect:/admin/san-pham/hien_thi";
+    }
 
     @GetMapping("/xem/{id}")
     public String xemSanPhamChiTiet(@PathVariable("id") Integer id,

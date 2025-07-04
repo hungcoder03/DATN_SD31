@@ -180,7 +180,7 @@
 <body>
 
 <section layout:fragment="content">
-    <div class="container mt-4">
+    <div >
         <h1  th:text="${dotGiamGia.id == null} ? 'Thêm Đợt Giảm Giá' : 'Cập nhật Đợt Giảm Giá'"></h1>
 
         <form th:action="@{/admin/dot-giam-gia/save}" th:object="${dotGiamGia}" method="post">
