@@ -6,7 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -15,7 +15,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "chat_lieu")
 public class ChatLieu {
@@ -40,19 +39,16 @@ public class ChatLieu {
     @Column(name = "nguoi_sua")
     private Integer nguoiSua;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
-    private LocalDate ngayTao;
+    private LocalDateTime ngayTao;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
-    private LocalDate ngaySua;
+    private LocalDateTime ngaySua;
 
     @Column(name = "trang_thai")
     private Boolean trangThai;
 
     @OneToMany(mappedBy = "chatLieu")
-    @ToString.Exclude
     private Set<SanPham> sanPhams = new LinkedHashSet<>();
 
 }

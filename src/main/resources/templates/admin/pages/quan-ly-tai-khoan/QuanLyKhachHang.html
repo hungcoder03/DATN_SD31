@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý khách hàng</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<section layout:fragment="content">
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">Quản lý khách hàng</h1>
+
+    <div class="d-flex justify-content-between mb-3">
+        <form th:action="@{/admin/quanlytaikhoan/khachhang/search}" method="get" class="d-flex">
+            <input type="text" name="sdt" class="form-control me-2" placeholder="Nhập SĐT bất kỳ" required>
+            <button type="submit" class="btn btn-secondary">
+                <i class="bi bi-search"></i> Tìm
+            </button>
+
+            <!-- Chỉ hiển thị nút quay lại khi đã tìm kiếm -->
+            <a th:if="${isSearch}" th:href="@{/admin/quanlytaikhoan/khachhang}" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-arrow-counterclockwise"></i> Quay lại
+            </a>
+        </form>
+
+
+        <button type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#khModal">
+            <i class="bi bi-person-plus"></i> Thêm khách hàng
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th>STT</th>
+                    <th>Tên</th>
+                    <th>SĐT</th>
+                    <th>Email</th>
+                    <th>Ngày sinh</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="kh, stat : ${khachhangList}">
+                    <td th:text="${stat.count}"></td>
+                    <td th:text="${kh.ten}"></td>
+                    <td th:text="${kh.soDienThoai}"></td>
+                    <td th:text="${kh.email}"></td>
+                    <td th:text="${kh.ngaySinh}"></td>
+                    <td th:text="${kh.trangThai} ? 'Hoạt động' : 'Ngưng hoạt động'"></td>
+                    <td class="text-nowrap">
+                        <a th:href="@{/admin/quanlytaikhoan/khachhang/chitiet(id=${kh.id})}"
+                           class="btn btn-sm btn-info">
+                            Chi tiết
+                        </a>
+                        <a th:href="@{/admin/quanlytaikhoan/khachhang/sua(id=${kh.id})}" class="btn btn-sm btn-warning">
+                            Sửa
+                        </a>
+                        <a th:href="@{/admin/quanlytaikhoan/khachhang/delete(id=${kh.id})}"
+                           class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xoá?')">Xóa</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm / Sửa Khách hàng -->
+<div class="modal fade" id="khModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <form th:action="@{/admin/quanlytaikhoan/khachhang/save}"
+                  th:object="${khachhang}"
+                  method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm khách hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6 form-floating">
+                            <input type="text" th:field="*{ma}" class="form-control" placeholder="Mã" required>
+                            <label for="ma">Mã</label>
+                            <div class="text-danger" th:if="${#fields.hasErrors('ma')}" th:errors="*{ma}"></div>
+                        </div>
+
+                        <div class="col-md-6 form-floating">
+                            <input type="text" th:field="*{ten}" class="form-control" placeholder="Tên" required>
+                            <label for="ten">Tên</label>
+                        </div>
+                        <div class="col-md-6 form-floating">
+                            <input type="date" th:field="*{ngaySinh}" class="form-control" placeholder="Ngày sinh" required>
+                            <label for="ngaySinh">Ngày sinh</label>
+                        </div>
+                        <div class="col-md-6 form-floating">
+                            <input type="text" th:field="*{soDienThoai}" class="form-control" placeholder="Số điện thoại" required>
+                            <label for="soDienThoai">Số điện thoại</label>
+                            <div class="text-danger" th:if="${#fields.hasErrors('soDienThoai')}" th:errors="*{soDienThoai}"></div>
+                        </div>
+
+<!--                        <input type="text" th:field="*{ngayThamGia}" class="form-control" readonly>-->
+
+                        <div class="col-md-6 form-floating">
+                            <select th:field="*{gioiTinh}" class="form-select" required>
+                                <option value="true">Nam</option>
+                                <option value="false">Nữ</option>
+                            </select>
+                            <label for="gioiTinh">Giới tính</label>
+                        </div>
+                        <div class="col-md-6 form-floating">
+                            <input type="email" th:field="*{email}" class="form-control" placeholder="Email" required>
+                            <label for="email">Email</label>
+                            <div class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+
+
+                        <div class="col-md-6">
+                            <div class="form-floating position-relative">
+                                <input th:type="${passwordVisible} ? 'text' : 'password'"
+                                       th:field="*{matKhau}" id="matKhauInput"
+                                       class="form-control" placeholder="Mật khẩu" required>
+                                <label for="matKhauInput">Mật khẩu</label>
+                                <button type="button"
+                                        class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 border-0"
+                                        style="z-index: 10"
+                                        onclick="togglePasswordVisibility()">
+                                    <i class="bi" id="eyeIcon"
+                                       th:classappend="${passwordVisible} ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                </button>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-md-6 form-floating">
+                            <select th:field="*{trangThai}" class="form-select" required>
+                                <option value="true">Hoạt động</option>
+                                <option value="false">Ngưng hoạt động</option>
+                            </select>
+                            <label for="trangThai">Trạng thái</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let showModal = /*[[${showModal}]]*/ false;
+        if (showModal) {
+            const modal = new bootstrap.Modal(document.getElementById('khModal'));
+            modal.show();
+        }
+        /*]]>*/
+        function togglePasswordVisibility() {
+            const input = document.getElementById("matKhauInput");
+            const icon = document.getElementById("eyeIcon");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            }
+        }
+    </script>
+</section>
+
+</body><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</html>

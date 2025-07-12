@@ -1,19 +1,19 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "hinh_anh")
 public class HinhAnh {
@@ -23,13 +23,15 @@ public class HinhAnh {
     private Integer id;
 
     @Size(max = 50)
+    @NotNull
     @Nationalized
-    @Column(name = "ma", length = 50)
+    @Column(name = "ma", nullable = false, length = 50)
     private String ma;
 
     @Size(max = 100)
+    @NotNull
     @Nationalized
-    @Column(name = "ten", length = 100)
+    @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
     @Column(name = "nguoi_tao")
@@ -38,25 +40,27 @@ public class HinhAnh {
     @Column(name = "nguoi_sua")
     private Integer nguoiSua;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
-    private LocalDate ngayTao;
+    private LocalDateTime ngayTao;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
-    private LocalDate ngaySua;
+    private LocalDateTime ngaySua;
 
-    @Column(name = "trang_thai")
-    private Boolean trangThai;
+    @NotNull
+    @Column(name = "trang_thai", nullable = false)
+    private Boolean trangThai = false;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "san_pham_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "san_pham_id", nullable = false)
     private SanPham sanPham;
 
+    @NotNull
     @Nationalized
     @Lob
-    @Column(name = "url")
+    @Column(name = "url", nullable = false)
     private String url;
 
+    @Column(name = "loai_anh")
+    private Integer loaiAnh;
 }

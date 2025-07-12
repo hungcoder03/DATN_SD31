@@ -1,12 +1,13 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -15,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "chi_tiet_san_pham")
 public class ChiTietSanPham {
@@ -26,28 +26,30 @@ public class ChiTietSanPham {
 
     @Size(max = 200)
     @Nationalized
-    @Column(name = "ten_ct", length = 200)
+    @Column(name = "ten_ct", nullable = false, length = 200)
     private String tenCt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "san_pham_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "san_pham_id", nullable = false)
     private SanPham sanPham;
 
+    @Column(name = "gia_goc")
+    private BigDecimal giaGoc;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "size_id")
-    @ToString.Exclude
+    @JoinColumn(name = "dot_giam_gia_id")
+    private DotGiamGia dotGiamGia;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "size_id", nullable = false)
     private com.main.datn_sd31.entity.Size size;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mau_sac_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "mau_sac_id", nullable = false)
     private MauSac mauSac;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "loai_thu_id")
-    @ToString.Exclude
-    private LoaiThu loaiThu;
 
     @Column(name = "gia_ban", precision = 18, scale = 2)
     private BigDecimal giaBan;
@@ -55,24 +57,20 @@ public class ChiTietSanPham {
     @Column(name = "gia_nhap", precision = 18, scale = 2)
     private BigDecimal giaNhap;
 
-    @Size(max = 100)
-    @Nationalized
-    @Column(name = "QR_code", length = 100)
-    private String qrCode;
-
     @Nationalized
     @Lob
     @Column(name = "mo_ta")
     private String moTa;
 
-    @Column(name = "so_luong")
+    @NotNull
+    @Column(name = "so_luong", nullable = false)
     private Integer soLuong;
 
     @Column(name = "ngay_tao")
-    private LocalDate ngayTao;
+    private LocalDateTime ngayTao;
 
     @Column(name = "ngay_sua")
-    private LocalDate ngaySua;
+    private LocalDateTime ngaySua;
 
     @Column(name = "nguoi_tao")
     private Integer nguoiTao;
@@ -89,15 +87,9 @@ public class ChiTietSanPham {
     private Boolean trangThai;
 
     @OneToMany(mappedBy = "chiTietSp")
-    @ToString.Exclude
-    private Set<ChiTietDotGiamGia> chiTietDotGiamGias = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "chiTietSp")
-    @ToString.Exclude
-    private Set<GioHang> gioHangs = new LinkedHashSet<>();
+    private Set<GioHangChiTiet> gioHangChiTiets = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "chiTietSanPham")
-    @ToString.Exclude
     private Set<HoaDonChiTiet> hoaDonChiTiets = new LinkedHashSet<>();
 
 }

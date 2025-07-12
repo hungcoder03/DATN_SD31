@@ -1,12 +1,14 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -15,7 +17,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "san_pham")
 public class SanPham {
@@ -25,78 +26,76 @@ public class SanPham {
     private Integer id;
 
     @Size(max = 50)
+    @NotNull
     @Nationalized
-    @Column(name = "ma", length = 50)
+    @Column(name = "ma", nullable = false, length = 50)
     private String ma;
 
     @Size(max = 100)
+    @NotNull
     @Nationalized
-    @Column(name = "ten", length = 100)
+    @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nguoi_tao")
-    @ToString.Exclude
-    private NhanVien nguoiTao;
-
-    @Column(name = "nguoi_sua")
-    private Integer nguoiSua;
-
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
-    private LocalDate ngayTao;
+    private LocalDateTime ngayTao;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
-    private LocalDate ngaySua;
+    private LocalDateTime ngaySua;
 
-    @Column(name = "trang_thai")
-    private Boolean trangThai;
+    @NotNull
+    @Column(name = "trang_thai", nullable = false)
+    private Boolean trangThai = false;
 
     @Nationalized
     @Lob
     @Column(name = "mo_ta")
     private String moTa;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "chat_lieu_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "chat_lieu_id", nullable = false)
     private ChatLieu chatLieu;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "danh_muc_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "danh_muc_id", nullable = false)
     private DanhMuc danhMuc;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "kieu_dang_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "kieu_dang_id", nullable = false)
     private KieuDang kieuDang;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "thuong_hieu_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "thuong_hieu_id", nullable = false)
     private ThuongHieu thuongHieu;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "xuat_xu_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "xuat_xu_id", nullable = false)
     private XuatXu xuatXu;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "loai_thu_id", nullable = false)
+    private LoaiThu loaiThu;
+
     @OneToMany(mappedBy = "sanPham")
-    @ToString.Exclude
     private Set<ChiTietSanPham> chiTietSanPhams = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "sanPham")
-    @ToString.Exclude
     private Set<DanhGia> danhGias = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "sanPham")
-    @ToString.Exclude
     private Set<HinhAnh> hinhAnhs = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "sanPham")
-    @ToString.Exclude
     private Set<SpYeuThich> spYeuThiches = new LinkedHashSet<>();
 
 }

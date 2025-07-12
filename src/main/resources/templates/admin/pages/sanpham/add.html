@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Thêm Sản Phẩm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<section layout:fragment="content">
+<div>
+    <h2 class="mb-4">Thêm Sản Phẩm</h2>
+
+    <form th:action="@{/admin/san-pham/them}" th:object="${form}" method="post" enctype="multipart/form-data" class="row g-3">
+
+        <!-- Mã sản phẩm -->
+        <div class="col-md-6">
+            <label class="form-label">Mã sản phẩm</label>
+            <input type="text" th:field="*{ma}" class="form-control" required>
+        </div>
+
+        <!-- Tên sản phẩm -->
+        <div class="col-md-6">
+            <label class="form-label">Tên sản phẩm</label>
+            <input type="text" th:field="*{ten}" class="form-control" required>
+        </div>
+
+        <!-- Mô tả -->
+        <div class="col-12">
+            <label class="form-label">Mô tả</label>
+            <textarea th:field="*{mota}" class="form-control" rows="3"></textarea>
+        </div>
+
+        <!-- Trạng thái -->
+        <div class="col-md-4">
+            <label class="form-label">Trạng thái</label>
+            <select th:field="*{trangthai}" class="form-select">
+                <option value="1">Đang hoạt động</option>
+                <option value="0">Ngưng hoạt động</option>
+            </select>
+        </div>
+
+        <!-- Chất liệu -->
+        <div class="col-md-4">
+            <label class="form-label">Chất liệu</label>
+            <select th:field="*{chatLieuId}" class="form-select">
+                <option th:each="cl : ${chatLieus}" th:value="${cl.id}" th:text="${cl.ten}"></option>
+            </select>
+        </div>
+
+        <!-- Xuất xứ -->
+        <div class="col-md-4">
+            <label class="form-label">Xuất xứ</label>
+            <select th:field="*{xuatXuId}" class="form-select">
+                <option th:each="xx : ${xuatXus}" th:value="${xx.id}" th:text="${xx.ten}"></option>
+            </select>
+        </div>
+
+        <!-- Danh mục -->
+        <div class="col-md-4">
+            <label class="form-label">Danh mục</label>
+            <select th:field="*{danhMucId}" class="form-select">
+                <option th:each="dm : ${danhMucs}" th:value="${dm.id}" th:text="${dm.ten}"></option>
+            </select>
+        </div>
+
+        <!-- Kiểu dáng -->
+        <div class="col-md-4">
+            <label class="form-label">Kiểu dáng</label>
+            <select th:field="*{kieuDangId}" class="form-select">
+                <option th:each="kd : ${kieuDangs}" th:value="${kd.id}" th:text="${kd.ten}"></option>
+            </select>
+        </div>
+
+        <!-- Thương hiệu -->
+        <div class="col-md-4">
+            <label class="form-label">Thương hiệu</label>
+            <select th:field="*{thuongHieuId}" class="form-select">
+                <option th:each="th : ${thuongHieus}" th:value="${th.id}" th:text="${th.ten}"></option>
+            </select>
+        </div>
+
+        <!-- Loại thú -->
+        <div class="col-md-6">
+            <label class="form-label">Loại thú</label>
+            <select th:field="*{loaiThuId}" class="form-select">
+                <option th:each="l : ${loaiThus}" th:value="${l.id}" th:text="${l.ten}"></option>
+            </select>
+        </div>
+
+        <!-- Ảnh chính -->
+        <div class="col-md-6">
+            <label class="form-label">Ảnh chính</label>
+            <input type="file" name="anhChinh" class="form-control" required>
+        </div>
+
+        <!-- Ảnh phụ -->
+        <div class="col-12">
+            <label class="form-label">Ảnh phụ (album)</label>
+            <input type="file" name="anhPhu" class="form-control" multiple>
+        </div>
+
+        <!-- Nút submit -->
+        <div class="col-12 d-flex justify-content-between mt-4">
+            <a th:href="@{/admin/san-pham/hien_thi}" class="btn btn-secondary">← Quay lại</a>
+            <button type="submit" class="btn btn-success">Lưu sản phẩm</button>
+        </div>
+    </form>
+</div>
+
+</section>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Đăng nhập Admin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- External CSS -->
+    <link rel="stylesheet" th:href="@{/css/admin-login.css}">
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <div class="admin-icon">👨‍💼</div>
+            <h1>Admin Login</h1>
+            <p>Đăng nhập vào hệ thống quản trị</p>
+        </div>
+
+        <form th:action="@{/login}" method="post" id="loginForm">
+            <div class="form-group">
+                <label for="username">Email</label>
+                <input type="email" id="username" name="username" placeholder="Nhập email của bạn" required />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required />
+            </div>
+
+            <button type="submit" class="login-btn">
+                Đăng nhập
+            </button>
+        </form>
+
+        <div th:if="${param.error}" class="error-message" style="display: block;">
+            <strong>❌ Lỗi đăng nhập!</strong><br>
+            Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại thông tin.
+        </div>
+    </div>
+
+    <script th:src="@{/js/admin-login.js}"></script>
+</body>
+</html>

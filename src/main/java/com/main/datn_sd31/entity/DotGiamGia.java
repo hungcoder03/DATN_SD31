@@ -1,13 +1,14 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -16,7 +17,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "dot_giam_gia")
 public class DotGiamGia {
@@ -26,42 +26,41 @@ public class DotGiamGia {
     private Integer id;
 
     @Size(max = 50)
+    @NotNull
     @Nationalized
-    @Column(name = "ma", length = 50)
+    @Column(name = "ma", nullable = false, length = 50)
     private String ma;
 
     @Size(max = 100)
+    @NotNull
     @Nationalized
-    @Column(name = "ten", length = 100)
+    @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nguoi_tao")
-    @ToString.Exclude
-    private NhanVien nguoiTao;
+    @Column(name = "ngay_tao")
+    private LocalDateTime ngayTao;
+
+    @Column(name = "ngay_sua")
+    private LocalDateTime ngaySua;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai;
+
+    @NotNull
+    @Column(name = "gia_tri_dot_giam_gia", nullable = false, precision = 18, scale = 2)
+    private BigDecimal giaTriDotGiamGia;
+
+    @Column(name = "ngay_bat_dau")
+    private LocalDateTime ngayBatDau;
+
+    @Column(name = "ngay_ket_thuc")
+    private LocalDateTime ngayKetThuc;
 
     @Column(name = "nguoi_sua")
     private Integer nguoiSua;
 
-    @ColumnDefault("getdate()")
-    @Column(name = "ngay_tao")
-    private LocalDate ngayTao;
-
-    @ColumnDefault("getdate()")
-    @Column(name = "ngay_sua")
-    private LocalDate ngaySua;
-
-    @Column(name = "trang_thai")
-    private Boolean trangThai;
-
-    @Column(name = "gia_tri_dot_giam_gia", precision = 5, scale = 2)
-    private BigDecimal giaTriDotGiamGia;
-
-    @Column(name = "ngay_bat_dau")
-    private LocalDate ngayBatDau;
-
-    @Column(name = "ngay_ket_thuc")
-    private LocalDate ngayKetThuc;
+    @Column(name = "nguoi_tao")
+    private Integer nguoiTao;
 
     @Size(max = 50)
     @Nationalized
@@ -69,7 +68,6 @@ public class DotGiamGia {
     private String loai;
 
     @OneToMany(mappedBy = "dotGiamGia")
-    @ToString.Exclude
-    private Set<ChiTietDotGiamGia> chiTietDotGiamGias = new LinkedHashSet<>();
+    private Set<ChiTietSanPham> chiTietSanPhams = new LinkedHashSet<>();
 
 }

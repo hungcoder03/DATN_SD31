@@ -1,12 +1,16 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -15,7 +19,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "nhan_vien")
 public class NhanVien {
@@ -25,47 +28,61 @@ public class NhanVien {
     private Integer id;
 
     @Size(max = 50)
+    @NotNull
     @Nationalized
-    @Column(name = "ma", length = 50)
+    @Column(name = "ma", nullable = false, length = 50)
     private String ma;
 
     @Size(max = 100)
+    @NotNull
     @Nationalized
-    @Column(name = "ten", length = 100)
+    @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
-    @Column(name = "ngay_sinh")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @NotNull
+    @Column(name = "ngay_sinh", nullable = false)
     private LocalDate ngaySinh;
 
     @Size(max = 20)
+    @NotNull
     @Nationalized
-    @Column(name = "so_dien_thoai", length = 20)
+    @Pattern(regexp = "^\\d{9,12}$", message = "Số điện thoại phải từ 9 đến 12 chữ số")
+    @Column(name = "so_dien_thoai", nullable = false, length = 20)
     private String soDienThoai;
 
-    @Column(name = "ngay_tham_gia")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "ngay_tham_gia", nullable = false)
     private LocalDate ngayThamGia;
 
     @Size(max = 20)
+    @NotNull
     @Nationalized
-    @Column(name = "chung_minh_thu", length = 20)
+    @Pattern(regexp = "^\\d{12}$", message = "CMND phải gồm 12 chữ số")
+    @Column(name = "chung_minh_thu", nullable = false, length = 20)
     private String chungMinhThu;
 
-    @Column(name = "gioi_tinh")
-    private Boolean gioiTinh;
+    @NotNull
+    @Column(name = "gioi_tinh", nullable = false)
+    private Boolean gioiTinh = false;
 
+//    @NotNull
     @Nationalized
     @Lob
-    @Column(name = "anh")
+    @Column(name = "anh", nullable = false)
     private String anh;
 
     @Size(max = 100)
+    @NotNull
     @Nationalized
-    @Column(name = "email", length = 100)
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Email phải đúng định dạng @gmail.com")
+    @Column(name = "email", nullable = false, length = 100)
     private String email;
 
     @Size(max = 100)
+    @NotNull
     @Nationalized
-    @Column(name = "mat_khau", length = 100)
+    @Column(name = "mat_khau", nullable = false, length = 100)
     private String matKhau;
 
     @Column(name = "nguoi_tao")
@@ -74,36 +91,23 @@ public class NhanVien {
     @Column(name = "nguoi_sua")
     private Integer nguoiSua;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
-    private LocalDate ngaySua;
+    private LocalDateTime ngaySua;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
-    private LocalDate ngayTao;
+    private LocalDateTime ngayTao;
 
     @Size(max = 50)
+    @NotNull
     @Nationalized
-    @Column(name = "chuc_vu", length = 50)
+    @Column(name = "chuc_vu", nullable = false, length = 50)
     private String chucVu;
 
-    @Column(name = "trang_thai")
-    private Boolean trangThai;
-
-    @OneToMany(mappedBy = "nguoiTao")
-    @ToString.Exclude
-    private Set<DotGiamGia> dotGiamGias = new LinkedHashSet<>();
+    @NotNull
+    @Column(name = "trang_thai", nullable = false)
+    private Boolean trangThai = false;
 
     @OneToMany(mappedBy = "nhanVien")
-    @ToString.Exclude
     private Set<HoaDon> hoaDons = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "nhanVien")
-    @ToString.Exclude
-    private Set<PhieuGiamGia> phieuGiamGias = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "nguoiTao")
-    @ToString.Exclude
-    private Set<SanPham> sanPhams = new LinkedHashSet<>();
 
 }

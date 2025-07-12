@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giỏ hàng - Pet Closet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-pink-50 text-gray-800 font-sans">
+
+<!-- Header -->
+<header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
+        <h1 class="text-2xl font-bold text-pink-600">🐾 Pet Closet</h1>
+        <a href="/" class="text-sm text-gray-600 hover:text-pink-500">← Tiếp tục mua sắm</a>
+    </div>
+</header>
+
+<!-- Giỏ hàng -->
+<div class="max-w-7xl mx-auto px-4 py-10">
+    <h2 class="text-2xl font-bold mb-6">🛒 Giỏ Hàng Của Bạn</h2>
+
+    <!-- Chọn tất cả -->
+    <div class="mb-4">
+        <label class="inline-flex items-center space-x-2">
+            <input type="checkbox" id="chonTatCa" class="form-checkbox w-4 h-4 text-pink-500" />
+            <span class="font-medium">Chọn tất cả</span>
+        </label>
+    </div>
+
+    <!-- Bảng sản phẩm -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded-lg shadow-md text-sm text-left">
+            <thead class="bg-pink-100 text-pink-700">
+            <tr>
+                <th class="p-3 text-center"><input type="checkbox" disabled /></th>
+                <th class="p-3">#</th>
+                <th class="p-3">Ảnh</th>
+                <th class="p-3">Sản phẩm</th>
+                <th class="p-3">Size</th>
+                <th class="p-3">Màu sắc</th>
+                <th class="p-3">Giá</th>
+                <th class="p-3">Số lượng</th>
+                <th class="p-3">Thành tiền</th>
+                <th class="p-3">Trạng thái</th>
+                <th class="p-3">Xóa</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item, iterStat : ${list}"
+                th:data-price="${item.chiTietSp.giaBan}"
+                class="border-b hover:bg-pink-50 transition">
+                <td class="text-center">
+                    <input type="checkbox" class="item-checkbox w-4 h-4 text-pink-500" name="selectedId" th:value="${item.id}" />
+                </td>
+                <td class="p-3" th:text="${iterStat.count}">1</td>
+                <td class="p-3">
+                    <img th:src="@{${item.chiTietSp.sanPham.hinhAnhs[0].url}}" class="w-20 rounded" />
+                </td>
+                <td class="p-3" th:text="${item.chiTietSp.sanPham.ten}">Áo Pet</td>
+                <td class="p-3" th:text="${item.chiTietSp.size.ten}">S</td>
+                <td class="p-3" th:text="${item.chiTietSp.mauSac.ten}">Đỏ</td>
+                <td class="p-3" th:text="${item.chiTietSp.giaBan} + '₫'">100.000₫</td>
+                <td class="p-3">
+                    <div class="flex items-center space-x-1">
+                        <a th:href="@{'/gio-hang/cap-nhat/' + ${item.id} + '?action=decrease'}"
+                           class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                           th:classappend="${item.soLuong == 1} ? 'pointer-events-none'">−</a>
+                        <input type="number" readonly th:value="${item.soLuong}"
+                               class="w-12 text-center border rounded bg-gray-50" />
+                        <a th:href="@{'/gio-hang/cap-nhat/' + ${item.id} + '?action=increase'}"
+                           class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">+</a>
+                    </div>
+                </td>
+                <td class="p-3 line-total" th:text="${item.thanhTien} + '₫'">100.000₫</td>
+                <td class="p-3">
+            <span th:switch="${item.trangThai}">
+              <span th:case="0" class="px-2 py-1 text-xs bg-gray-300 rounded">Mới</span>
+              <span th:case="1" class="px-2 py-1 text-xs bg-green-300 rounded">Đã xác nhận</span>
+              <span th:case="2" class="px-2 py-1 text-xs bg-red-300 rounded">Đã hủy</span>
+              <span th:case="*">N/A</span>
+            </span>
+                </td>
+                <td class="p-3">
+                    <a th:href="@{'/gio-hang/xoa/' + ${item.id}}"
+                       class="text-red-600 hover:underline"
+                       onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">Xóa</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tổng tiền + nút thanh toán -->
+    <div class="flex flex-col md:flex-row justify-between items-center mt-6 gap-4">
+        <div>
+            <a th:href="@{/khach-hang/danh-sach}" class="text-sm text-gray-600 hover:text-pink-600">← Tiếp tục mua sắm</a>
+        </div>
+        <div class="text-right">
+            <h3 class="text-lg font-bold mb-2">
+                Tổng tiền: <span id="totalTien" class="text-pink-600">0₫</span>
+            </h3>
+            <a href="#" id="submitThanhToan"
+               class="inline-block bg-pink-600 text-white px-6 py-2 rounded-full hover:bg-pink-700 transition">🔒 Thanh Toán</a>
+        </div>
+    </div>
+</div>
+
+<!-- JS xử lý chọn sản phẩm -->
+<script>
+    function formatMoney(number) {
+        return number.toLocaleString('vi-VN') + "₫";
+    }
+
+    function updateTotalTien() {
+        let total = 0;
+        document.querySelectorAll("tbody tr").forEach(row => {
+            const checkbox = row.querySelector(".item-checkbox");
+            if (checkbox && checkbox.checked) {
+                const price = parseInt(row.getAttribute("data-price")) || 0;
+                const quantity = parseInt(row.querySelector("input[type='number']").value) || 1;
+                total += price * quantity;
+            }
+        });
+        document.getElementById("totalTien").textContent = formatMoney(total);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const chonTatCa = document.getElementById("chonTatCa");
+        const checkboxes = document.querySelectorAll(".item-checkbox");
+
+        chonTatCa.addEventListener("change", function () {
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateTotalTien();
+        });
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener("change", function () {
+                chonTatCa.checked = [...checkboxes].every(c => c.checked);
+                updateTotalTien();
+            });
+        });
+
+        updateTotalTien();
+
+        document.getElementById("submitThanhToan").addEventListener("click", function (e) {
+            e.preventDefault();
+            const checked = document.querySelectorAll(".item-checkbox:checked");
+            if (checked.length === 0) {
+                alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+                return;
+            }
+            const params = new URLSearchParams();
+            checked.forEach(cb => params.append("selectedId", cb.value));
+            const url = "/gio-hang/thanh-toan?" + params.toString();
+            window.location.href = url;
+        });
+    });
+</script>
+
+</body>
+</html>

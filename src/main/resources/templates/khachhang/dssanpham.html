@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pet Closet - Trang chủ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-pink-50 text-gray-800 font-sans">
+
+<!-- 🌸 Header -->
+<header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
+        <h1 class="text-2xl font-bold text-pink-600">D&C Fashions</h1>
+        <nav class="space-x-6 hidden md:flex text-sm">
+            <a href="#" class="hover:text-pink-600">Trang chủ</a>
+            <a th:href="@{/san-pham}" class="hover:text-pink-600">Sản phẩm</a>
+            <a href="#" class="hover:text-pink-600">Blog</a>
+            <a href="#" class="hover:text-pink-600">Liên hệ</a>
+        </nav>
+        <div class="flex items-center gap-4">
+            <a th:href="@{/dang-nhap}" class="text-sm bg-pink-500 text-white px-3 py-1.5 rounded hover:bg-pink-600">Đăng nhập</a>
+            <a th:href="@{/gio-hang/hien_thi}" class="relative text-2xl text-pink-600">
+                🛒
+                <span th:if="${soLuongTrongGio > 0}" th:text="${soLuongTrongGio}"
+                      class="absolute -top-2 -right-2 text-xs bg-pink-500 text-white rounded-full px-1.5 py-0.5">0</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- 🐶 Hero Banner -->
+<section class="bg-pink-100 py-16 text-center">
+    <div class="max-w-3xl mx-auto">
+        <h2 class="text-4xl font-extrabold mb-4">Thời trang thú cưng siêu đáng yêu 🐶🐱</h2>
+        <p class="text-lg mb-6 text-gray-700">Khám phá bộ sưu tập quần áo & phụ kiện siêu xinh cho chó mèo.</p>
+        <a th:href="@{/san-pham}" class="bg-pink-600 text-white px-6 py-3 rounded-full hover:bg-pink-700 transition">
+            Mua sắm ngay
+        </a>
+    </div>
+</section>
+
+<!-- 🎀 Danh mục nổi bật -->
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4">
+        <h3 class="text-2xl font-bold text-center mb-10 text-pink-600">Danh mục nổi bật</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div class="shadow-lg rounded-lg p-4 bg-pink-50 hover:shadow-xl transition">
+                <img src="https://i.imgur.com/xN0QKzJ.png" class="w-24 h-24 mx-auto mb-3" />
+                <h4 class="font-medium">Áo cho chó</h4>
+            </div>
+            <div class="shadow-lg rounded-lg p-4 bg-pink-50 hover:shadow-xl transition">
+                <img src="https://i.imgur.com/xYrOig9.png" class="w-24 h-24 mx-auto mb-3" />
+                <h4 class="font-medium">Áo cho mèo</h4>
+            </div>
+            <div class="shadow-lg rounded-lg p-4 bg-pink-50 hover:shadow-xl transition">
+                <img src="https://i.imgur.com/IuZbGoU.png" class="w-24 h-24 mx-auto mb-3" />
+                <h4 class="font-medium">Phụ kiện xinh</h4>
+            </div>
+            <div class="shadow-lg rounded-lg p-4 bg-pink-50 hover:shadow-xl transition">
+                <img src="https://i.imgur.com/PUJ7v0M.png" class="w-24 h-24 mx-auto mb-3" />
+                <h4 class="font-medium">Giường & chăn</h4>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 🌟 Sản phẩm mới -->
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center text-pink-600 mb-10">Sản phẩm mới nhất</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div th:each="sp : ${danhSachSanPham}" class="bg-white rounded-lg shadow hover:shadow-lg p-4 flex flex-col">
+                <img th:if="${sp.hinhAnhs != null and !sp.hinhAnhs.isEmpty()}"
+                     th:src="${sp.hinhAnhs[0].url}" alt="Ảnh sản phẩm"
+                     class="w-full h-56 object-cover rounded-md mb-4" />
+                <h3 class="text-lg font-semibold text-pink-600 mb-1" th:text="${sp.ten}">Tên sản phẩm</h3>
+                <p class="text-sm text-gray-600 flex-grow" th:text="${sp.moTa}">Mô tả sản phẩm</p>
+                <a th:href="@{/khach-hang/chi-tiet/{id}(id=${sp.id})}"
+                   class="mt-4 inline-block text-center bg-pink-600 text-white py-2 px-4 rounded-full hover:bg-pink-700 transition">
+                    Xem chi tiết
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 🐾 Footer -->
+<footer class="bg-white border-t mt-12">
+    <div class="max-w-7xl mx-auto px-4 py-6 text-center text-sm text-gray-600">
+        © 2025 Pet Closet. Yêu thương thú cưng mỗi ngày 🐾
+    </div>
+</footer>
+
+</body>
+</html>

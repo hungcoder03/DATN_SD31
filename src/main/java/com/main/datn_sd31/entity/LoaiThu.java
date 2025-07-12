@@ -1,12 +1,13 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -15,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "loai_thu")
 public class LoaiThu {
@@ -25,13 +25,15 @@ public class LoaiThu {
     private Integer id;
 
     @Size(max = 50)
+    @NotNull
     @Nationalized
-    @Column(name = "ma", length = 50)
+    @Column(name = "ma", nullable = false, length = 50)
     private String ma;
 
     @Size(max = 100)
+    @NotNull
     @Nationalized
-    @Column(name = "ten", length = 100)
+    @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
     @Column(name = "nguoi_tao")
@@ -40,19 +42,16 @@ public class LoaiThu {
     @Column(name = "nguoi_sua")
     private Integer nguoiSua;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_tao")
-    private LocalDate ngayTao;
+    private LocalDateTime ngayTao;
 
-    @ColumnDefault("getdate()")
     @Column(name = "ngay_sua")
-    private LocalDate ngaySua;
+    private LocalDateTime ngaySua;
 
     @Column(name = "trang_thai")
     private Boolean trangThai;
 
     @OneToMany(mappedBy = "loaiThu")
-    @ToString.Exclude
-    private Set<ChiTietSanPham> chiTietSanPhams = new LinkedHashSet<>();
+    private Set<SanPham> sanPhams = new LinkedHashSet<>();
 
 }

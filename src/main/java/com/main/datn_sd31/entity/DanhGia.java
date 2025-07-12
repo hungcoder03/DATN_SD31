@@ -1,6 +1,7 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
 
@@ -11,7 +12,6 @@ import java.time.Instant;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "danh_gia")
 public class DanhGia {
@@ -20,22 +20,24 @@ public class DanhGia {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "san_pham_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "san_pham_id", nullable = false)
     private SanPham sanPham;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "khach_hang_id")
-    @ToString.Exclude
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "khach_hang_id", nullable = false)
     private KhachHang khachHang;
 
-    @Column(name = "so_sao")
+    @NotNull
+    @Column(name = "so_sao", nullable = false)
     private Integer soSao;
 
+    @NotNull
     @Nationalized
     @Lob
-    @Column(name = "noi_dung")
+    @Column(name = "noi_dung", nullable = false)
     private String noiDung;
 
     @Nationalized
@@ -43,7 +45,8 @@ public class DanhGia {
     @Column(name = "hinh_anh")
     private String hinhAnh;
 
-    @Column(name = "thoi_gian")
+    @NotNull
+    @Column(name = "thoi_gian", nullable = false)
     private Instant thoiGian;
 
 }
