@@ -12,22 +12,75 @@
 </head>
 <body class="bg-light">
 <section layout:fragment="content">
+    <!-- FLASH ALERTS -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            // Nếu dùng showModal để mở modal, hủy flag update khi form lỗi
+            let showModal = /*[[${showModal}]]*/ false;
+            if (showModal) {
+                localStorage.removeItem('khUpdated');
+                return;
+            }
 
-<div class="container my-5">
+            // Thêm mới
+            if (localStorage.getItem('khAdded')) {
+                alert('Thêm khách hàng thành công!');
+                localStorage.removeItem('khAdded');
+            }
+            // Xóa
+            if (localStorage.getItem('khDeleted')) {
+                alert('Xóa khách hàng thành công!');
+                localStorage.removeItem('khDeleted');
+            }
+            // Cập nhật
+            if (localStorage.getItem('khUpdated')) {
+                alert('Cập nhật khách hàng thành công!');
+                localStorage.removeItem('khUpdated');
+            }
+        });
+        /*]]>*/
+    </script>
+
+    <!-- Thêm script kiểm tra -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function validateSearch() {
+            const input = document.querySelector('input[name="search"]');
+            if (!input.value.trim()) {
+                alert('Bạn chưa nhập gì cả');
+                input.focus();
+                return false;  // ngăn form submit
+            }
+            return true;    // cho phép submit
+        }
+        /*]]>*/
+    </script>
+
+    <div class="container my-5">
     <h1 class="text-center mb-4">Quản lý khách hàng</h1>
 
     <div class="d-flex justify-content-between mb-3">
-        <form th:action="@{/admin/quanlytaikhoan/khachhang/search}" method="get" class="d-flex">
-            <input type="text" name="sdt" class="form-control me-2" placeholder="Nhập SĐT bất kỳ" required>
+        <!-- Form tìm kiếm -->
+        <form th:action="@{/admin/quanlytaikhoan/khachhang/search}"
+              method="get"
+              class="d-flex mb-3"
+              onsubmit="return validateSearch()">
+            <input type="text"
+                   name="search"
+                   th:value="${param.search}"
+                   class="form-control me-2"
+                   placeholder="Nhập tên, SĐT hoặc email…"/>
             <button type="submit" class="btn btn-secondary">
                 <i class="bi bi-search"></i> Tìm
             </button>
-
-            <!-- Chỉ hiển thị nút quay lại khi đã tìm kiếm -->
-            <a th:if="${isSearch}" th:href="@{/admin/quanlytaikhoan/khachhang}" class="btn btn-outline-secondary ms-2">
+            <a th:if="${param.search}"
+               th:href="@{/admin/quanlytaikhoan/khachhang}"
+               class="btn btn-outline-secondary ms-2">
                 <i class="bi bi-arrow-counterclockwise"></i> Quay lại
             </a>
         </form>
+
 
 
         <button type="button"
@@ -69,7 +122,15 @@
                             Sửa
                         </a>
                         <a th:href="@{/admin/quanlytaikhoan/khachhang/delete(id=${kh.id})}"
-                           class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xoá?')">Xóa</a>
+                           class="btn btn-sm btn-danger"
+                           onclick="if(confirm('Bạn có chắc chắn muốn xoá?')) {
+              localStorage.setItem('khDeleted','true');
+              return true;
+            }
+            return false;">
+                            Xóa
+                        </a>
+
                     </td>
                 </tr>
                 </tbody>
@@ -156,7 +217,11 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <button type="submit"
+                            class="btn btn-primary"
+                            onclick="localStorage.setItem('khAdded','true')">
+                        Lưu
+                    </button>
                 </div>
             </form>
         </div>

@@ -290,14 +290,30 @@ public class QuanLyTaiKhoan {
         khachHangRepository.deleteById(id);
         return "redirect:/admin/quanlytaikhoan/khachhang";
     }
+
     @GetMapping("/khachhang/search")
-    public String searchKhachHang(@RequestParam String sdt, Model model) {
-        List<KhachHang> list = khachHangRepository.findBySoDienThoaiContaining(sdt);
+    public String searchKhachHang(
+            @RequestParam("search") String search,
+            Model model) {
+
+        List<KhachHang> list = khachHangRepository.search(search.trim());
         model.addAttribute("khachhangList", list);
+
+        // ** phải có khachhang để form th:object binding **
         model.addAttribute("khachhang", new KhachHang());
-        model.addAttribute("isSearch", true); // cờ báo là đang ở trạng thái tìm kiếm
+
+        // giữ lại từ khóa và cờ tìm kiếm nếu bạn dùng
+        model.addAttribute("search", search);
+        model.addAttribute("isSearch", true);
+
+        // nếu bạn dùng showModal / passwordVisible ở template thêm nữa:
+        model.addAttribute("showModal", false);
+        model.addAttribute("passwordVisible", false);
+
         return "admin/pages/quan-ly-tai-khoan/QuanLyKhachHang";
     }
+
+
 
 
 
