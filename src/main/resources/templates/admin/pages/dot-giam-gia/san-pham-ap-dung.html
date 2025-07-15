@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sản phẩm áp dụng</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .product-table thead {
+            background-color: rgba(241, 181, 191, 0.86);
+            color: white;
+        }
+
+        .product-table th, .product-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .product-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .product-table td:last-child {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .product-table th, .product-table td {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            h2 {
+                font-size: 20px;
+                align-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<h2 >Sản phẩm áp dụng cho đợt giảm: <span th:text="${dot.ten}"></span></h2>
+
+<table class="product-table">
+    <thead>
+    <tr>
+        <th>Tên sản phẩm</th>
+        <th>Màu sắc</th>
+        <th>Số lượng</th>
+        <th>Giá gốc</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="sp : ${sanPhams.content}">
+        <td th:text="${sp.tenCt}"></td>
+        <td th:text="${sp.mauSac.ten}"></td>
+        <td th:text="${sp.soLuong}"></td>
+        <td th:text="${#numbers.formatDecimal(sp.giaBan, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
+
+<!-- Phân trang -->
+<div style="margin-top: 10px;">
+        <span th:if="${sanPhams.totalPages > 1}">
+            <span th:each="i : ${#numbers.sequence(0, sanPhams.totalPages - 1)}">
+                <a th:href="@{|/dot-giam-gia/${dot.id}/san-pham?page=${i}|}"
+                   th:text="${i + 1}"
+                   th:class="${i == currentPage ? 'active' : ''}"
+                   style="margin: 0 5px; text-decoration: none;"></a>
+            </span>
+        </span>
+</div>
+</body>
+</html>

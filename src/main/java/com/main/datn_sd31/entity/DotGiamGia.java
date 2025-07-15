@@ -10,6 +10,7 @@ import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -71,4 +72,7 @@ public class DotGiamGia {
     @Nationalized
     @Column(name = "loai", length = 50)
     private String loai;
+
+    @OneToMany(mappedBy = "dotGiamGia")
+    private List<ChiTietSanPham> sanPhams;
 }
