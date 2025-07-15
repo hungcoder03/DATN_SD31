@@ -1,17 +1,24 @@
 package com.main.datn_sd31.controller.admin_controller.dotGiamGia;
 
+import com.main.datn_sd31.entity.ChiTietSanPham;
 import com.main.datn_sd31.entity.DotGiamGia;
+import com.main.datn_sd31.repository.ChiTietSanPhamRepository;
 import com.main.datn_sd31.repository.dotGiamGia.DotGiamGiaRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/dot-giam-gia")
@@ -37,6 +44,56 @@ public class dotGiamGiaController {
             }
         }
         dotGiamGiaRepository.saveAll(list);
+    }
+
+    @Autowired
+    private ChiTietSanPhamRepository chiTietSanPhamRepo;
+
+    @GetMapping("/{id}/san-pham")
+    public String xemSanPhamApDung(
+            @PathVariable("id") Integer id,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
+
+        DotGiamGia dot = dotGiamGiaRepository.findById(id).orElse(null);
+        Pageable pageable = PageRequest.of(page, 5);
+        Page<ChiTietSanPham> sanPhams = chiTietSanPhamRepo.findByDotGiamGia_Id(id, pageable);
+
+        model.addAttribute("dot", dot);
+        model.addAttribute("sanPhams", sanPhams);
+        model.addAttribute("currentPage", page);
+
+        return "admin/pages/dot-giam-gia/dot-giam-gia";
+    }
+    @GetMapping("/tim-kiem")
+    public String index(
+            @RequestParam(value = "ten", required = false) String ten,
+            @RequestParam(value = "trangThai", required = false) Integer trangThai,
+            @RequestParam(value = "loai", required = false) String loai,
+            Model model) {
+        List<DotGiamGia> dotGiamGias = dotGiamGiaRepository.findAll();
+
+        if (ten != null && !ten.trim().isEmpty()) {
+            dotGiamGias = dotGiamGias.stream()
+                    .filter(d -> d.getTen() != null && d.getTen().toLowerCase().contains(ten.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if (trangThai != null) {
+            dotGiamGias = dotGiamGias.stream()
+                    .filter(d -> d.getTrangThai() == trangThai)
+                    .collect(Collectors.toList());
+        }
+
+        if (loai != null && !loai.trim().isEmpty()) {
+            dotGiamGias = dotGiamGias.stream()
+                    .filter(d -> d.getLoai() != null && d.getLoai().equalsIgnoreCase(loai))
+                    .collect(Collectors.toList());
+        }
+
+        model.addAttribute("dotGiamGias", dotGiamGias);
+        model.addAttribute("dotGiamGia", new DotGiamGia()); // nếu bạn đang dùng form thêm
+        return "admin/pages/dot-giam-gia/dot-giam-gia"; // tên template của bạn
     }
 
     //  Trang chính: hiển thị danh sách + form thêm/sửa
@@ -76,7 +133,7 @@ public class dotGiamGiaController {
     //  Lưu (thêm hoặc cập nhật)
     @PostMapping("/save")
     public String save(@Valid @ModelAttribute("dotGiamGia") DotGiamGia dotGiamGia,
-                       BindingResult result,
+                       BindingResult result, RedirectAttributes redirectAttributes,
                        Model model) {
 
         // Kiểm tra ngày bắt đầu trước ngày kết thúc
@@ -104,7 +161,7 @@ public class dotGiamGiaController {
 
         // Ngày sửa luôn được cập nhật
         dotGiamGia.setNgaySua(LocalDateTime.now());
-        int adminId = 1; // 👈 ID mặc định cho admin
+        int adminId = 1; //  ID mặc định cho admin
 
         if (dotGiamGia.getId() == null) {
             dotGiamGia.setNguoiTao(adminId);
@@ -112,15 +169,42 @@ public class dotGiamGiaController {
             dotGiamGia.setNguoiTao(adminId);
         }
         capNhatTrangThaiTuDong();
+        boolean isNew = (dotGiamGia.getId() == null);
         dotGiamGiaRepository.save(dotGiamGia);
+        if (isNew) {
+            redirectAttributes.addFlashAttribute("success", "Thêm đợt giảm giá thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("success", "Cập nhật đợt giảm giá thành công!");
+        }
 
         return "redirect:/admin/dot-giam-gia";
     }
 
     //  Xoá
+//    @GetMapping("/delete/{id}")
+//    public String delete(@PathVariable Integer id) {
+//        dotGiamGiaRepository.deleteById(id);
+//        return "redirect:/admin/dot-giam-gia";
+//    }
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Integer id) {
-        dotGiamGiaRepository.deleteById(id);
+    public String delete(@PathVariable("id") Integer id, RedirectAttributes attributes) {
+        Optional<DotGiamGia> optional = dotGiamGiaRepository.findById(id);
+        if (optional.isPresent()) {
+            DotGiamGia dot = optional.get();
+            if (dot.getTrangThai() != 0) {
+                attributes.addFlashAttribute("error", "Không thể xóa đợt giảm giá khi chuẩn bị hoạt động.");
+                return "redirect:/admin/dot-giam-gia";
+            }
+            if (dot.getTrangThai() != 1) {
+                attributes.addFlashAttribute("error", "Không thể xóa đợt giảm giá khi đang hoạt động.");
+                return "redirect:/admin/dot-giam-gia";
+            }
+
+            dotGiamGiaRepository.deleteById(id);
+            attributes.addFlashAttribute("success", "Xóa thành công!");
+        } else {
+            attributes.addFlashAttribute("error", "Không tìm thấy đợt giảm giá.");
+        }
         return "redirect:/admin/dot-giam-gia";
     }
 }
