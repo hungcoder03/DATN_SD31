@@ -1,0 +1,106 @@
+<div th:fragment="page">
+    <div class="container mt-4">
+        <h2 class="mb-4 text-center">Chỉnh sửa Phiếu giảm giá</h2>
+    </div>
+
+    <div class="container">
+        <form
+                th:action="@{/admin/phieu-giam-gia/update}"
+                th:object="${phieuGiamGia}"
+                method="post"
+        >
+            <input type="hidden" th:field="*{id}" />
+            <div th:if="${#fields.hasGlobalErrors()}">
+                <div
+                        class="alert alert-danger"
+                        th:each="err : ${#fields.globalErrors()}"
+                        th:text="${err}"
+                ></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Tên</label>
+                <input type="text" class="form-control" th:field="*{ten}" />
+                <div class="text-danger" th:errors="*{ten}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Mã</label>
+                <input type="text" class="form-control" th:field="*{ma}" />
+                <div class="text-danger" th:errors="*{ma}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Loại Phiếu</label>
+                <select
+                        class="form-select"
+                        th:field="*{loaiPhieuGiamGia}"
+                        id="loaiPhieuGiamGia"
+                >
+                    <option value="">-- Chọn loại phiếu --</option>
+                    <option value="1">Giảm %</option>
+                    <option value="2">Giảm tiền</option>
+                </select>
+                <div class="text-danger" th:errors="*{loaiPhieuGiamGia}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Ngày bắt đầu</label>
+                <input type="date" class="form-control" th:field="*{ngayBatDau}" />
+                <div class="text-danger" th:errors="*{ngayBatDau}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Ngày kết thúc</label>
+                <input type="date" class="form-control" th:field="*{ngayKetThuc}" />
+                <div class="text-danger" th:errors="*{ngayKetThuc}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Mức giảm</label>
+                <input type="number" class="form-control" th:field="*{mucDo}" />
+                <div class="text-danger" th:errors="*{mucDo}"></div>
+            </div>
+
+            <div class="mb-3" id="divGiamToiDa">
+                <label>Giảm tối đa</label>
+                <input type="number" class="form-control" th:field="*{giamToiDa}" />
+                <div class="text-danger" th:errors="*{giamToiDa}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Điều kiện</label>
+                <input type="number" class="form-control" th:field="*{dieuKien}" />
+                <div class="text-danger" th:errors="*{dieuKien}"></div>
+            </div>
+
+            <div class="mb-3">
+                <label>Số lượng</label>
+                <input type="number" class="form-control" th:field="*{soLuongTon}" />
+                <div class="text-danger" th:errors="*{soLuongTon}"></div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Lưu</button>
+                <a href="/admin/phieu-giam-gia" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#loaiPhieuGiamGia").on("change", function () {
+            const selectedValue = parseInt($(this).val());
+            if (selectedValue === 1) {
+                $("#mucDo").attr("placeholder", "Nhập phần trăm giảm giá");
+                $("#divGiamToiDa").show();
+                $("#giamToiDa").attr("required", true).val(0);
+            } else if (selectedValue === 2) {
+                $("#mucDo").attr("placeholder", "Nhập số tiền giảm");
+                $("#divGiamToiDa").hide();
+                $("#giamToiDa").removeAttr("required").val(0);
+            }
+        });
+    });
+</script>
