@@ -66,16 +66,16 @@ public class NhanVien {
     @Column(name = "gioi_tinh", nullable = false)
     private Boolean gioiTinh = false;
 
-//    @NotNull
+    @NotNull
     @Nationalized
     @Lob
-    @Column(name = "anh", nullable = false)
+    @Column(name = "anh", nullable = true)
     private String anh;
 
     @Size(max = 100)
     @NotNull
     @Nationalized
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Email phải đúng định dạng @gmail.com")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Email phải có định dạng hợp lệ")
     @Column(name = "email", nullable = false, length = 100)
     private String email;
 

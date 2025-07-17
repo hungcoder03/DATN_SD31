@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <style>
+                .form-floating {
+        position: relative;    /* để chứa các phần tử absolute bên trong */
+        }
+
+        .toggle-password-btn {
+        position: absolute;
+        right: 1rem;           /* cách mép phải input ~1rem */
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        z-index: 10;
+        }
+
+    </style>
     <meta charset="UTF-8">
     <title th:text="${readonly} ? 'Thông tin nhân viên' : 'Cập nhật nhân viên'"></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -13,7 +29,7 @@
     <form th:action="${readonly}
                   ? @{/admin/quanlytaikhoan/nhanvien/detail(id=${nhanvien.id})}
                   : @{/admin/quanlytaikhoan/nhanvien/update}"
-          th:object="${nhanvien}" method="post" enctype="multipart/form-data">
+          th:object="${nhanvien}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
 
     <input type="hidden" th:field="*{id}"/>
 
@@ -30,6 +46,7 @@
                 <div th:if="${#fields.hasErrors('ma')}"
                      th:errors="*{ma}"
                      class="text-danger small"></div>
+                <div id="err-ma" class="text-danger small js-error"></div>
             </div>
 
             <!-- Tên -->
@@ -40,6 +57,9 @@
                        th:readonly="${readonly}"
                        required>
                 <label>Tên</label>
+                <div th:if="${#fields.hasErrors('ten')}"
+                     th:errors="*{ten}"
+                     class="text-danger small"></div>
             </div>
 
             <!-- Ngày sinh -->
@@ -49,6 +69,9 @@
                        th:readonly="${readonly}"
                        required>
                 <label>Ngày sinh</label>
+                <div th:if="${#fields.hasErrors('ngaySinh')}"
+                     th:errors="*{ngaySinh}"
+                     class="text-danger small"></div>
             </div>
 
             <!-- SĐT -->
@@ -61,6 +84,7 @@
                 <div th:if="${#fields.hasErrors('soDienThoai')}"
                      th:errors="*{soDienThoai}"
                      class="text-danger small"></div>
+                <div id="err-sdt" class="text-danger small js-error"></div>
             </div>
 
             <!-- Ngày tham gia -->
@@ -69,6 +93,9 @@
                        class="form-control"
                        th:readonly="true">
                 <label>Ngày tham gia</label>
+                <div th:if="${#fields.hasErrors('ngayThamGia')}"
+                     th:errors="*{ngayThamGia}"
+                     class="text-danger small"></div>
             </div>
 
             <!-- CMND -->
@@ -81,6 +108,7 @@
                 <div th:if="${#fields.hasErrors('chungMinhThu')}"
                      th:errors="*{chungMinhThu}"
                      class="text-danger small"></div>
+                <div id="err-cccd" class="text-danger small js-error"></div>
             </div>
 
             <!-- Giới tính -->
@@ -93,6 +121,9 @@
                     <option value="false">Nữ</option>
                 </select>
                 <label>Giới tính</label>
+                <div th:if="${#fields.hasErrors('gioiTinh')}"
+                     th:errors="*{gioiTinh}"
+                     class="text-danger small"></div>
             </div>
 
             <!-- Email -->
@@ -105,6 +136,7 @@
                 <div th:if="${#fields.hasErrors('email')}"
                      th:errors="*{email}"
                      class="text-danger small"></div>
+                <div id="err-email" class="text-danger small js-error"></div>
             </div>
 
             <!-- Chức vụ -->
@@ -117,8 +149,35 @@
                     <option value="1">Nhân viên</option>
                 </select>
                 <label>Chức vụ</label>
+                <div th:if="${#fields.hasErrors('chucVu')}"
+                     th:errors="*{chucVu}"
+                     class="text-danger small"></div>
             </div>
-
+<!-- Trường mật khẩu -->
+            <div class="col-md-6 form-floating">
+                
+                    <input th:field="*{matKhau}"
+                           th:type="${passwordVisible} ? 'text' : (readonly? 'text':'password')"
+                           class="form-control"
+                           id="matKhauInput"
+                           placeholder="Mật khẩu"
+                           th:readonly="${readonly}"
+                           th:required="${!readonly}">
+                    <label for="matKhauInput">Mật khẩu</label>
+                
+                <!-- nút toggle mắt -->
+                <button type="button"
+                        class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 border-0"
+                        style="z-index: 10"
+                        onclick="togglePasswordVisibility()"
+                        th:attr="disabled=${readonly}">
+                    <i class="bi" id="eyeIcon"
+                       th:classappend="${passwordVisible} ? 'bi-eye-slash' : 'bi-eye'"></i>
+                </button>
+                <div class="text-danger"
+                     th:if="${#fields.hasErrors('matKhau')}"
+                     th:errors="*{matKhau}"></div>
+            </div>
             <!-- Trạng thái -->
             <div class="col-md-6 form-floating">
                 <select th:field="*{trangThai}"
@@ -129,7 +188,12 @@
                     <option value="false">Ngưng hoạt động</option>
                 </select>
                 <label>Trạng thái</label>
+                <div th:if="${#fields.hasErrors('trangThai')}"
+                     th:errors="*{trangThai}"
+                     class="text-danger small"></div>
             </div>
+
+            
 
             <!-- Ảnh -->
             <input type="hidden" th:field="*{anh}" />
@@ -139,8 +203,12 @@
                      class="img-fluid rounded mb-2" style="max-height:150px"/>
                 <input type="file" name="anhFile"
                        class="form-control"
-                       th:disabled="${readonly}">
+                       th:disabled="${readonly}"
+                       accept="image/*">
                 <label>Ảnh nhân viên</label>
+                <div th:if="${#fields.hasErrors('anh')}"
+                     th:errors="*{anh}"
+                     class="text-danger small"></div>
             </div>
 
         </div>
@@ -157,5 +225,121 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+        const form   = document.querySelector('form');
+        const fields = form.querySelectorAll('input[name], select[name]');
+        const initialData = {};
+
+        // Lưu giá trị ban đầu
+        fields.forEach(field => {
+            initialData[field.name] = field.value;
+        });
+
+        form.addEventListener('submit', function(event) {
+            // Kiểm tra có thay đổi không
+            let isChanged = false;
+            fields.forEach(field => {
+                if (field.value !== initialData[field.name]) {
+                    isChanged = true;
+                }
+            });
+
+            if (!isChanged) {
+                // Chưa sửa gì → hủy submit, show alert
+                event.preventDefault();
+                alert('Bạn chưa sửa gì!');
+                return;
+            }
+
+            // Nếu có sửa → đánh dấu để hiển thị alert thành công ở list page
+            localStorage.setItem('nvUpdated','true');
+        });
+    });
+    /*]]>*/
+</script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    let passwordVisible = false;
+    function togglePasswordVisibility() {
+        const input = document.getElementById("matKhauInput");
+        const icon  = document.getElementById("eyeIcon");
+        passwordVisible = !passwordVisible;
+
+        if (passwordVisible) {
+            input.type = "text";
+            icon.classList.replace("bi-eye", "bi-eye-slash");
+        } else {
+            // Sửa lỗi linter: truyền biến readonly từ Thymeleaf sang JS
+            var isReadonly = /*[[${readonly}]]*/ false;
+            if (!isReadonly) {
+                input.type = "password";
+            }
+            icon.classList.replace("bi-eye-slash", "bi-eye");
+        }
+    }
+    /*]]>*/
+</script>
+<script>
+function validateForm() {
+    let valid = true;
+    document.querySelectorAll('.js-error').forEach(e => e.innerText = '');
+
+    let ma = document.querySelector('[name="ma"]').value.trim();
+    if (!/^NV\d{3,5}$/.test(ma)) {
+        document.getElementById('err-ma').innerText = "Mã phải có dạng NV + tối đa 5 chữ số";
+        valid = false;
+    }
+    // Kiểm tra mã trùng
+    if (typeof existingMaNhanVien !== "undefined" && existingMaNhanVien.includes(ma)) {
+        document.getElementById('err-ma').innerText = "Mã nhân viên đã tồn tại";
+        valid = false;
+    }
+
+    let email = document.querySelector('[name="email"]').value.trim();
+    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
+        document.getElementById('err-email').innerText = "Email phải đúng định dạng @gmail.com";
+        valid = false;
+    }
+
+    let cccd = document.querySelector('[name="chungMinhThu"]').value.trim();
+    if (!/^\d{12}$/.test(cccd)) {
+        document.getElementById('err-cccd').innerText = "CMND phải gồm 12 chữ số";
+        valid = false;
+    }
+
+    let sdt = document.querySelector('[name="soDienThoai"]').value.trim();
+    if (!/^\d{9,12}$/.test(sdt)) {
+        document.getElementById('err-sdt').innerText = "Số điện thoại phải từ 9 đến 12 chữ số";
+        valid = false;
+    }
+
+    // So sánh dữ liệu hiện tại với initialData
+    let changed = false;
+    if (
+        document.querySelector('[name="ma"]').value.trim() !== initialData.ma ||
+        document.querySelector('[name="ten"]').value.trim() !== initialData.ten ||
+        document.querySelector('[name="ngaySinh"]').value !== initialData.ngaySinh ||
+        document.querySelector('[name="soDienThoai"]').value.trim() !== initialData.soDienThoai ||
+        document.querySelector('[name="chungMinhThu"]').value.trim() !== initialData.chungMinhThu ||
+        document.querySelector('[name="gioiTinh"]').value !== initialData.gioiTinh ||
+        document.querySelector('[name="email"]').value.trim() !== initialData.email ||
+        document.querySelector('[name="chucVu"]').value !== initialData.chucVu ||
+        document.querySelector('[name="trangThai"]').value !== initialData.trangThai ||
+        document.querySelector('[name="matKhau"]').value.trim() !== initialData.matKhau
+    ) {
+        changed = true;
+    }
+    if (!changed) {
+        alert("Bạn chưa nhập gì cả!");
+        return false;
+    }
+
+    if (!valid) return false;
+    return true;
+}
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </body>
 </html>

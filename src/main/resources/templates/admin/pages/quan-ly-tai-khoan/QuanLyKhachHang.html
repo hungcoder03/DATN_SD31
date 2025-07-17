@@ -12,35 +12,19 @@
 </head>
 <body class="bg-light">
 <section layout:fragment="content">
-    <!-- FLASH ALERTS -->
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        document.addEventListener('DOMContentLoaded', function() {
-            // Nếu dùng showModal để mở modal, hủy flag update khi form lỗi
-            let showModal = /*[[${showModal}]]*/ false;
-            if (showModal) {
-                localStorage.removeItem('khUpdated');
-                return;
-            }
+<!-- FLASH ALERTS -->
+<!-- Chỉ render script khi có flash-attribute tương ứng -->
+<script th:if="${added}">
+  alert('Thêm khách hàng thành công!');
+</script>
+<script th:if="${deleted}">
+  alert('Xóa khách hàng thành công!');
+</script>
+<script th:if="${updated}">
+  alert('Cập nhật khách hàng thành công!');
+</script>
 
-            // Thêm mới
-            if (localStorage.getItem('khAdded')) {
-                alert('Thêm khách hàng thành công!');
-                localStorage.removeItem('khAdded');
-            }
-            // Xóa
-            if (localStorage.getItem('khDeleted')) {
-                alert('Xóa khách hàng thành công!');
-                localStorage.removeItem('khDeleted');
-            }
-            // Cập nhật
-            if (localStorage.getItem('khUpdated')) {
-                alert('Cập nhật khách hàng thành công!');
-                localStorage.removeItem('khUpdated');
-            }
-        });
-        /*]]>*/
-    </script>
+    
 
     <!-- Thêm script kiểm tra -->
     <script th:inline="javascript">

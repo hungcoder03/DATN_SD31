@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -13,162 +14,113 @@
 
     <h2 class="text-center mb-4">Thêm Nhân Viên</h2>
 
-    <form th:action="@{/admin/quanlytaikhoan/nhanvien/save}"
-          th:object="${nhanvien}"
-          method="post"
+    <form th:action="@{/admin/quanlytaikhoan/nhanvien/save}" 
+          th:object="${nhanvien}" 
+          method="post" 
           enctype="multipart/form-data">
         <div class="row g-3">
 
-            <!-- Mã NV -->
+           <!-- Mã nhân viên -->
             <div class="col-md-6 form-floating">
-                <input type="text"
-                       th:field="*{ma}"
-                       class="form-control"
-                       placeholder="Mã (NV#####)"
-                       required>
-                <label>Mã</label>
-                <div th:if="${#fields.hasErrors('ma')}"
-                     th:errors="*{ma}"
-                     class="text-danger small"></div>
+            <input type="text"
+                    th:field="*{ma}"
+                    id="ma"
+                    class="form-control"
+                    placeholder="Mã"
+                    required
+                    pattern="^NV\d{1,5}$"
+                    title="Mã phải bắt đầu NV + 1–5 chữ số">
+            <label for="ma">Mã</label>
+            <div th:if="${maDuplicateError}" class="text-danger small mt-1">
+                <span th:text="${maDuplicateError}"></span>
+            </div>
             </div>
 
-            <!-- Tên -->
+
             <div class="col-md-6 form-floating">
-                <input type="text"
-                       th:field="*{ten}"
-                       class="form-control"
-                       placeholder="Tên"
-                       required>
+                <input type="text" th:field="*{ten}" class="form-control" placeholder="Tên" required>
                 <label>Tên</label>
-                <div th:if="${#fields.hasErrors('ten')}"
-                     th:errors="*{ten}"
-                     class="text-danger small"></div>
             </div>
 
-            <!-- Ngày sinh -->
             <div class="col-md-6 form-floating">
-                <input type="date"
-                       th:field="*{ngaySinh}"
-                       class="form-control"
-                       placeholder="Ngày sinh"
-                       required>
+                <input type="date" th:field="*{ngaySinh}" class="form-control" placeholder="Ngày sinh" required>
                 <label>Ngày sinh</label>
-                <div th:if="${#fields.hasErrors('ngaySinh')}"
-                     th:errors="*{ngaySinh}"
-                     class="text-danger small"></div>
             </div>
 
             <!-- Số điện thoại -->
             <div class="col-md-6 form-floating">
-                <input type="text"
-                       th:field="*{soDienThoai}"
-                       class="form-control"
-                       placeholder="Số điện thoại"
-                       required>
+                <input type="number" th:field="*{soDienThoai}" class="form-control"
+                    placeholder="Số điện thoại" required
+                    pattern="^\d{8,12}$"
+                    title="Số điện thoại phải có từ 8 đến 12 chữ số.">
                 <label>Số điện thoại</label>
-                <div th:if="${#fields.hasErrors('soDienThoai')}"
-                     th:errors="*{soDienThoai}"
-                     class="text-danger small"></div>
             </div>
 
-            <!-- Ngày tham gia (ẩn) -->
             <input type="hidden" th:field="*{ngayThamGia}"/>
 
             <!-- CMND -->
             <div class="col-md-6 form-floating">
-                <input type="text"
-                       th:field="*{chungMinhThu}"
-                       class="form-control"
-                       placeholder="CMND"
-                       required>
+                <input type="number" th:field="*{chungMinhThu}" class="form-control"
+                    placeholder="CMND" required
+                    pattern="^\d{12}$"
+                    title="CMND phải gồm đúng 12 chữ số.">
                 <label>CMND</label>
-                <div th:if="${#fields.hasErrors('chungMinhThu')}"
-                     th:errors="*{chungMinhThu}"
-                     class="text-danger small"></div>
             </div>
 
-            <!-- Giới tính -->
             <div class="col-md-6 form-floating">
-                <select th:field="*{gioiTinh}"
-                        class="form-select"
-                        required>
+                <select th:field="*{gioiTinh}" class="form-select" required>
                     <option value="true">Nam</option>
                     <option value="false">Nữ</option>
                 </select>
                 <label>Giới tính</label>
             </div>
 
-            <!-- Ảnh -->
             <div class="col-md-6 form-floating">
-                <input type="file"
-                       name="anhFile"
-                       class="form-control"
-                       id="anhFile">
+                <input type="file" name="anhFile" class="form-control" id="anhFile">
                 <label for="anhFile">Ảnh nhân viên</label>
             </div>
 
             <!-- Email -->
             <div class="col-md-6 form-floating">
-                <input type="email"
-                       th:field="*{email}"
-                       class="form-control"
-                       placeholder="Email"
-                       required>
-                <label>Email</label>
-                <div th:if="${#fields.hasErrors('email')}"
-                     th:errors="*{email}"
-                     class="text-danger small"></div>
+            <input type="text"
+                    th:field="*{email}"
+                    class="form-control"
+                    placeholder="Email@gmail.com"
+                    required
+                    pattern="[A-Za-z0-9._%+-]+@gmail\.com"
+                    title="Email phải kết thúc bằng @gmail.com">
+            <label>Email</label>
             </div>
 
-            <!-- Mật khẩu với toggle -->
-            <div class="col-md-6">
-                <div class="form-floating position-relative">
-                    <input th:type="${passwordVisible} ? 'text' : 'password'"
-                           th:field="*{matKhau}"
-                           id="matKhauInput"
-                           class="form-control"
-                           placeholder="Mật khẩu"
-                           required>
-                    <label for="matKhauInput">Mật khẩu</label>
-                    <button type="button"
-                            class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 border-0"
-                            style="z-index: 10"
-                            onclick="togglePasswordVisibility()">
-                        <i class="bi" id="eyeIcon"
-                           th:classappend="${passwordVisible} ? 'bi-eye-slash' : 'bi-eye'"></i>
-                    </button>
-                </div>
-                <div th:if="${#fields.hasErrors('matKhau')}"
-                     th:errors="*{matKhau}"
-                     class="text-danger small mt-1"></div>
-            </div>
 
-            <!-- Chức vụ -->
             <div class="col-md-6 form-floating">
-                <select th:field="*{chucVu}"
-                        class="form-select"
-                        required>
+                <input th:type="${passwordVisible} ? 'text' : 'password'"
+                                       th:field="*{matKhau}" id="matKhauInput"
+                                       class="form-control" placeholder="Mật khẩu" required>
+                                <label for="matKhauInput">Mật khẩu</label>
+                                <button type="button"
+                                        class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 border-0"
+                                        style="z-index: 10"
+                                        onclick="togglePasswordVisibility()">
+                                    <i class="bi" id="eyeIcon"
+                                       th:classappend="${passwordVisible} ? 'bi-eye-slash' : 'bi-eye'"></i>
+                                </button>
+            </div>
+
+            <div class="col-md-6 form-floating">
+                <select th:field="*{chucVu}" class="form-select" required>
                     <option value="0">Quản lý</option>
                     <option value="1">Nhân viên</option>
                 </select>
                 <label>Chức vụ</label>
-                <div th:if="${#fields.hasErrors('chucVu')}"
-                     th:errors="*{chucVu}"
-                     class="text-danger small"></div>
             </div>
 
-            <!-- Trạng thái -->
             <div class="col-md-6 form-floating">
-                <select th:field="*{trangThai}"
-                        class="form-select"
-                        required>
+                <select th:field="*{trangThai}" class="form-select" required>
                     <option value="true">Hoạt động</option>
-                    <option value="false">Ngưng hoạt động</option>
+                    <option value="false">Khoá</option>
                 </select>
                 <label>Trạng thái</label>
-                <div th:if="${#fields.hasErrors('trangThai')}"
-                     th:errors="*{trangThai}"
-                     class="text-danger small"></div>
             </div>
         </div>
 
@@ -177,13 +129,12 @@
             <button type="submit" class="btn btn-primary">Lưu</button>
         </div>
     </form>
-
-    <!-- Toggle password script -->
-    <script th:inline="javascript">
-        /*<![CDATA[*/
+    <script>
+        /*]]>*/
         function togglePasswordVisibility() {
             const input = document.getElementById("matKhauInput");
             const icon = document.getElementById("eyeIcon");
+
             if (input.type === "password") {
                 input.type = "text";
                 icon.classList.remove("bi-eye");
@@ -194,10 +145,48 @@
                 icon.classList.add("bi-eye");
             }
         }
-        /*]]>*/
-    </script>
-</section>
+  document.addEventListener("DOMContentLoaded", function() {
+    
+    const maInput    = document.getElementById("ma");
+    const errorDiv   = document.getElementById("maError");
+    const submitBtn  = document.querySelector("button[type=submit]");
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    function checkMaUnique() {
+      const maVal = maInput.value.trim();
+      if (!maVal.match(/^NV\d{1,5}$/)) {
+        // Nếu không đúng pattern, bỏ qua kiểm tra uniqueness
+        errorDiv.style.display = "none";
+        submitBtn.disabled = false;
+        return;
+      }
+      fetch(`/admin/quanlytaikhoan/nhanvien/checkMa?ma=${encodeURIComponent(maVal)}`)
+        .then(resp => resp.json())
+        .then(exists => {
+          if (exists) {
+            errorDiv.textContent = "Mã NV đã tồn tại, vui lòng nhập mã khác.";
+            errorDiv.style.display = "block";
+            submitBtn.disabled = true;
+          } else {
+            errorDiv.style.display = "none";
+            submitBtn.disabled = false;
+          }
+        })
+        .catch(() => {
+          // lỗi mạng, vẫn cho phép submit — server sẽ validate lần cuối
+          errorDiv.style.display = "none";
+          submitBtn.disabled = false;
+        });
+    }
+
+    maInput.addEventListener("blur", checkMaUnique);
+    maInput.addEventListener("input", () => {
+      // Xoá lỗi khi user sửa
+      errorDiv.style.display = "none";
+      submitBtn.disabled = false;
+    });
+  });
+</script>
+
+</section>
+</body><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </html>

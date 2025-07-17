@@ -12,6 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
+    boolean existsByMa(String ma);
+
     Optional<NhanVien> findByEmail(String email);
 
     @Query("select n from NhanVien n where n.id=:id")
