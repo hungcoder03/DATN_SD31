@@ -303,9 +303,7 @@
         <tr>
           <th>STT</th>
           <th>Tên sản phẩm</th>
-          <th>Giá gốc</th>
-          <th>Giá giảm</th>
-          <th>Giá sau giảm</th>
+          <th>Giá bán</th>
           <th>Số lượng</th>
           <th>Tổng tiền</th>
         </tr>
@@ -314,8 +312,6 @@
         <tr th:each="hdct, index : ${hdctList}">
           <td th:text="${index.count}" class="text-center"></td>
           <td th:text="${hdct.tenCTSP}"></td>
-          <td th:text="${@utils.formatCurrency(hdct.giaGoc)}" class="text-end"></td>
-          <td th:text="${@utils.formatCurrency(hdct.giaGiam)}" class="text-end"></td>
           <td th:text="${@utils.formatCurrency(hdct.giaSauGiam)}" class="text-end"></td>
           <td th:text="${hdct.soLuong}" class="text-center"></td>
           <td th:text="${@utils.formatCurrency(hdct.tongTien)}" class="text-end"></td>
@@ -334,7 +330,7 @@
         <p><strong>Phiếu giảm giá:</strong> <span th:text="${hoaDon.maGiamGia}"></span></p>
       </div>
       <div class="col-md-6">
-        <p><strong>Giảm giá:</strong> <span th:text="${hoaDon.giamGia}"></span></p>
+        <p><strong>Giảm giá:</strong> <span th:text="${hoaDon.giaGiamGia}"></span></p>
       </div>
       <div class="col-md-6">
         <p><strong>Giá gốc:</strong> <span th:text="${@utils.formatCurrency(hoaDon.giaGoc)}"></span></p>

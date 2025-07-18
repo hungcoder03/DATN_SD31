@@ -105,20 +105,6 @@
         <h3 class="mb-4">Các biến thể đã có</h3>
 
         <!-- Form cập nhật đợt giảm giá -->
-        <form th:action="@{/admin/san-pham/cap-nhat-dot-giam-gia}" method="post">
-            <input type="hidden" name="sanPhamId" th:value="${sanPham.id}" />
-            <div class="row g-2 mb-3 align-items-center">
-                <div class="col-md-4">
-                    <select name="dotGiamGiaId" class="form-select">
-                        <option value="">-- Chọn đợt giảm giá --</option>
-                        <option value="">Không áp dụng đợt giảm giá</option>
-                        <option th:each="dgg : ${dsDotGiamGia}" th:value="${dgg.id}" th:text="${dgg.ten}"></option>
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-success">Áp dụng</button>
-                </div>
-            </div>
 
             <!-- Bảng chi tiết sản phẩm -->
             <table class="table table-bordered table-striped">
@@ -128,7 +114,7 @@
                     <th>Màu</th>
                     <th>Size</th>
                     <th>Số lượng</th>
-                    <th>Giá gốc</th>
+                    <th>Giá bán chưa sale</th>
                     <th>Giá nhập</th>
                     <th>Giá bán</th>
                     <th>Đang áp dụng</th>
@@ -147,7 +133,6 @@
                 </tr>
                 </tbody>
             </table>
-        </form>
 
         <!-- Thêm màu -->
         <h4 class="mt-5">Chọn màu để thêm biến thể còn thiếu:</h4>
@@ -183,41 +168,79 @@
         </div>
 
         <!-- Form thêm biến thể -->
-        <form method="post"
-              th:action="@{/admin/san-pham/chitietsanpham/them(sanPhamId=${sanPham.id})}"
+        <!-- ======================= THÊM BIẾN THỂ ======================= -->
+        <form th:action="@{/admin/san-pham/chitietsanpham/them(sanPhamId=${sanPham.id})}"
               th:object="${form}"
               th:if="${form.chiTietList.size() > 0}"
               class="mt-4">
-            <h5 th:text="'Thêm biến thể cho màu: ' + ${mauDangChon.ten}"></h5>
 
-            <div th:each="ct, iter : *{chiTietList}" class="chi-tiet-block">
-                <button type="button" class="btn-close float-end" onclick="xoaBienThe(this)"></button>
+            <h5 class="fw-bold mb-3">
+                Thêm biến thể cho màu:
+                <span th:text="${mauDangChon.ten}"></span>
+            </h5>
 
-                <p><strong>Size:</strong> <span th:text="${ct.size.ten}"></span> | <strong>Màu:</strong> <span th:text="${ct.mauSac.ten}"></span></p>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Size</th>
+                        <th>Giá gốc</th>
+                        <th>Giá nhập</th>
+                        <th>Số lượng</th>
+                        <th>Xoá</th>
+                    </tr>
+                    </thead>
 
-                <input type="hidden" th:field="*{chiTietList[__${iter.index}__].sanPham.id}" />
-                <input type="hidden" th:field="*{chiTietList[__${iter.index}__].mauSac.id}" />
-                <input type="hidden" th:field="*{chiTietList[__${iter.index}__].size.id}" />
+                    <tbody>
+                    <tr th:each="ct,iter : *{chiTietList}">
+                        <!-- Số thứ tự -->
+                        <td th:text="${iter.index + 1}"></td>
 
-                <div class="mb-2">
-                    <label>Giá bán:</label>
-                    <input type="number" th:field="*{chiTietList[__${iter.index}__].giaGoc}" class="form-control" min="0" required />
-                </div>
-                <div class="mb-2">
-                    <label>Giá nhập:</label>
-                    <input type="number" th:field="*{chiTietList[__${iter.index}__].giaNhap}" class="form-control" min="0" required />
-                </div>
-                <div class="mb-2">
-                    <label>Số lượng:</label>
-                    <input type="number" th:field="*{chiTietList[__${iter.index}__].soLuong}" class="form-control" min="0" required />
-                </div>
+                        <!-- Tên size hiển thị -->
+                        <td th:text="${ct.size.ten}"></td>
+
+                        <!-- hidden id SP | size | màu để Spring bind đúng -->
+                        <input type="hidden"
+                               th:field="*{chiTietList[__${iter.index}__].sanPham.id}" />
+                        <input type="hidden"
+                               th:field="*{chiTietList[__${iter.index}__].mauSac.id}" />
+                        <input type="hidden"
+                               th:field="*{chiTietList[__${iter.index}__].size.id}" />
+
+                        <!-- Giá & số lượng -->
+                        <td>
+                            <input type="number" min="0" class="form-control form-control-sm text-end"
+                                   th:field="*{chiTietList[__${iter.index}__].giaGoc}" required />
+                        </td>
+                        <td>
+                            <input type="number" min="0" class="form-control form-control-sm text-end"
+                                   th:field="*{chiTietList[__${iter.index}__].giaNhap}" required />
+                        </td>
+                        <td>
+                            <input type="number" min="0" class="form-control form-control-sm text-end"
+                                   th:field="*{chiTietList[__${iter.index}__].soLuong}" required />
+                        </td>
+
+                        <!-- Nút xoá hàng -->
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="this.closest('tr').remove()">
+                                &times;
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <div class="mt-3 d-flex gap-2">
+            <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-success">Lưu tất cả</button>
                 <a th:href="@{/admin/san-pham/xem/{id}(id=${sanPham.id})}" class="btn btn-secondary">Hủy</a>
             </div>
         </form>
+        <!-- ============================================================ -->
+
 
         <!-- Nút quay lại -->
         <a th:href="@{/admin/san-pham/hien_thi}" class="btn btn-light btn-quay-lai">← Quay lại</a>

@@ -17,14 +17,19 @@
                 <div class="col-md-3">
                     <select name="dotGiamGiaId" class="form-select" required>
                         <option value="">-- Chọn đợt giảm giá --</option>
-                        <option th:each="dgg : ${dsDotGiamGia}" th:value="${dgg.id}" th:text="${dgg.ten}"></option>
+                        <option value="">-- Không áp dụng đợt giảm giá --</option>
+                        <option th:each="dgg : ${dsDotGiamGia}"
+                                th:value="${dgg.id}"
+                                th:text="${dgg.giaTriDotGiamGia}+'%'">
+                        </option>
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-success">Áp dụng giảm giá</button>
+                    <button type="submit" class="btn btn-success">
+                        Áp dụng giảm giá
+                    </button>
                 </div>
-            </div>
-        </form>
+
         <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mt-3 mx-3" role="alert">
             <i class="bi bi-exclamation-triangle-fill"></i>
             <span th:text="${error}"></span>
@@ -40,12 +45,14 @@
         <table id="productTable" class="table table-bordered table-striped">
             <thead>
             <tr>
-                <th>ID</th>
+                <th>
+                    <input type="checkbox" id="checkAll" />
+                </th>
                 <th>Mã</th>
                 <th>Tên</th>
                 <th>Mô tả</th>
-                <th>Ngày tạo</th>
-                <th>Ngày sửa</th>
+                <th>Đang áp dụng</th>
+                <th>Giá</th>
                 <th>Trạng thái</th>
                 <th>Chất liệu</th>
                 <th>Danh mục</th>
@@ -58,12 +65,24 @@
             </thead>
             <tbody>
             <tr th:each="sp : ${list}">
-                <td th:text="${sp.id}"></td>
+                <td>
+                    <input type="checkbox" name="sanPhamIds"
+                           th:value="${sp.id}" class="check-item" />
+                </td>
                 <td th:text="${sp.ma}"></td>
                 <td th:text="${sp.ten}"></td>
                 <td th:text="${sp.moTa}"></td>
-                <td th:text="${sp.ngayTao}"></td>
-                <td th:text="${sp.ngaySua}"></td>
+                <td th:if="${dotMap[sp.id] != null}"
+                    th:text="${dotMap[sp.id].ten + ' - Giảm ' + dotMap[sp.id].giaTriDotGiamGia +'%'}">
+                </td>
+                <td th:if="${dotMap[sp.id] == null}">Không</td>
+
+                <td th:with="gia=${giaSanPhamMap[sp.id]}"
+                    th:text="${gia != null ? (gia[0].equals(gia[1])
+                    ? #numbers.formatDecimal(gia[0], 0, 'COMMA', 0, 'POINT') + ' ₫'
+                    : #numbers.formatDecimal(gia[0], 0, 'COMMA', 0, 'POINT') + ' ₫ - '
+                    + #numbers.formatDecimal(gia[1], 0, 'COMMA', 0, 'POINT') + ' ₫') : 'N/A'}">
+                </td>
                 <td th:text="${sp.trangThai ? 'Đang hoạt động' : 'Ngừng bán'}"></td>
                 <td th:text="${sp.chatLieu.ten}"></td>
                 <td th:text="${sp.danhMuc.ten}"></td>
@@ -80,6 +99,8 @@
             </tr>
             </tbody>
         </table>
+            </div>
+        </form>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -87,6 +108,16 @@
     <script>
         $(document).ready(function () {
             $('#productTable').DataTable();
+        });
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('#productTable').DataTable();
+
+            $('#checkAll').on('change', function () {
+                $('.check-item').prop('checked', $(this).is(':checked'));
+            });
         });
     </script>
 </section>

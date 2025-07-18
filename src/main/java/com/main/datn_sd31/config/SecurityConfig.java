@@ -36,11 +36,11 @@ public class SecurityConfig {
     }
 
     /* ===== 2. Bảo vệ khu vực KHÁCH HÀNG ===== */
-    @Bean
     @Order(2)
+    @Bean
     public SecurityFilterChain customerSecurity(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/khach-hang/**", "/gio-hang/**")
+                .securityMatcher("/khach-hang/**", "/gio-hang/**", "/khach-hang/dang-nhap")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/khach-hang/dang-nhap",
@@ -53,8 +53,8 @@ public class SecurityConfig {
                         .anyRequest().hasRole("CUSTOMER")
                 )
                 .formLogin(form -> form
-                        .loginPage("/khach-hang/dang-nhap")           // ⬅️ Đây là đường dẫn GET trả về form login
-                        .loginProcessingUrl("/khach-hang/dang-nhap")   // ⬅️ Đây là POST để xử lý form
+                        .loginPage("/khach-hang/dang-nhap")
+                        .loginProcessingUrl("/khach-hang/dang-nhap")
                         .defaultSuccessUrl("/khach-hang/danh-sach", true)
                         .permitAll()
                 )

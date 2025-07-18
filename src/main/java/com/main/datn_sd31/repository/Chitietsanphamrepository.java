@@ -33,6 +33,15 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
     @Query("select n from ChiTietSanPham n where n.sanPham.id =:spId")
     ChiTietSanPham find(Integer spId);
 
+    @Query("""
+    SELECT ctsp FROM ChiTietSanPham ctsp
+    JOIN FETCH ctsp.mauSac
+    JOIN FETCH ctsp.size
+    JOIN FETCH ctsp.sanPham
+    WHERE ctsp.id = :id
+""")
+    ChiTietSanPham findWithDetailsById(@Param("id") Integer id);
+
 
 }
 

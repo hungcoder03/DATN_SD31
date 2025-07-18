@@ -1,34 +1,53 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng nhập Khách Hàng</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Đăng Nhập Khách Hàng</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<div class="login-box">
-    <h2>Đăng Nhập Khách Hàng</h2>
+<body class="bg-pink-50 font-sans text-gray-800">
 
-    <form th:action="@{/khach-hang/dang-nhap}" method="post">
-        <div>
-            <label>Email:</label>
-            <input type="email" name="username" required />
+<div class="flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-pink-600 mb-6">Đăng Nhập Khách Hàng</h2>
+
+        <form th:action="@{/khach-hang/dang-nhap}" method="post" class="space-y-5">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="email" name="username" required
+                       class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+                <input type="password" id="password" name="password" required
+                       class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500">
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-pink-600 text-white py-2 rounded-md hover:bg-pink-700 transition">
+                Đăng nhập
+            </button>
+        </form>
+
+        <div class="mt-4 text-center text-sm">
+            <a th:href="@{/khach-hang/quen-mat-khau}" class="text-pink-500 hover:underline">Quên mật khẩu?</a>
+            |
+            <a th:href="@{/khach-hang/dang-ky}" class="text-pink-500 hover:underline">Đăng ký</a>
         </div>
 
-        <div>
-            <label>Mật khẩu:</label>
-            <input type="password" name="password" required />
+        <!-- Thông báo lỗi đăng nhập -->
+        <div th:if="${param.error}" class="mt-4 text-center text-red-600 font-medium">
+            ❌ Sai email hoặc mật khẩu!
         </div>
 
-        <button type="submit">Đăng nhập</button>
-    </form>
-
-    <div th:if="${param.error}">
-        <p style="color: red;">❌ Sai email hoặc mật khẩu!</p>
-    </div>
-    <div th:if="${param.logout}">
-        <p style="color: green;">✅ Đã đăng xuất thành công.</p>
+        <!-- Thông báo đăng xuất -->
+        <div th:if="${param.logout}" class="mt-4 text-center text-green-600 font-medium">
+            ✅ Đã đăng xuất thành công.
+        </div>
     </div>
 </div>
+
 </body>
 </html>

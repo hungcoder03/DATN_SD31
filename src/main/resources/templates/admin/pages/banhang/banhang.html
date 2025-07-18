@@ -98,32 +98,24 @@
                 </tr>
                 </tbody>
             </table>
-
+            <p>Tổng tiền: <span class="total" th:text="${#numbers.formatDecimal(tongTien, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
             <form method="post" th:action="@{/admin/ban-hang/xoa-gio}">
                 <input type="hidden" name="cartKey" th:value="${cartKey}" />
                 <button class="btn btn-danger">Xóa giỏ hàng</button>
             </form>
         </div>
 
-        <!-- Địa chỉ giao hàng -->
+        <!-- Mã giảm giá -->
         <div class="card p-3">
-            <h5>Địa chỉ giao hàng</h5>
-            <div class="row g-2">
-                <div class="col-md-4"><select id="province" class="form-select"></select></div>
-                <div class="col-md-4"><select id="district" class="form-select"></select></div>
-                <div class="col-md-4"><select id="ward" class="form-select"></select></div>
-            </div>
-        </div>
-
-        <!-- Mã giảm giá & tổng tiền -->
-        <div class="card p-3">
-            <form method="get" th:action="@{/admin/ban-hang/ap-dung-ma}">
+            <form method="post" th:action="@{/admin/ban-hang/ap-dung-ma}">
                 <input type="hidden" name="cartKey" th:value="${cartKey}" />
                 <div class="row g-2 mb-2">
                     <div class="col-md-6">
                         <select class="form-select" name="maGiamGia">
                             <option value="">-- Mã giảm giá --</option>
-                            <option th:each="p : ${dsPhieuGiamGia}" th:value="${p.ma}" th:text="${p.ma}"></option>
+                            <option th:each="p : ${dsPhieuGiamGia}" th:value="${p.ma}"
+                                    th:text="${p.ma + '-' + (#numbers.formatDecimal(p.mucDo, 0, 'COMMA', 0, 'POINT')) + (p.loaiPhieuGiamGia == 1 ? '%' : 'đ') + ' - giảm tối đa:' + (#numbers.formatDecimal(p.giamToiDa, 0, 'COMMA', 0, 'POINT'))}">
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -131,18 +123,61 @@
                     </div>
                 </div>
             </form>
+        </div>
 
-            <div>
-                <p>Phí vận chuyển: <strong id="shippingFee" th:text="${#numbers.formatDecimal(phiVanChuyen, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></strong></p>
-                <p>Tổng tiền: <span class="total" th:text="${#numbers.formatDecimal(tongTien, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
-                <p>Thành tiền sau giảm: <span class="total" th:text="${#numbers.formatDecimal(tongTienSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
-            </div>
+        <!-- Thanh toán -->
+        <div class="card p-3">
+            <form method="post" th:action="@{/admin/ban-hang/thanh-toan}" onsubmit="updateDiaChiHienThi()">
+                <input type="hidden" name="giagiam" th:value="${giamGia}" />
+                <input type="hidden" name="diaChiTinh" id="hiddenTinh">
+                <input type="hidden" name="diaChiHuyen" id="hiddenHuyen">
+                <input type="hidden" name="diaChiXa" id="hiddenXa">
 
-            <form method="post" th:action="@{/admin/ban-hang/thanh-toan}">
+                <h5>Địa chỉ giao hàng</h5>
+                <div class="row g-2">
+                    <div class="col-md-4"><select id="province" class="form-select"></select></div>
+                    <div class="col-md-4"><select id="district" class="form-select"></select></div>
+                    <div class="col-md-4"><select id="ward" class="form-select"></select></div>
+                </div>
+
+                <div class="mb-2">
+                    <label for="soDienThoai" class="form-label">Số điện thoại:</label>
+                    <input type="text" name="soDienThoai" class="form-control" id="soDienThoai" placeholder="Nhập số điện thoại">
+                </div>
+
+                <div class="mb-2">
+                    <label>Địa chỉ nhận hàng:</label>
+                    <p id="hienThiDiaChi" class="form-control-plaintext text-primary fw-bold"></p>
+                </div>
+
+                <div th:if="${maGiamGia != null}">
+                    <p>Mã giảm giá đã áp dụng: <strong th:text="${maGiamGia}"></strong></p>
+                </div>
+
+                <div>
+                    <p>Phí vận chuyển: <strong id="shippingFee" th:text="${#numbers.formatDecimal(phiVanChuyen, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></strong></p>
+                    <p>Tổng tiền: <span class="total" th:text="${#numbers.formatDecimal(tongTien, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
+                    <p>Giảm giá: <span class="total" th:text="${#numbers.formatDecimal(giamGia, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
+                    <p>Thành tiền sau giảm: <span class="total" th:text="${#numbers.formatDecimal(tongTienSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Phương thức thanh toán:</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="tienmat" value="tien_mat" checked>
+                        <label class="form-check-label" for="tienmat">Tiền mặt</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="chuyenkhoan" value="chuyen_khoan">
+                        <label class="form-check-label" for="chuyenkhoan">Chuyển khoản</label>
+                    </div>
+                </div>
+
                 <input type="hidden" name="cartKey" th:value="${cartKey}" />
                 <button class="btn btn-success w-100 mt-2">Thanh toán</button>
             </form>
         </div>
+
     </div>
 
     <script th:inline="javascript">
@@ -177,17 +212,46 @@
         async function calculateShipping() {
             const districtId = document.getElementById("district").value;
             const wardCode = document.getElementById("ward").value;
-            const res = await fetch(`/admin/ban-hang/phi-ship?toDistrictId=${districtId}&wardCode=${wardCode}`);
-            const fee = await res.json();
-            document.getElementById("shippingFee").innerText = formatCurrency(fee);
-            window.location.reload(); // cập nhật tổng tiền
+            if (districtId && wardCode) {
+                const res = await fetch(`/admin/ban-hang/phi-ship?toDistrictId=${districtId}&wardCode=${wardCode}`);
+                const fee = await res.json();
+                document.getElementById("shippingFee").innerText = formatCurrency(fee);
+            }
+        }
+
+        function updateDiaChiHienThi() {
+            const tinh = document.getElementById("province");
+            const huyen = document.getElementById("district");
+            const xa = document.getElementById("ward");
+
+            const tenTinh = tinh.options[tinh.selectedIndex]?.text || "";
+            const tenHuyen = huyen.options[huyen.selectedIndex]?.text || "";
+            const tenXa = xa.options[xa.selectedIndex]?.text || "";
+
+            document.getElementById("hiddenTinh").value = tenTinh;
+            document.getElementById("hiddenHuyen").value = tenHuyen;
+            document.getElementById("hiddenXa").value = tenXa;
+
+            const full = [tenXa, tenHuyen, tenTinh].filter(Boolean).join(", ");
+            document.getElementById("hienThiDiaChi").innerText = full;
+        }
+
+        function whenAddressChanges() {
+            updateDiaChiHienThi();
+            calculateShipping();
         }
 
         window.onload = function () {
             loadProvinces();
-            document.getElementById("province").addEventListener("change", loadDistricts);
-            document.getElementById("district").addEventListener("change", loadWards);
-            document.getElementById("ward").addEventListener("change", calculateShipping);
+            document.getElementById("province").addEventListener("change", async function () {
+                await loadDistricts();
+                updateDiaChiHienThi();
+            });
+            document.getElementById("district").addEventListener("change", async function () {
+                await loadWards();
+                updateDiaChiHienThi();
+            });
+            document.getElementById("ward").addEventListener("change", whenAddressChanges);
         };
     </script>
 </section>

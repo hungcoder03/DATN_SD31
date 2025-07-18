@@ -19,7 +19,11 @@
             <a href="#" class="hover:text-pink-600">Liên hệ</a>
         </nav>
         <div class="flex items-center gap-4">
-            <a th:href="@{/dang-nhap}" class="text-sm bg-pink-500 text-white px-3 py-1.5 rounded hover:bg-pink-600">Đăng nhập</a>
+            <a th:href="@{/khach-hang/dang-nhap}" class="text-sm bg-pink-500 text-white px-3 py-1.5 rounded hover:bg-pink-600">Đăng nhập</a>
+            <form th:action="@{/khach-hang/dang-xuat}" method="post">
+                <button type="submit" class="dropdown-item">Sign Out</button>
+            </form>
+
             <a th:href="@{/gio-hang/hien_thi}" class="relative text-2xl text-pink-600">
                 🛒
                 <span th:if="${soLuongTrongGio > 0}" th:text="${soLuongTrongGio}"
@@ -76,6 +80,17 @@
                      class="w-full h-56 object-cover rounded-md mb-4" />
                 <h3 class="text-lg font-semibold text-pink-600 mb-1" th:text="${sp.ten}">Tên sản phẩm</h3>
                 <p class="text-sm text-gray-600 flex-grow" th:text="${sp.moTa}">Mô tả sản phẩm</p>
+                <p class="text-sm text-pink-700 font-semibold mt-2">
+    <span th:if="${giaThapNhatMap[sp.id] != giaCaoNhatMap[sp.id]}"
+          th:text="'Giá: ' + ${#numbers.formatDecimal(giaThapNhatMap[sp.id], 0, 'COMMA', 0, 'POINT')} + ' đ - ' + ${#numbers.formatDecimal(giaCaoNhatMap[sp.id], 0, 'COMMA', 0, 'POINT')} + ' đ'">
+        Giá: 0 đ - 0 đ
+    </span>
+                    <span th:if="${giaThapNhatMap[sp.id] == giaCaoNhatMap[sp.id]}"
+                          th:text="'Giá: ' + ${#numbers.formatDecimal(giaThapNhatMap[sp.id], 0, 'COMMA', 0, 'POINT')} + ' đ'">
+        Giá: 0 đ
+    </span>
+                </p>
+
                 <a th:href="@{/khach-hang/chi-tiet/{id}(id=${sp.id})}"
                    class="mt-4 inline-block text-center bg-pink-600 text-white py-2 px-4 rounded-full hover:bg-pink-700 transition">
                     Xem chi tiết

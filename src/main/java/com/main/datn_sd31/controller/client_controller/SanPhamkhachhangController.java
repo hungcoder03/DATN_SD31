@@ -23,10 +23,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -52,10 +56,37 @@ public class SanPhamkhachhangController {
 
     @GetMapping("/danh-sach")
     public String hienThiDanhSachSanPham(Model model) {
-        List<SanPham> danhSach = sanPhamService.getAll();
-        model.addAttribute("danhSachSanPham", danhSach);
+        List<SanPham> danhSachSanPham = sanPhamService.getAll();
+        List<ChiTietSanPham> danhSachChiTiet = chitietsanphamRepo.findAll();
+
+        // Map lưu giá thấp nhất
+        Map<Integer, BigDecimal> giaThapNhatMap = danhSachChiTiet.stream()
+                .collect(Collectors.groupingBy(
+                        ct -> ct.getSanPham().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.minBy(Comparator.comparing(ChiTietSanPham::getGiaBan)),
+                                optional -> optional.map(ChiTietSanPham::getGiaBan).orElse(BigDecimal.ZERO)
+                        )
+                ));
+
+        // Map lưu giá cao nhất
+        Map<Integer, BigDecimal> giaCaoNhatMap = danhSachChiTiet.stream()
+                .collect(Collectors.groupingBy(
+                        ct -> ct.getSanPham().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparing(ChiTietSanPham::getGiaBan)),
+                                optional -> optional.map(ChiTietSanPham::getGiaBan).orElse(BigDecimal.ZERO)
+                        )
+                ));
+
+        model.addAttribute("danhSachSanPham", danhSachSanPham);
+        model.addAttribute("giaThapNhatMap", giaThapNhatMap);
+        model.addAttribute("giaCaoNhatMap", giaCaoNhatMap);
+
         return "khachhang/dssanpham";
     }
+
+
 
     @GetMapping("/chi-tiet/{id}")
     public String xemChiTietSanPham(@PathVariable("id") Integer id, Model model) {

@@ -5,7 +5,7 @@ import com.main.datn_sd31.repository.*;
 import com.main.datn_sd31.service.impl.GHNService;
 import com.main.datn_sd31.service.impl.Giohangservice;
 import com.main.datn_sd31.service.impl.Sanphamservice;
-import com.main.datn_sd31.util.VnPayUtils;
+import com.main.datn_sd31.service.impl.VnPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
@@ -18,9 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -47,7 +47,7 @@ public class GiohangController {
     @Autowired
     private GHNService ghnService;
     @Autowired
-    private VnPayUtils vnPayUtils;
+    private VnPayService vnPayService;
 
     private KhachHang getCurrentKhachHang() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -169,6 +169,7 @@ public class GiohangController {
                                    @RequestParam Map<String, String> formData,
                                    HttpSession session,
                                    HttpServletRequest request,
+                                   RedirectAttributes redirect,
                                    Model model) {
 
         String diaChiChiTiet = formData.get("diaChi");
@@ -253,12 +254,22 @@ public class GiohangController {
 
         giohangreposiroty.deleteAll(gioHangChiTiets);
 
-        if ("chuyen_khoan".equals(phuongThuc)) {
-            String orderInfo = "Thanh toan don hang #" + hoaDon.getId();
-            long amount = hoaDon.getThanhTien().longValue();
-            String vnpUrl = vnPayUtils.createVnpayUrl(amount, orderInfo, hoaDon.getMa(), request);
-            return "redirect:" + vnpUrl;
-        }
+//        if (phuongThuc.equals("chuyen_khoan")) {
+//            if (thanhTien.compareTo(BigDecimal.valueOf(5000)) < 0) {
+//                redirect.addFlashAttribute("error", "Tổng tiền sau giảm giá phải từ 5.000 VNĐ trở lên để thanh toán bằng VNPAY.");
+//                return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+//            }
+//
+//            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+//
+//            String redirectUrl = vnPayService.createOrder(
+//                    request,
+//                    thanhTien.intValue(),  // service sẽ tự nhân *100
+//                    "Thanh toan hoa don " + maHD,
+//                    baseUrl
+//            );
+//            return "redirect:" + redirectUrl;
+//        }
         model.addAttribute("maHoaDon", hoaDon.getMa());
         return "khachhang/thanhcong";
     }

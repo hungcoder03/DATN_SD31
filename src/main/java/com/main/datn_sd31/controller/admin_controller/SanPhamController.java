@@ -43,8 +43,12 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -72,10 +76,40 @@ public class SanPhamController {
 
     @GetMapping("/hien_thi")
     public String hienthi(Model model) {
-        model.addAttribute("list", sanPhamService.getAll());
+        List<SanPham> listSanPham = sanPhamService.getAll();
+        model.addAttribute("list", listSanPham);
         model.addAttribute("dsDotGiamGia", dotgiamgiarepository.findAll());
+
+        Map<Integer, BigDecimal[]> giaSanPhamMap = new HashMap<>();
+        for (SanPham sp : listSanPham) {
+            List<BigDecimal> giaList = sp.getChiTietSanPhams().stream()
+                    .map(ChiTietSanPham::getGiaBan)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            if (!giaList.isEmpty()) {
+                BigDecimal min = Collections.min(giaList);
+                BigDecimal max = Collections.max(giaList);
+                giaSanPhamMap.put(sp.getId(), new BigDecimal[]{min, max});
+            }
+        }
+        Map<Integer, DotGiamGia> dotMap = new HashMap<>();
+
+        for (SanPham sp : listSanPham) {
+            Optional<DotGiamGia> optionalDot = sp.getChiTietSanPhams().stream()
+                    .map(ChiTietSanPham::getDotGiamGia)
+                    .filter(Objects::nonNull)
+                    .findFirst();
+
+            optionalDot.ifPresent(dot -> dotMap.put(sp.getId(), dot));
+        }
+
+        model.addAttribute("dotMap", dotMap);
+
+        model.addAttribute("giaSanPhamMap", giaSanPhamMap);
         return "admin/pages/sanpham/list";
     }
+
     @GetMapping("/them")
     public String hienThiForm(Model model) {
         model.addAttribute("form", new Sanphamform());
@@ -388,6 +422,90 @@ public class SanPhamController {
         return "redirect:/admin/san-pham/xem/" + sanPhamId + "?themMau=true";
     }
 
+    @PostMapping("/ap-dung-giam-gia-nhieu")
+    public String apDungGiamGiaNhieu(@RequestParam(value = "dotGiamGiaId", required = false) Integer dotGiamGiaId,
+                                     @RequestParam(value = "sanPhamIds", required = false) List<Integer> sanPhamIds,
+                                     RedirectAttributes redirectAttributes) {
+
+        if (sanPhamIds == null || sanPhamIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Bạn chưa chọn sản phẩm nào để áp dụng.");
+            return "redirect:/admin/san-pham/hien_thi";
+        }
+
+        // Nếu không chọn đợt nào → Gỡ đợt giảm giá khỏi CTSP
+        if (dotGiamGiaId == null) {
+            List<ChiTietSanPham> toUpdate = new ArrayList<>();
+            for (Integer spId : sanPhamIds) {
+                List<ChiTietSanPham> chiTietList = chitietsanphamRepo.findBySanPhamId(spId);
+                for (ChiTietSanPham ct : chiTietList) {
+                    ct.setDotGiamGia(null);
+                    if (ct.getGiaGoc() != null) {
+                        ct.setGiaBan(ct.getGiaGoc());
+                    }
+                    toUpdate.add(ct);
+                }
+            }
+            chitietsanphamRepo.saveAll(toUpdate);
+            redirectAttributes.addFlashAttribute("success", "Đã gỡ đợt giảm giá khỏi các sản phẩm đã chọn.");
+            return "redirect:/admin/san-pham/hien_thi";
+        }
+
+        // Ngược lại: thực hiện áp dụng đợt giảm giá như cũ
+        DotGiamGia dot = dotgiamgiarepository.findById(dotGiamGiaId).orElse(null);
+        if (dot == null) {
+            redirectAttributes.addFlashAttribute("error", "Đợt giảm giá không tồn tại.");
+            return "redirect:/admin/san-pham/hien_thi";
+        }
+
+        List<ChiTietSanPham> toUpdate = new ArrayList<>();
+        List<String> khongCapNhat = new ArrayList<>();
+
+        for (Integer spId : sanPhamIds) {
+            List<ChiTietSanPham> chiTietList = chitietsanphamRepo.findBySanPhamId(spId);
+            for (ChiTietSanPham ct : chiTietList) {
+                if (ct.getGiaBan() == null || ct.getGiaNhap() == null) continue;
+
+                if (ct.getGiaGoc() == null) {
+                    ct.setGiaGoc(ct.getGiaBan());
+                }
+
+                BigDecimal giaGoc = ct.getGiaGoc();
+                BigDecimal giaNhap = ct.getGiaNhap();
+                BigDecimal giam;
+
+                if ("TIEN".equalsIgnoreCase(dot.getLoai())) {
+                    giam = dot.getGiaTriDotGiamGia();
+                } else {
+                    giam = giaGoc.multiply(dot.getGiaTriDotGiamGia())
+                            .divide(BigDecimal.valueOf(100));
+                }
+
+                BigDecimal giaSauGiam = giaGoc.subtract(giam);
+                ct.setDotGiamGia(dot);
+
+                if (giaSauGiam.compareTo(giaNhap) >= 0 && giaSauGiam.compareTo(giaGoc) < 0) {
+                    ct.setGiaBan(giaSauGiam);
+                    toUpdate.add(ct);
+                } else {
+                    khongCapNhat.add("CTSP ID: " + ct.getId());
+                }
+            }
+        }
+
+        if (!toUpdate.isEmpty()) {
+            chitietsanphamRepo.saveAll(toUpdate);
+        }
+
+        if (!khongCapNhat.isEmpty()) {
+            redirectAttributes.addFlashAttribute("warning",
+                    "Một số chi tiết sản phẩm không cập nhật: " + String.join(", ", khongCapNhat));
+        } else {
+            redirectAttributes.addFlashAttribute("success", "Áp dụng đợt giảm giá thành công cho các sản phẩm đã chọn.");
+        }
+
+        return "redirect:/admin/san-pham/hien_thi";
+    }
+
     @PostMapping("/cap-nhat-dot-giam-gia")
     public String apDungDotGiamGia(@RequestParam("dotGiamGiaId") Integer dotGiamGiaId,
                                    @RequestParam("sanPhamId") Integer sanPhamId,
@@ -494,6 +612,19 @@ public class SanPhamController {
         }
 
         return "redirect:/admin/san-pham/hien_thi";
+    }
+    @PostMapping("/admin/san-pham/cap-nhat-so-luong")
+    public String capNhatSoLuongChiTiet(@RequestParam("id") Integer id,
+                                        @RequestParam("soLuong") int soLuong,
+                                        RedirectAttributes redirect) {
+        ChiTietSanPham ct = chitietsanphamRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm"));
+
+        ct.setSoLuong(soLuong);
+        chitietsanphamRepo.save(ct);
+
+        redirect.addFlashAttribute("message", "Cập nhật số lượng thành công!");
+        return "redirect:/admin/san-pham/xem/" + ct.getSanPham().getId();
     }
 }
 
