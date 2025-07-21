@@ -57,31 +57,99 @@ public class SanPhamkhachhangController {
     @GetMapping("/danh-sach")
     public String hienThiDanhSachSanPham(Model model) {
         List<SanPham> danhSachSanPham = sanPhamService.getAll();
-        List<ChiTietSanPham> danhSachChiTiet = chitietsanphamRepo.findAll();
+        List<ChiTietSanPham> chiTiets = chitietsanphamRepo.findAll();
 
-        // Map lưu giá thấp nhất
-        Map<Integer, BigDecimal> giaThapNhatMap = danhSachChiTiet.stream()
+        Map<Integer, BigDecimal> giaGocMap = chiTiets.stream()
+                .collect(Collectors.groupingBy(ct -> ct.getSanPham().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparing(ChiTietSanPham::getGiaBan)),
+                                opt -> opt.map(ChiTietSanPham::getGiaBan).orElse(BigDecimal.ZERO)
+                        )
+                ));
+
+        Map<Integer, BigDecimal> giaKhuyenMaiMap = chiTiets.stream()
                 .collect(Collectors.groupingBy(
                         ct -> ct.getSanPham().getId(),
                         Collectors.collectingAndThen(
                                 Collectors.minBy(Comparator.comparing(ChiTietSanPham::getGiaBan)),
-                                optional -> optional.map(ChiTietSanPham::getGiaBan).orElse(BigDecimal.ZERO)
+                                optionalMin -> {
+                                    BigDecimal min = optionalMin.map(ChiTietSanPham::getGiaBan).orElse(BigDecimal.ZERO);
+                                    BigDecimal max = giaGocMap.getOrDefault(
+                                            optionalMin.map(ChiTietSanPham::getSanPham)
+                                                    .map(SanPham::getId)
+                                                    .orElse(-1),
+                                            BigDecimal.ZERO
+                                    );
+                                    return min.compareTo(max) < 0 ? min : null;
+                                }
                         )
                 ));
-
-        // Map lưu giá cao nhất
-        Map<Integer, BigDecimal> giaCaoNhatMap = danhSachChiTiet.stream()
+// Sau khi đã load danhSachSanPham và danhSachChiTietSp
+        Map<Integer, Integer> phanTramGiamMap = chiTiets.stream()
+                .filter(ct -> ct.getDotGiamGia() != null)
+                .collect(Collectors.groupingBy(
+                        ct -> ct.getSanPham().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparing(
+                                        ct -> ct.getDotGiamGia().getGiaTriDotGiamGia())),
+                                opt -> opt
+                                        .map(ct -> ct.getDotGiamGia().getGiaTriDotGiamGia().intValue())
+                                        .orElse(0)
+                        )
+                ));
+        Map<Integer, BigDecimal> giaGocThapNhatMap = chiTiets.stream()
+                .collect(Collectors.groupingBy(
+                        ct -> ct.getSanPham().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.minBy(Comparator.comparing(ChiTietSanPham::getGiaGoc)),
+                                opt -> opt.map(ChiTietSanPham::getGiaGoc).orElse(BigDecimal.ZERO)
+                        )
+                ));
+        Map<Integer, BigDecimal> giaBanMaxMap = chiTiets.stream()
                 .collect(Collectors.groupingBy(
                         ct -> ct.getSanPham().getId(),
                         Collectors.collectingAndThen(
                                 Collectors.maxBy(Comparator.comparing(ChiTietSanPham::getGiaBan)),
-                                optional -> optional.map(ChiTietSanPham::getGiaBan).orElse(BigDecimal.ZERO)
+                                opt -> opt.map(ChiTietSanPham::getGiaBan).orElse(BigDecimal.ZERO)
                         )
                 ));
 
+        Map<Integer, BigDecimal> giaBanMinMap = chiTiets.stream()
+                .collect(Collectors.groupingBy(
+                        ct -> ct.getSanPham().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.minBy(Comparator.comparing(ChiTietSanPham::getGiaBan)),
+                                opt -> opt.map(ChiTietSanPham::getGiaBan).orElse(BigDecimal.ZERO)
+                        )
+                ));
+
+        Map<Integer, BigDecimal> giaGocMinMap = chiTiets.stream()
+                .collect(Collectors.groupingBy(
+                        ct -> ct.getSanPham().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.minBy(Comparator.comparing(ChiTietSanPham::getGiaGoc)),
+                                opt -> opt.map(ChiTietSanPham::getGiaGoc).orElse(BigDecimal.ZERO)
+                        )
+                ));
+        Map<Integer, BigDecimal> giaGocMaxMap = chiTiets.stream()
+                .collect(Collectors.groupingBy(
+                        ct -> ct.getSanPham().getId(),
+                        Collectors.collectingAndThen(
+                                Collectors.maxBy(Comparator.comparing(ChiTietSanPham::getGiaGoc)),
+                                opt -> opt.map(ChiTietSanPham::getGiaGoc).orElse(BigDecimal.ZERO)
+                        )
+                ));
+        model.addAttribute("giaGocMaxMap", giaGocMaxMap);
+        model.addAttribute("giaBanMaxMap", giaBanMaxMap);
+        model.addAttribute("giaBanMinMap", giaBanMinMap);
+        model.addAttribute("giaGocMinMap", giaGocMinMap);
+        model.addAttribute("phanTramGiamMap", phanTramGiamMap);
         model.addAttribute("danhSachSanPham", danhSachSanPham);
-        model.addAttribute("giaThapNhatMap", giaThapNhatMap);
-        model.addAttribute("giaCaoNhatMap", giaCaoNhatMap);
+        model.addAttribute("giagoc", giaGocThapNhatMap);
+        model.addAttribute("phanTramGiamMap", phanTramGiamMap);
+        model.addAttribute("danhSachSanPham", danhSachSanPham);
+        model.addAttribute("giaGocMap", giaGocMap);
+        model.addAttribute("giaKhuyenMaiMap", giaKhuyenMaiMap);
 
         return "khachhang/dssanpham";
     }

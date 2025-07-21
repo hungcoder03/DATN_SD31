@@ -37,16 +37,16 @@
             <td th:text="${item.chiTietSp.sanPham.ten}">Tên sản phẩm</td>
             <td th:text="${item.chiTietSp.size.ten}">Size</td>
             <td th:text="${item.chiTietSp.mauSac.ten}">Màu sắc</td>
-            <td th:text="${item.chiTietSp.giaBan} + '₫'">0₫</td>
+            <td th:text="${#numbers.formatDecimal(item.chiTietSp.giaBan,0,'COMMA',0,'POINT')} + '₫'">0₫</td>
             <td th:text="${item.soLuong}">1</td>
-            <td th:text="${item.thanhTien} + '₫'">0₫</td>
+            <td th:text="${#numbers.formatDecimal(item.thanhTien,0,'COMMA',0,'POINT')} + '₫'">0₫</td>
         </tr>
         </tbody>
     </table>
 
     <!-- Tổng tiền -->
     <h4 class="text-end text-danger fw-bold mb-4">
-        Tổng tiền: <span th:text="${tongTien} + '₫'">0₫</span>
+        Tổng tiền: <span th:text="${#numbers.formatDecimal(tongTien,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
     </h4>
 
     <!-- Form nhập thông tin thanh toán -->
@@ -160,16 +160,16 @@
                     <ul class="list-group">
                         <li class="list-group-item d-flex justify-content-between">
                             <span>Tổng tiền hàng:</span>
-                            <strong th:text="${tongTien} + '₫'">0₫</strong>
+                            <strong th:text="${#numbers.formatDecimal(tongTien,0,'COMMA',0,'POINT')} + '₫'">0₫</strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between">
                             <span>Giảm giá:</span>
-                            <strong id="tienGiamText" th:text="${tienGiam} + '₫'">0₫</strong>
+                            <strong id="tienGiamText" th:text="${#numbers.formatDecimal(tienGiam,0,'COMMA',0,'POINT')} + '₫'">0₫</strong>
                         </li>
 
                         <li class="list-group-item d-flex justify-content-between">
                             <span>Phí vận chuyển:</span>
-                            <strong id="tienVanChuyenText" th:text="${shippingFee} + '₫'">0₫</strong>
+                            <strong id="tienVanChuyenText" th:text="${#numbers.formatDecimal(shippingFee,0,'COMMA',0,'POINT')} + '₫'">0₫</strong>
                         </li>
                         <li class="list-group-item d-flex justify-content-between bg-light">
                             <span class="fw-bold text-danger">Tiền cần thanh toán:</span>

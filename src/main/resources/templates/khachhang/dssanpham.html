@@ -74,22 +74,38 @@
     <div class="max-w-7xl mx-auto px-4">
         <h2 class="text-3xl font-bold text-center text-pink-600 mb-10">Sản phẩm mới nhất</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <div th:each="sp : ${danhSachSanPham}" class="bg-white rounded-lg shadow hover:shadow-lg p-4 flex flex-col">
-                <img th:if="${sp.hinhAnhs != null and !sp.hinhAnhs.isEmpty()}"
-                     th:src="${sp.hinhAnhs[0].url}" alt="Ảnh sản phẩm"
-                     class="w-full h-56 object-cover rounded-md mb-4" />
+            <!-- Đặt th:each ở đây -->
+            <div th:each="sp : ${danhSachSanPham}"
+                 class="product-card relative bg-white rounded-lg shadow hover:shadow-lg p-4 flex flex-col">
+
+                <div class="relative">
+                    <img th:src="${sp.hinhAnhs[0]?.url}" alt="Ảnh sản phẩm"
+                         class="w-full h-56 object-cover rounded-md mb-4"/>
+
+                    <!-- Badge phần trăm giảm -->
+                    <div th:if="${phanTramGiamMap[sp.id] != null and phanTramGiamMap[sp.id] > 0}"
+                         class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        <span th:text="'-' + ${phanTramGiamMap[sp.id]} + '%'">-10%</span>
+                    </div>
+                </div>
+
                 <h3 class="text-lg font-semibold text-pink-600 mb-1" th:text="${sp.ten}">Tên sản phẩm</h3>
                 <p class="text-sm text-gray-600 flex-grow" th:text="${sp.moTa}">Mô tả sản phẩm</p>
+
                 <p class="text-sm text-pink-700 font-semibold mt-2">
-    <span th:if="${giaThapNhatMap[sp.id] != giaCaoNhatMap[sp.id]}"
-          th:text="'Giá: ' + ${#numbers.formatDecimal(giaThapNhatMap[sp.id], 0, 'COMMA', 0, 'POINT')} + ' đ - ' + ${#numbers.formatDecimal(giaCaoNhatMap[sp.id], 0, 'COMMA', 0, 'POINT')} + ' đ'">
-        Giá: 0 đ - 0 đ
-    </span>
-                    <span th:if="${giaThapNhatMap[sp.id] == giaCaoNhatMap[sp.id]}"
-                          th:text="'Giá: ' + ${#numbers.formatDecimal(giaThapNhatMap[sp.id], 0, 'COMMA', 0, 'POINT')} + ' đ'">
-        Giá: 0 đ
-    </span>
+                    <span th:if="${giaBanMinMap[sp.id].compareTo(giaGocMinMap[sp.id]) < 0}">
+                        <span class="line-through text-gray-500 mr-2"
+                              th:text="${#numbers.formatDecimal(giaGocMinMap[sp.id],0,'COMMA',0,'POINT')} + ' đ'">100,000 đ</span>
+                        <span th:text="${#numbers.formatDecimal(giaBanMinMap[sp.id],0,'COMMA',0,'POINT')} + ' đ'">80,000 đ</span>
+                    </span>
+                    <span th:if="${giaBanMinMap[sp.id].compareTo(giaGocMinMap[sp.id]) >= 0}"
+                          th:text="${#numbers.formatDecimal(giaGocMinMap[sp.id],0,'COMMA',0,'POINT')+ ' đ – ' + #numbers.formatDecimal(giaGocMaxMap[sp.id],0,'COMMA',0,'POINT')} + ' đ'">
+                        100.000 đ – 150.000 đ
+                    </span>
+
+
                 </p>
+
 
                 <a th:href="@{/khach-hang/chi-tiet/{id}(id=${sp.id})}"
                    class="mt-4 inline-block text-center bg-pink-600 text-white py-2 px-4 rounded-full hover:bg-pink-700 transition">
