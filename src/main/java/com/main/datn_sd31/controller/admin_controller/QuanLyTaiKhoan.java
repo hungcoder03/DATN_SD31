@@ -75,13 +75,15 @@ public class QuanLyTaiKhoan {
             @ModelAttribute("nhanvien") NhanVien nhanVien,
             BindingResult result,
             Model model,
-            @RequestParam("anhFile") MultipartFile anhFile
+            @RequestParam("anhFile") MultipartFile anhFile,
+            RedirectAttributes ra 
     ) throws IOException {
         if (nhanVienRepository.existsByMa(nhanVien.getMa())) {
-        model.addAttribute("maDuplicateError", "Mã NV đã tồn tại!");
-        model.addAttribute("nhanvien", nhanVien);
-        return "admin/pages/quan-ly-tai-khoan/Themnhanvien";
-    }
+            model.addAttribute("maDuplicateError", "Mã NV đã tồn tại!");
+            model.addAttribute("nhanvien", nhanVien);
+            return "admin/pages/quan-ly-tai-khoan/Themnhanvien";
+        }
+     
         String rawPassword = nhanVien.getMatKhau();
         String encodedPassword = passwordEncoder.encode(rawPassword);
         nhanVien.setMatKhau(encodedPassword);
@@ -101,6 +103,7 @@ public class QuanLyTaiKhoan {
             nhanVien.setAnh("/uploads/" + fileName);
         }
         nhanVien.setNgayThamGia(LocalDate.now());
+        ra.addFlashAttribute("added", true);     // ← đánh dấu thêm thành công
 
         nhanVienRepository.save(nhanVien);
         return "redirect:/admin/quanlytaikhoan/nhanvien";
@@ -122,10 +125,10 @@ public class QuanLyTaiKhoan {
 
         // Lấy danh sách mã nhân viên (trừ mã của chính nhân viên đang sửa)
         List<String> maNhanVienList = nhanVienRepository.findAll()
-            .stream()
-            .map(NhanVien::getMa)
-            .filter(ma -> !ma.equals(nv.getMa()))
-            .collect(Collectors.toList());
+                .stream()
+                .map(NhanVien::getMa)
+                .filter(ma -> !ma.equals(nv.getMa()))
+                .collect(Collectors.toList());
         model.addAttribute("maNhanVienList", maNhanVienList);
 
         return "admin/pages/quan-ly-tai-khoan/QuanLyNhanVienDetail";
@@ -136,16 +139,17 @@ public class QuanLyTaiKhoan {
             @Valid @ModelAttribute("nhanvien") NhanVien nv,
             BindingResult result,
             @RequestParam("anhFile") MultipartFile anhFile,
-            Model model
+            Model model,
+            RedirectAttributes ra 
     ) throws IOException {
         // Lấy bản ghi cũ để giữ lại các giá trị không thay đổi
         NhanVien old = nhanVienRepository.findById(nv.getId()).orElseThrow();
-    
+
         // Xử lý ảnh:
-        if (anhFile != null && !anhFile.isEmpty() 
-                && anhFile.getOriginalFilename() != null 
+        if (anhFile != null && !anhFile.isEmpty()
+                && anhFile.getOriginalFilename() != null
                 && !anhFile.getOriginalFilename().isBlank()) {
-            
+
             // Validate định dạng file ảnh
             String originalFilename = anhFile.getOriginalFilename();
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
@@ -155,7 +159,7 @@ public class QuanLyTaiKhoan {
                 result.rejectValue("anh", "error.nv", "Kích thước file không được vượt quá 5MB");
             } else {
                 String original = Path.of(originalFilename).getFileName().toString();
-                String fileName = UUID.randomUUID() + "_" 
+                String fileName = UUID.randomUUID() + "_"
                         + original.replaceAll("[^a-zA-Z0-9.\\-]", "_");
                 Path uploadPath = Paths.get(uploadDir);
                 Files.createDirectories(uploadPath);
@@ -170,47 +174,51 @@ public class QuanLyTaiKhoan {
             // Nếu không chọn file mới, giữ ảnh cũ lấy từ DB
             nv.setAnh(old.getAnh());
         }
-    
+
         // Validate mã nhân viên
         if (!nv.getMa().matches("^NV\\d{3,5}$")) {
             result.rejectValue("ma", "error.nv",
                     "Mã phải có dạng NV + tối đa 5 chữ số");
         }
-        
+
         // Validate trùng mã
         List<NhanVien> duplicates = nhanVienRepository.findByMa(nv.getMa());
         if (!duplicates.isEmpty() && !duplicates.get(0).getId().equals(nv.getId())) {
             result.rejectValue("ma", "error.nv", "Mã đã tồn tại");
         }
-        
-        
+
+
 
         // Nếu có lỗi validation, trả về form với lỗi
-        // if (result.hasErrors()) {
-        //     model.addAttribute("nhanvien", nv);
-        //     model.addAttribute("readonly", false);
-        //     return "admin/pages/quan-ly-tai-khoan/QuanLyNhanVienDetail";
-        // }
+        if (result.hasErrors()) {
+            model.addAttribute("nhanvien", nv);
+            model.addAttribute("readonly", false);
+            return "admin/pages/quan-ly-tai-khoan/QuanLyNhanVienDetail";
+        }
 
-        // Giữ nguyên mật khẩu cũ
-        nv.setMatKhau(old.getMatKhau());
-        
+        // // Giữ nguyên mật khẩu cũ
+        // nv.setMatKhau(old.getMatKhau());
+
         // Giữ nguyên ngày tham gia
         nv.setNgayThamGia(old.getNgayThamGia());
-        
+
         // Cập nhật người sửa và ngày sửa
         nv.setNguoiSua(old.getId()); // Giả sử người sửa là chính nhân viên đó
         nv.setNgaySua(LocalDateTime.now());
-        
+
         // Lưu thông tin cập nhật
+        ra.addFlashAttribute("updated", true);
+
         nhanVienRepository.save(nv);
         return "redirect:/admin/quanlytaikhoan/nhanvien";
     }
 
 
     @GetMapping("/nhanvien/delete")
-    public String deleteNhanVien(@RequestParam Integer id) {
+    public String deleteNhanVien(@RequestParam Integer id, RedirectAttributes ra) {
         nhanVienRepository.deleteById(id);
+        ra.addFlashAttribute("deleted", true);
+
         return "redirect:/admin/quanlytaikhoan/nhanvien";
     }
 
@@ -309,13 +317,13 @@ public class QuanLyTaiKhoan {
         }
 
         // giữ nguyên mật khẩu
-        KhachHang old = khachHangRepository.findById(kh.getId()).orElse(null);
-        if (old != null) {
-            kh.setMatKhau(old.getMatKhau());
-            khachHangRepository.save(kh);
-        }
+        // KhachHang old = khachHangRepository.findById(kh.getId()).orElse(null);
+        // if (old != null) {
+        //     kh.setMatKhau(old.getMatKhau());
+        //     khachHangRepository.save(kh);
+        // }
         ra.addFlashAttribute("updated", true);   // ← đánh dấu cập nhật thành công
-
+        khachHangRepository.save(kh);
         return "redirect:/admin/quanlytaikhoan/khachhang";
     }
 

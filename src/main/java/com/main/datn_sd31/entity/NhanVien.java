@@ -1,6 +1,7 @@
 package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -17,9 +18,9 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Getter
 @Setter
-@Entity
 @Table(name = "nhan_vien")
 public class NhanVien {
     @Id
@@ -75,8 +76,11 @@ public class NhanVien {
     @Size(max = 100)
     @NotNull
     @Nationalized
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Email phải có định dạng hợp lệ")
-    @Column(name = "email", nullable = false, length = 100)
+    @NotBlank(message = "Email không được để trống")
+    @Pattern(
+      regexp = "^[A-Za-z0-9._%+-]+@gmail\\.com$",
+      message = "Email phải kết thúc bằng @gmail.com"
+    )    @Column(name = "email", nullable = false, length = 100)
     private String email;
 
     @Size(max = 100)

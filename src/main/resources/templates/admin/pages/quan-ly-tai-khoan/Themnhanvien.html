@@ -21,20 +21,24 @@
         <div class="row g-3">
 
            <!-- Mã nhân viên -->
-            <div class="col-md-6 form-floating">
-            <input type="text"
-                    th:field="*{ma}"
-                    id="ma"
-                    class="form-control"
-                    placeholder="Mã"
-                    required
-                    pattern="^NV\d{1,5}$"
-                    title="Mã phải bắt đầu NV + 1–5 chữ số">
-            <label for="ma">Mã</label>
-            <div th:if="${maDuplicateError}" class="text-danger small mt-1">
-                <span th:text="${maDuplicateError}"></span>
-            </div>
-            </div>
+        <div class="col-md-6 form-floating position-relative">
+        <input type="text"
+                th:field="*{ma}"
+                id="ma"
+                class="form-control"
+                placeholder="NV001"
+                required
+                pattern="NV[0-9]{1,5}"
+                title="Mã phải bắt đầu NV + 1–5 chữ số">
+        <label for="ma">Mã</label>
+        <!-- luôn render, mặc định ẩn -->
+        <div id="maError"
+            class="text-danger small mt-1 d-none">
+            <!-- nội dung sẽ được JS hoặc server fill vào -->
+            <span th:text="${maDuplicateError}"></span>
+        </div>
+        </div>
+
 
 
             <div class="col-md-6 form-floating">
@@ -49,10 +53,10 @@
 
             <!-- Số điện thoại -->
             <div class="col-md-6 form-floating">
-                <input type="number" th:field="*{soDienThoai}" class="form-control"
+                <input type="text" th:field="*{soDienThoai}" class="form-control"
                     placeholder="Số điện thoại" required
-                    pattern="^\d{8,12}$"
-                    title="Số điện thoại phải có từ 8 đến 12 chữ số.">
+                    pattern="^\d{9,12}$"
+                    title="Số điện thoại phải có từ 9 đến 12 chữ số.">
                 <label>Số điện thoại</label>
             </div>
 
@@ -60,9 +64,9 @@
 
             <!-- CMND -->
             <div class="col-md-6 form-floating">
-                <input type="number" th:field="*{chungMinhThu}" class="form-control"
+                <input type="text" th:field="*{chungMinhThu}" class="form-control"
                     placeholder="CMND" required
-                    pattern="^\d{12}$"
+                    pattern="[0-9]{12}"
                     title="CMND phải gồm đúng 12 chữ số.">
                 <label>CMND</label>
             </div>
@@ -82,15 +86,12 @@
 
             <!-- Email -->
             <div class="col-md-6 form-floating">
-            <input type="text"
-                    th:field="*{email}"
-                    class="form-control"
-                    placeholder="Email@gmail.com"
-                    required
-                    pattern="[A-Za-z0-9._%+-]+@gmail\.com"
-                    title="Email phải kết thúc bằng @gmail.com">
-            <label>Email</label>
+                <input type="text" id="email" th:field="*{email}" class="form-control"
+                    placeholder="you@gmail.com" required>
+                <label for="email">Email</label>
+                <div id="emailError" class="text-danger small mt-1 d-none"></div>
             </div>
+
 
 
             <div class="col-md-6 form-floating">
@@ -151,11 +152,10 @@
     const errorDiv   = document.getElementById("maError");
     const submitBtn  = document.querySelector("button[type=submit]");
 
-    function checkMaUnique() {
+     function checkMaUnique() {
       const maVal = maInput.value.trim();
-      if (!maVal.match(/^NV\d{1,5}$/)) {
-        // Nếu không đúng pattern, bỏ qua kiểm tra uniqueness
-        errorDiv.style.display = "none";
+      if (!/^NV\d{1,5}$/.test(maVal)) {
+        errorDiv.classList.add("d-none");
         submitBtn.disabled = false;
         return;
       }
@@ -164,29 +164,102 @@
         .then(exists => {
           if (exists) {
             errorDiv.textContent = "Mã NV đã tồn tại, vui lòng nhập mã khác.";
-            errorDiv.style.display = "block";
+            errorDiv.classList.remove("d-none");
             submitBtn.disabled = true;
           } else {
-            errorDiv.style.display = "none";
+            errorDiv.classList.add("d-none");
             submitBtn.disabled = false;
           }
         })
         .catch(() => {
-          // lỗi mạng, vẫn cho phép submit — server sẽ validate lần cuối
-          errorDiv.style.display = "none";
+          // lỗi mạng: cho phép submit, server sẽ validate lần cuối
+          errorDiv.classList.add("d-none");
           submitBtn.disabled = false;
         });
     }
 
     maInput.addEventListener("blur", checkMaUnique);
     maInput.addEventListener("input", () => {
-      // Xoá lỗi khi user sửa
-      errorDiv.style.display = "none";
+      errorDiv.classList.add("d-none");
       submitBtn.disabled = false;
     });
   });
 </script>
 
 </section>
-</body><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form      = document.getElementById("formNhanVien");
+  const maInput   = document.getElementById("ma");
+  const emailIn   = document.getElementById("email");
+  const fileInput = document.getElementById("anhFile");
+  const maErr     = document.getElementById("maError");
+  const emailErr  = document.getElementById("emailError");
+  const fileErr   = document.getElementById("fileError");
+
+  function show(el, msg) {
+    el.textContent = msg;
+    el.classList.remove("d-none");
+  }
+  function hide(el) {
+    el.textContent = "";
+    el.classList.add("d-none");
+  }
+
+  form.addEventListener("submit", e => {
+    let valid = true;
+    hide(maErr); hide(emailErr); hide(fileErr);
+
+    // --- 1) Mã NV phải NV + 1–5 số
+    if (!/^NV[0-9]{1,5}$/.test(maInput.value.trim())) {
+      show(maErr, "Mã phải bắt đầu NV + 1–5 chữ số");
+      valid = false;
+    }
+
+    // --- 2) Email phải kết thúc @gmail.com
+    if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/.test(emailIn.value.trim())) {
+      show(emailErr, "Email phải kết thúc bằng @gmail.com");
+      valid = false;
+    }
+
+    // --- 3) Ảnh: nếu có, phải jpg/png/gif và ≤5MB
+    if (fileInput.files.length > 0) {
+      const f = fileInput.files[0];
+      const ext = f.name.split(".").pop().toLowerCase();
+      if (!["jpg","jpeg","png","gif"].includes(ext)) {
+        show(fileErr, "Chỉ chấp nhận JPG, PNG, GIF");
+        valid = false;
+      } else if (f.size > 5 * 1024 * 1024) {
+        show(fileErr, "Kích thước phải ≤ 5MB");
+        valid = false;
+      }
+    }
+
+    if (!valid) {
+      e.preventDefault();
+      // cuộn lại tới chỗ đầu tiên có lỗi nếu muốn:
+      const firstErr = document.querySelector(".text-danger:not(.d-none)");
+      firstErr && firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    (function () {
+    'use strict'
+    const forms = document.querySelectorAll('.needs-validation')
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+  })()
+</script>
+</body>
 </html>

@@ -10,7 +10,15 @@
 </head>
 <body>
 <section layout:fragment="content">
-
+<script th:if="${added}">
+    alert('Thêm nhân viên thành công!');
+  </script>
+  <script th:if="${updated}">
+    alert('Cập nhật nhân viên thành công!');
+  </script>
+  <script th:if="${deleted}">
+    alert('Xóa nhân viên thành công!');
+  </script>
     <h1 class="text-center mb-4">Dashboard Admin</h1>
 
 
