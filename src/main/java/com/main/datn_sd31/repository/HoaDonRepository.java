@@ -47,4 +47,19 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
     @Query("SELECT n FROM HoaDon n WHERE n.ma = :orderCode")
     HoaDon findByMa(@Param("orderCode") String orderCode);
+
+    HoaDon getHoaDonByMa(String ma);
+
+    @Query("""
+    SELECT hd FROM HoaDon hd
+    WHERE (hd.ngayThanhToan >= :startOfDay
+      AND hd.ngayThanhToan < :startOfNextDay)
+      AND hd.trangThai = :trangThai
+    """)
+    List<HoaDon> findHoaDonByNgayAndTrangThai(
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("startOfNextDay") LocalDateTime startOfNextDay,
+            @Param("trangThai") Integer trangThai
+
+    );
 }

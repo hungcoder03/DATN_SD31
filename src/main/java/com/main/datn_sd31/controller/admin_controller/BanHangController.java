@@ -4,25 +4,29 @@ import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
 import com.main.datn_sd31.entity.*;
 import com.main.datn_sd31.repository.*;
 import com.main.datn_sd31.service.impl.GHNService;
-import com.main.datn_sd31.service.impl.VnPayService;
+import com.main.datn_sd31.util.GetNhanVien;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/ban-hang")
@@ -30,6 +34,7 @@ import java.util.*;
 @Transactional
 public class BanHangController {
 
+    private final GetNhanVien getNhanVien;
     private final Chitietsanphamrepository chiTietSanPhamRepository;
     private final HoaDonRepository hoaDonRepository;
     private final Chitiethoadonrepository hoaDonChiTietRepository;
@@ -39,8 +44,6 @@ public class BanHangController {
     private final PhieuGiamGiaRepository phieugiamgiarepository;
     private final GHNService ghnService;
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
-    @Autowired
-    private VnPayService vnpayService;
 
 
     private List<HoaDonChiTiet> getCart(String cartKey, HttpSession session) {
@@ -143,6 +146,60 @@ public class BanHangController {
         session.removeAttribute("maGiamGia");
         return "redirect:/admin/ban-hang?cartKey=" + cartKey;
     }
+    @GetMapping("/tim-kiem-san-pham")
+    @ResponseBody
+    public List<Map<String, Object>> timKiemSanPham(@RequestParam("keyword") String keyword) {
+        List<ChiTietSanPham> list = chiTietSanPhamRepository.findByTenSanPhamContainingIgnoreCase(keyword);
+        return list.stream().map(ctsp -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("idChiTietSp", ctsp.getId());
+            map.put("tenSanPham", ctsp.getSanPham().getTen());
+            map.put("mauSac", ctsp.getMauSac().getTen());
+            map.put("size", ctsp.getSize().getTen());
+            map.put("soluong", ctsp.getSoLuong());
+            map.put("gia", ctsp.getGiaBan());
+            return map;
+        }).collect(Collectors.toList());
+    }
+    @PostMapping("/cap-nhat-so-luong")
+    public String capNhatSoLuong(@RequestParam("idChiTietSp") Integer id,
+                                 @RequestParam("soLuong") Integer soLuong,
+                                 @RequestParam("cartKey") String cartKey,
+                                 HttpSession session) {
+        List<HoaDonChiTiet> gio = getCart(cartKey, session);
+        gio.stream()
+                .filter(item -> item.getChiTietSanPham().getId().equals(id))
+                .findFirst()
+                .ifPresent(item -> item.setSoLuong(soLuong));
+
+        return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+    }
+    @GetMapping("/tim-kiem")
+    public String timKiemSanPham(@RequestParam("keyword") String keyword,
+                                 @RequestParam("cartKey") String cartKey,
+                                 Model model) {
+        ChiTietSanPham ketQua = chiTietSanPhamRepository.findByMaVach(keyword);
+        model.addAttribute("ketQua", ketQua);
+        model.addAttribute("ten",ketQua.getTenCt());
+        model.addAttribute("mausac",ketQua.getMauSac().getTen());
+        model.addAttribute("cartKey", cartKey);
+        return "admin/banhang"; // trang bán hàng hiển thị luôn kết quả tìm
+    }
+    @GetMapping("/tim-kiem-theo-ma-vach")
+    @ResponseBody
+    public Map<String, Object> timKiemSanPhamJson(@RequestParam("maVach") String maVach) {
+        Map<String, Object> result = new HashMap<>();
+        ChiTietSanPham sp = chiTietSanPhamRepository.findByMaVach(maVach);
+        if (sp != null) {
+            result.put("tenSanPham", sp.getSanPham().getTen());
+            result.put("mauSac", sp.getMauSac().getTen());
+            result.put("size", sp.getSize().getTen());
+            result.put("soluong", sp.getSoLuong());
+            result.put("gia", sp.getGiaBan());
+            result.put("idChiTietSp", sp.getId()); // Thêm ID nếu cần xử lý tiếp
+        }
+        return result;
+    }
 
     @PostMapping("/them-gio")
     public String themVaoGio(@RequestParam("idChiTietSp") Integer id,
@@ -161,6 +218,8 @@ public class BanHangController {
                     ct.setGiaGiam(BigDecimal.ZERO);
                     ct.setGiaSauGiam(ctsp.getGiaBan());
                     ct.setTrangThai(true);
+                    ct.setNgayTao(LocalDateTime.now());
+                    ct.setNguoiTao(getNhanVien.getCurrentNhanVien().getId());
                     ct.setTenCtsp(ctsp.getSanPham().getTen() + " - " + ctsp.getMauSac().getTen() + " / " + ctsp.getSize().getTen());
                     gio.add(ct);
                 });
@@ -197,10 +256,10 @@ public class BanHangController {
         String maHD = "HD" + System.currentTimeMillis();
         hd.setMa(maHD);
         hd.setNgayTao(LocalDateTime.now());
-        hd.setNgayMua(LocalDateTime.now());
+        hd.setNgayThanhToan(LocalDateTime.now());
         hd.setTenNguoiNhan("Trực tiếp");
         hd.setKhachHang(khachHangRepository.findById(1).orElse(null));
-        NhanVien nv = (NhanVien) session.getAttribute("nhanVien");
+        NhanVien nv = getNhanVien.getCurrentNhanVien();
         if (nv == null) {
             redirect.addFlashAttribute("error", "Không tìm thấy nhân viên đang đăng nhập.");
             return "redirect:/admin/ban-hang?cartKey=" + cartKey;
@@ -213,7 +272,7 @@ public class BanHangController {
         hd.setGiaGiamGia(giagiam);
         hd.setPhiVanChuyen(phiShip);
         hd.setThanhTien(thanhTien);
-        hd.setTrangThai(false);
+        hd.setTrangThai(3);
         hd.setNgaySua(LocalDateTime.now());
         hd.setNguoiSua(1);
         hd.setNguoiTao(1);
@@ -223,50 +282,9 @@ public class BanHangController {
         session.setAttribute("gioTam", gio);
         session.setAttribute("cartKeyTam", cartKey);
 
-        if (phuongThuc.equals("chuyen_khoan")) {
-            if (thanhTien.compareTo(BigDecimal.valueOf(5000)) < 0) {
-                redirect.addFlashAttribute("error", "Tổng tiền sau giảm giá phải từ 5.000 VNĐ trở lên để thanh toán bằng VNPAY.");
-                return "redirect:/admin/ban-hang?cartKey=" + cartKey;
-            }
-
-            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-
-            String redirectUrl = vnpayService.createOrder(
-                    request,
-                    thanhTien.intValue(),  // service sẽ tự nhân *100
-                    "Thanh toan hoa don " + maHD,
-                    baseUrl
-            );
-            return "redirect:" + redirectUrl;
-        }
         String diachi=diaChiTinh+'-'+diaChiHuyen+'-'+diaChiXa;
         return hoanTatThanhToan(cartKey, gio, sdt, giagiam, tongTien, phiShip, "Tiền mặt", true,diachi, session);
     }
-
-    @GetMapping("/vnpay-payment-return")
-    public String paymentCompleted(HttpServletRequest request, HttpSession session, Model model, RedirectAttributes redirect) {
-        int paymentStatus = vnpayService.orderReturn(request);
-
-        if (paymentStatus == 1) {
-            HoaDon hoaDonTam = (HoaDon) session.getAttribute("hoaDonTam");
-            List<HoaDonChiTiet> gioTam = (List<HoaDonChiTiet>) session.getAttribute("gioTam");
-            String cartKey = (String) session.getAttribute("cartKeyTam");
-
-            if (hoaDonTam != null && gioTam != null && cartKey != null) {
-                hoanTatThanhToan(cartKey, gioTam, hoaDonTam.getSoDienThoai(), hoaDonTam.getGiaGiamGia(),
-                        hoaDonTam.getGiaGoc(), hoaDonTam.getPhiVanChuyen(), "Chuyển khoản", true,hoaDonTam.getDiaChi(), session);
-            }
-
-            model.addAttribute("orderId", hoaDonTam.getMa());
-            model.addAttribute("totalPrice", hoaDonTam.getThanhTien());
-            model.addAttribute("paymentTime", request.getParameter("vnp_PayDate"));
-            model.addAttribute("transactionId", request.getParameter("vnp_TransactionNo"));
-            return "ordersuccess";
-        }
-
-        return "orderfail";
-    }
-
     private String hoanTatThanhToan(String cartKey, List<HoaDonChiTiet> gio,
                                     String sdt, BigDecimal giagiam, BigDecimal tongTien,
                                     BigDecimal phiShip, String phuongThuc, boolean trangThai,String diachi,
@@ -275,14 +293,14 @@ public class BanHangController {
         HoaDon hd = new HoaDon();
         hd.setMa("HD" + System.currentTimeMillis());
         hd.setNgayTao(LocalDateTime.now());
-        hd.setNgayMua(LocalDateTime.now());
+        hd.setNgayThanhToan(LocalDateTime.now());
         hd.setTenNguoiNhan("Trực tiếp");
         hd.setKhachHang(khachHangRepository.findById(1).orElse(null));
-        NhanVien nv = (NhanVien) session.getAttribute("nhanVien");
+        NhanVien nv = getNhanVien.getCurrentNhanVien();
         if (nv == null) nv = nhanVienRepository.findById(1).orElse(null); // fallback nếu cần
         hd.setNhanVien(nv);
 
-        hd.setTrangThai(trangThai);
+        hd.setTrangThai(3);
         hd.setDiaChi(diachi);
         hd.setPhuongThuc(phuongThuc);
         hd.setSoDienThoai(sdt);
@@ -338,8 +356,6 @@ public class BanHangController {
 
         return "redirect:/admin/ban-hang";
     }
-
-
     //    @GetMapping("/vnpay/create-payment")
 //    public ResponseEntity<String> createPayment(HttpServletRequest request) {
 //        String vnp_TxnRef = String.valueOf(System.currentTimeMillis());
@@ -390,11 +406,11 @@ public class BanHangController {
 //
 //        return ResponseEntity.ok(paymentUrl);
 //    }
-@GetMapping("/dia-chi/tinh")
-@ResponseBody
-public List<Map<String, Object>> getTinh() {
-    return ghnService.getProvinces();
-}
+    @GetMapping("/dia-chi/tinh")
+    @ResponseBody
+    public List<Map<String, Object>> getTinh() {
+        return ghnService.getProvinces();
+    }
 
     @GetMapping("/dia-chi/huyen")
     @ResponseBody

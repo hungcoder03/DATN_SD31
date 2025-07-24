@@ -172,7 +172,8 @@
         <form th:action="@{/admin/san-pham/chitietsanpham/them(sanPhamId=${sanPham.id})}"
               th:object="${form}"
               th:if="${form.chiTietList.size() > 0}"
-              class="mt-4">
+              class="mt-4"
+        method="post">
 
             <h5 class="fw-bold mb-3">
                 Thêm biến thể cho màu:

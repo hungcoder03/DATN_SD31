@@ -365,6 +365,11 @@ public class SanPhamController {
             ct.setMoTa(null);
             ct.setGhiChu(null);
 
+            String randomMaVach = "SP" + System.currentTimeMillis();
+            ct.setMaVach(randomMaVach);
+            if (ct.getGiaBan() == null && ct.getGiaGoc() != null) {
+                ct.setGiaBan(ct.getGiaGoc());
+            }
             if (ct.getGiaBan() == null) {
                 ct.setGiaBan(ct.getGiaGoc());
             }

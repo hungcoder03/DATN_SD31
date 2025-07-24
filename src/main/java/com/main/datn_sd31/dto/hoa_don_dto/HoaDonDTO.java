@@ -46,7 +46,9 @@ public class HoaDonDTO {
 
     private String ngayTao;
 
-    private String trangThaiHoaDon;
+    private String trangThaiHoaDonString;
+
+    private Integer trangThaiHoaDonInteger;
 
     private String ghiChu;
 

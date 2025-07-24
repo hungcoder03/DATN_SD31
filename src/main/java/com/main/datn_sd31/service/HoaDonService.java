@@ -26,4 +26,6 @@ public interface HoaDonService {
 
     HoaDonDTO getHoaDonByMa(String ma);
 
+    void capNhatGhiChuHoaDon(String ma, String ghiChu);
+
 }

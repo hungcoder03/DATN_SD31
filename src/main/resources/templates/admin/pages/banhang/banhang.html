@@ -35,15 +35,44 @@
 
         <!-- Chọn sản phẩm -->
         <div class="card p-3">
-            <form method="get" th:action="@{/admin/ban-hang}">
-                <input type="hidden" name="cartKey" th:value="${cartKey}"/>
-                <div class="row">
-                    <div class="col-md-8">
-                        <select class="form-select" name="idSanPham" onchange="this.form.submit()">
-                            <option value="">-- Chọn sản phẩm --</option>
-                            <option th:each="sp : ${dsSanPham}" th:value="${sp.id}"
-                                    th:selected="${sp.id == sanPhamDaChon}" th:text="${sp.ten}"></option>
-                        </select>
+            <form id="formThemGio" method="post" th:action="@{/admin/ban-hang/them-gio}">
+                <input type="hidden" name="cartKey" th:value="${cartKey}" />
+                <input type="hidden" name="idChiTietSp" id="idChiTietSp" />
+                <div class="row g-2">
+                    <!-- Tìm kiếm sản phẩm -->
+                    <div class="col-md-6 position-relative">
+                        <input type="text" class="form-control" id="timSanPham" placeholder="Tìm theo tên sản phẩm..." autocomplete="off" />
+                        <div id="goiYSanPham" class="list-group position-absolute w-100 z-3" style="max-height: 200px; overflow-y: auto;"></div>
+                    </div>
+                    <!-- Nhập số lượng -->
+                    <div class="col-md-2">
+                        <input type="number" name="soLuong" class="form-control" value="1" min="1" required />
+                    </div>
+                    <!-- Modal Quét Mã -->
+                    <div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Quét mã sản phẩm</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="scanner" style="width: 100%; height: 400px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-secondary w-100" onclick="openScanner()">📷 Quét mã</button>
+                    </div>
+                    <div th:if="${error}" class="alert alert-danger" role="alert">
+                        <p th:text="${error}"></p>
+                    </div>
+
+                    <!-- Nút thêm vào giỏ -->
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Thêm vào giỏ</button>
                     </div>
                 </div>
             </form>
@@ -90,7 +119,16 @@
                 <tr th:each="item : ${gioHang}">
                     <td th:text="${item.tenCtsp}"></td>
                     <td th:text="${#numbers.formatDecimal(item.giaSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></td>
-                    <td th:text="${item.soLuong}"></td>
+                    <td>
+                        <form th:action="@{/admin/ban-hang/cap-nhat-so-luong}" method="post" class="d-flex align-items-center">
+                            <input type="hidden" name="cartKey" th:value="${cartKey}" />
+                            <input type="hidden" name="idChiTietSp" th:value="${item.chiTietSanPham.id}" />
+                            <input type="number" name="soLuong" th:value="${item.soLuong}" min="1"
+                                   class="form-control form-control-sm me-2" style="width: 80px;"
+                                   oninput="this.form.submit()" />
+                        </form>
+                    </td>
+
                     <td th:text="${#numbers.formatDecimal(item.giaSauGiam * item.soLuong, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></td>
                 </tr>
                 <tr th:if="${gioHang.isEmpty()}">
@@ -157,19 +195,21 @@
                 <div>
                     <p>Phí vận chuyển: <strong id="shippingFee" th:text="${#numbers.formatDecimal(phiVanChuyen, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></strong></p>
                     <p>Tổng tiền: <span class="total" th:text="${#numbers.formatDecimal(tongTien, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
-                    <p>Giảm giá: <span class="total" th:text="${#numbers.formatDecimal(giamGia, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
-                    <p>Thành tiền sau giảm: <span class="total" th:text="${#numbers.formatDecimal(tongTienSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
+                    <p th:if="${giamGia != null and giamGia > 0}">
+                        Giảm giá: <span class="total" th:text="${#numbers.formatDecimal(giamGia, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span>
+                    </p>
+                    <p>Thành tiền sau giảm: <span class="total" id="tongTien" th:text="${#numbers.formatDecimal(tongTienSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></span></p>
                 </div>
 
                 <div class="mb-2">
                     <label class="form-label">Phương thức thanh toán:</label>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="tienmat" value="tien_mat" checked>
-                        <label class="form-check-label" for="tienmat">Tiền mặt</label>
+                        <input type="radio" name="phuongThucThanhToan" value="tien_mat" checked />
+                        <label class="form-check-label" >Tiền mặt</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="chuyenkhoan" value="chuyen_khoan">
-                        <label class="form-check-label" for="chuyenkhoan">Chuyển khoản</label>
+                        <input type="radio" name="phuongThucThanhToan" value="vnpay" />
+                        <label class="form-check-label">Chuyển khoản</label>
                     </div>
                 </div>
 
@@ -179,7 +219,8 @@
         </div>
 
     </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
     <script th:inline="javascript">
         const formatCurrency = (vnd) => vnd.toLocaleString("vi-VN") + " ₫";
 
@@ -254,6 +295,147 @@
             document.getElementById("ward").addEventListener("change", whenAddressChanges);
         };
     </script>
+    <!-- Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script>
+        const timSanPham = document.getElementById("timSanPham");
+        const goiYBox = document.getElementById("goiYSanPham");
+
+        timSanPham.addEventListener("input", function () {
+            const keyword = this.value;
+            if (keyword.length < 2) {
+                goiYBox.innerHTML = "";
+                return;
+            }
+
+            fetch(`/admin/ban-hang/tim-kiem-san-pham?keyword=${encodeURIComponent(keyword)}`)
+                .then(res => res.json())
+                .then(data => {
+                    goiYBox.innerHTML = "";
+                    data.forEach(sp => {
+                        const item = document.createElement("button");
+                        item.type = "button";
+                        item.classList.add("list-group-item", "list-group-item-action");
+                        item.textContent = `${sp.tenSanPham} - ${sp.mauSac} / ${sp.size}-SL:${sp.soluong}-Gia:${sp.gia}`;
+                        item.addEventListener("click", () => {
+                            timSanPham.value = item.textContent;
+                            document.getElementById("idChiTietSp").value = sp.idChiTietSp;
+                            goiYBox.innerHTML = "";
+                        });
+                        goiYBox.appendChild(item);
+                    });
+                });
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!goiYBox.contains(e.target) && e.target !== timSanPham) {
+                goiYBox.innerHTML = "";
+            }
+        });
+
+        function openScanner() {
+            const modal = new bootstrap.Modal(document.getElementById("scannerModal"));
+            modal.show();
+
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#scanner'),
+                    constraints: {
+                        width: 640,
+                        height: 400,
+                        facingMode: "environment" // camera sau
+                    }
+                },
+                decoder: {
+                    readers: ["ean_reader", "code_128_reader", "upc_reader", "ean_8_reader", "code_39_reader"]
+                }
+            }, function (err) {
+                if (err) {
+                    console.error("Quagga init error:", err);
+                    return;
+                }
+                Quagga.start();
+            });
+            Quagga.onDetected(function (result) {
+                const code = result.codeResult.code;
+                Quagga.offDetected();
+                Quagga.stop();
+                modal.hide();
+
+                fetch(`/admin/ban-hang/tim-kiem-theo-ma-vach?maVach=${code}`)
+                    .then(response => response.json())
+                    .then(sp => {
+                        if (sp && sp.tenSanPham) {
+                            timSanPham.value = `${sp.tenSanPham} - ${sp.mauSac} / ${sp.size} - SL: ${sp.soluong} - Giá: ${sp.gia}`;
+                            document.getElementById("idChiTietSp").value = sp.idChiTietSp;
+                        } else {
+                            timSanPham.value = `Không tìm thấy mã vạch: ${code}`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Lỗi khi tìm sản phẩm:", error);
+                        timSanPham.value = "Lỗi kết nối khi tìm sản phẩm.";
+                    });
+            });
+            Quagga.onDetected(function (result) {
+                const code = result.codeResult.code;
+                Quagga.offDetected();
+                Quagga.stop();
+                modal.hide();
+
+                fetch(`/admin/ban-hang/tim-kiem-theo-ma-vach?maVach=${code}`)
+                    .then(response => response.json())
+                    .then(sp => {
+                        if (sp && sp.tenSanPham) {
+                            timSanPham.value = `${sp.tenSanPham} - ${sp.mauSac} / ${sp.size} - SL: ${sp.soluong} - Giá: ${sp.gia}`;
+                            document.getElementById("idChiTietSp").value = sp.idChiTietSp;
+                            const form = document.getElementById("formThemGio"); // gán id cho form của bạn
+                            if (form) {
+                                form.submit();
+                            }
+                        } else {
+                            timSanPham.value = `Không tìm thấy mã vạch: ${code}`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Lỗi khi tìm sản phẩm:", error);
+                        timSanPham.value = "Lỗi kết nối khi tìm sản phẩm.";
+                    });
+            });
+            // Quagga.onDetected(function (result) {
+            //     const code = result.codeResult.code;
+            //     Quagga.offDetected(); // chỉ bắt 1 lần
+            //     Quagga.stop();
+            //     modal.hide();
+            //
+            //     // Gán vào input và kích hoạt event
+            //     timSanPham.value = code;
+            //     const inputEvent = new Event("input", { bubbles: true });
+            //     timSanPham.dispatchEvent(inputEvent);
+            // });
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const btnMomo = document.getElementById("btnMomo");
+            const momoForm = document.getElementById("momoForm");
+
+            btnMomo?.addEventListener("click", function () {
+                if (momoForm) {
+                    momoForm.submit();
+                } else {
+                    alert("Có lỗi xảy ra: Không tìm thấy form thanh toán MoMo.");
+                }
+            });
+        });
+    </script>
+
+
+
 </section>
+
+
 </body>
 </html>

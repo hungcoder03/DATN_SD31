@@ -5,7 +5,6 @@ import com.main.datn_sd31.repository.*;
 import com.main.datn_sd31.service.impl.GHNService;
 import com.main.datn_sd31.service.impl.Giohangservice;
 import com.main.datn_sd31.service.impl.Sanphamservice;
-import com.main.datn_sd31.service.impl.VnPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
@@ -46,8 +45,6 @@ public class GiohangController {
 
     @Autowired
     private GHNService ghnService;
-    @Autowired
-    private VnPayService vnPayService;
 
     private KhachHang getCurrentKhachHang() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -190,7 +187,7 @@ public class GiohangController {
         HoaDon hoaDon = new HoaDon();
         hoaDon.setMa("HD" + System.currentTimeMillis());
         hoaDon.setNgayTao(LocalDateTime.now());
-        hoaDon.setNgayMua(LocalDateTime.now());
+        hoaDon.setNgayThanhToan(LocalDateTime.now());
         hoaDon.setNgaySua(LocalDateTime.now());
         hoaDon.setPhuongThuc(phuongThuc);
         hoaDon.setLoaihoadon(formData.get("loaiHoaDon"));
@@ -215,11 +212,7 @@ public class GiohangController {
             PhieuGiamGia phieu = phieugiamgiarepository.findByMa(formData.get("phieuGiamGia"));
             hoaDon.setPhieuGiamGia(phieu);
         }
-        if ("chuyen_khoan".equals(phuongThuc)) {
-            hoaDon.setTrangThai(true); // Chưa thanh toán vì đang chờ VNPay callback
-        } else {
-            hoaDon.setTrangThai(false); // Tiền mặt, được coi là sẽ thanh toán khi giao hàng
-        }
+            hoaDon.setTrangThai(3); // Tiền mặt, được coi là sẽ thanh toán khi giao hàng
 
         hoadonreposiroty.save(hoaDon);
 
@@ -250,26 +243,7 @@ public class GiohangController {
 
             hoadonCTreposiroty.save(ct);
         }
-
-
         giohangreposiroty.deleteAll(gioHangChiTiets);
-
-//        if (phuongThuc.equals("chuyen_khoan")) {
-//            if (thanhTien.compareTo(BigDecimal.valueOf(5000)) < 0) {
-//                redirect.addFlashAttribute("error", "Tổng tiền sau giảm giá phải từ 5.000 VNĐ trở lên để thanh toán bằng VNPAY.");
-//                return "redirect:/admin/ban-hang?cartKey=" + cartKey;
-//            }
-//
-//            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-//
-//            String redirectUrl = vnPayService.createOrder(
-//                    request,
-//                    thanhTien.intValue(),  // service sẽ tự nhân *100
-//                    "Thanh toan hoa don " + maHD,
-//                    baseUrl
-//            );
-//            return "redirect:" + redirectUrl;
-//        }
         model.addAttribute("maHoaDon", hoaDon.getMa());
         return "khachhang/thanhcong";
     }
@@ -311,37 +285,6 @@ public class GiohangController {
 
         return ResponseEntity.ok(fee);
     }
-    @GetMapping("/thanh-toan/vnpay-return")
-    public String ketQuaVnpay(@RequestParam Map<String, String> params, Model model) {
-        String responseCode = params.get("vnp_ResponseCode");
-        String transactionStatus = params.get("vnp_TransactionStatus");
-        String orderCode = params.get("vnp_TxnRef");
-
-        boolean thanhCong = "00".equals(responseCode) && "00".equals(transactionStatus);
-
-        HoaDon hoaDon = hoadonreposiroty.findByMa(orderCode);
-
-        if (thanhCong) {
-            hoaDon.setTrangThai(true); // ĐÃ THANH TOÁN
-            hoaDon.setNgaySua(LocalDateTime.now());
-            hoadonreposiroty.save(hoaDon);
-
-            LichSuHoaDon lichSu = new LichSuHoaDon();
-            lichSu.setHoaDon(hoaDon);
-            lichSu.setTrangThai(1);
-            lichSu.setGhiChu("Đã thanh toán qua VNPAY");
-            lichSu.setNguoiTao(1);
-            lichSu.setNguoiSua(1);
-            lichsuhoadonrepository.save(lichSu);
-
-            model.addAttribute("message", "Thanh toán thành công!");
-        } else {
-            model.addAttribute("message", "Thanh toán thất bại hoặc bị hủy!");
-        }
-
-        return "view/khachhang/thanhcong";
-    }
-
     @GetMapping("/phieu-giam-gia/tien-giam")
     @ResponseBody
     public ResponseEntity<BigDecimal> tinhTienGiam(

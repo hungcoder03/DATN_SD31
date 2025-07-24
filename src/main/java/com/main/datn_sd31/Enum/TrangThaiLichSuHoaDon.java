@@ -13,7 +13,8 @@ public enum TrangThaiLichSuHoaDon {
     XAC_NHAN_HOAN_HANG(7, "Xác nhận hoàn hàng"),
     DA_HOAN(8, "Đã hoàn"),
 
-    HUY(9, "Hủy");
+    HUY(9, "Hủy"),
+    GIAO_KHONG_THANH_CONG(10, "Giao không thành công");
 
     private final int value;
     private final String moTa;

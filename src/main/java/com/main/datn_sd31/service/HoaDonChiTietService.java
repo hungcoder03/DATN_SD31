@@ -10,4 +10,6 @@ public interface HoaDonChiTietService {
 
     List<HoaDonChiTietDTO> getHoaDonChiTietByMaHoaDon(String maHoaDon);
 
+    HoaDonChiTietDTO capNhatSoLuong(Integer id, Integer soLuongMoi);
+
 }

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,5 +46,15 @@ public class HoaDonChiTietServiceIpml implements HoaDonChiTietService {
     @Override
     public List<HoaDonChiTietDTO> getHoaDonChiTietByMaHoaDon(String maHoaDon) {
         return mapToDTOs(hoaDonChiTietRepository.findByHoaDon(maHoaDon));
+    }
+
+    @Override
+    public HoaDonChiTietDTO capNhatSoLuong(Integer id, Integer soLuongMoi) {
+        HoaDonChiTiet hdct = hoaDonChiTietRepository.findById(id).orElseThrow();
+        hdct.setSoLuong(soLuongMoi);
+        hdct.setNgaySua(LocalDateTime.now());
+//        hdct.setTongTien(hdct.getGiaSauGiam().multiply(BigDecimal.valueOf(soLuongMoi)));
+        hoaDonChiTietRepository.save(hdct);
+        return mapToDTO(hdct);
     }
 }
