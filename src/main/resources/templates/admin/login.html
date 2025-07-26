@@ -41,7 +41,7 @@
 
         <div th:if="${param.error}" class="error-message" style="display: block;">
             <strong>❌ Lỗi đăng nhập!</strong><br>
-            Email hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại thông tin.
+            <span th:text="${param.error}">Lỗi không xác định</span>
         </div>
     </div>
 
