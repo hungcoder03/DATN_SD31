@@ -22,17 +22,17 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
         WHERE LOWER(hd.ma) LIKE LOWER(CONCAT('%', :keyword, '%'))
         OR LOWER(hd.tenNguoiNhan) LIKE LOWER(CONCAT('%', :keyword, '%'))
         OR hd.soDienThoai LIKE CONCAT('%', :keyword, '%')
+        ORDER BY hd.ngayTao Desc
     """)
     Page<HoaDon> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("""
     SELECT hd FROM HoaDon hd 
     WHERE LOWER(hd.ma) LIKE LOWER(CONCAT('%', :ma, '%'))
+    ORDER BY hd.ngayTao Desc
 """)
     List<HoaDon> findByMaContainingIgnoreCase(@Param("ma") String ma);
 
-    @Query("select n from GioHangChiTiet n where n.id=:id")
-    GioHangChiTiet find(Integer id);
 
     @Query("select n from GioHangChiTiet n where n.khachHang.id = :username and n.id IN :selectedId ")
     List<GioHangChiTiet> laySanPhamTheoIds(
@@ -62,4 +62,5 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
             @Param("trangThai") Integer trangThai
 
     );
+
 }

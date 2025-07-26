@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -60,9 +61,27 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
 
     // ChiTietSanPhamRepository.java
     @Query("SELECT ct FROM ChiTietSanPham ct " +
-            "WHERE ct.maVach = :maVach")
+            "WHERE ct.id = :maVach")
     ChiTietSanPham findByMaVach(@Param("maVach") String maVach);
-
+    @Query("""
+    SELECT
+        ctsp.id,
+        ctsp.tenCt,
+        MAX(hdct.tenCtsp),
+        COALESCE(SUM(hdct.soLuong), 0),
+        ctsp.soLuong
+    FROM ChiTietSanPham ctsp
+    LEFT JOIN HoaDonChiTiet hdct
+      ON hdct.chiTietSanPham = ctsp
+      AND hdct.ngayTao BETWEEN :startDate AND :endDate
+    GROUP BY ctsp.id, ctsp.tenCt, ctsp.soLuong
+    HAVING MAX(hdct.tenCtsp) IS NOT NULL AND MAX(hdct.tenCtsp) <> ''
+    ORDER BY ctsp.id
+    """)
+    List<Object[]> getRawThongKeSanPhamTheoKhoangNgay(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 
 }
 
