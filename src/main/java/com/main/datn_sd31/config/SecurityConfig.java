@@ -60,7 +60,7 @@ public class SecurityConfig {
                 )
                 .logout(lg -> lg
                         .logoutUrl("/khach-hang/dang-xuat")
-                        .logoutSuccessUrl("/khach-hang/dang-nhap?logout")
+                        .logoutSuccessUrl("/khach-hang/danh-sach")
                 );
 
         return http.build();

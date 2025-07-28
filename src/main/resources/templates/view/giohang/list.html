@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Giỏ hàng - Pet Closet</title>
+    <title>Giỏ hàng - D&C Fashions</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-pink-50 text-gray-800 font-sans">
@@ -11,7 +11,7 @@
 <!-- Header -->
 <header class="bg-white shadow sticky top-0 z-50">
     <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
-        <h1 class="text-2xl font-bold text-pink-600">🐾 Pet Closet</h1>
+        <h1 class="text-2xl font-bold text-pink-600">D&C Fashions</h1>
         <a href="/" class="text-sm text-gray-600 hover:text-pink-500">← Tiếp tục mua sắm</a>
     </div>
 </header>
@@ -35,6 +35,7 @@
             <tr>
                 <th class="p-3 text-center"><input type="checkbox" disabled /></th>
                 <th class="p-3">#</th>
+                <th class="p-3">Mã</th>
                 <th class="p-3">Ảnh</th>
                 <th class="p-3">Sản phẩm</th>
                 <th class="p-3">Size</th>
@@ -54,6 +55,7 @@
                     <input type="checkbox" class="item-checkbox w-4 h-4 text-pink-500" name="selectedId" th:value="${item.id}" />
                 </td>
                 <td class="p-3" th:text="${iterStat.count}">1</td>
+                <td class="p-3" th:text="${item.chiTietSp.sanPham.ma}">Áo Pet</td>
                 <td class="p-3">
                     <img th:src="@{${item.chiTietSp.sanPham.hinhAnhs[0].url}}" class="w-20 rounded" />
                 </td>

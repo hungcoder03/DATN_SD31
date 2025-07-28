@@ -4,6 +4,7 @@ import com.main.datn_sd31.dto.phieu_giam_gia.PhieuGiamGiaDto;
 import com.main.datn_sd31.entity.PhieuGiamGia;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -13,4 +14,6 @@ public interface PhieuGiamGiaService {
     PhieuGiamGia findById(Integer id);
     void save(PhieuGiamGia pg);
     void delete(Integer id);
+    BigDecimal tinhTienGiam(String maPhieu, BigDecimal tongTien);
+
 }

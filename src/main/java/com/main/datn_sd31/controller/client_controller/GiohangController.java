@@ -2,6 +2,7 @@ package com.main.datn_sd31.controller.client_controller;
 
 import com.main.datn_sd31.entity.*;
 import com.main.datn_sd31.repository.*;
+import com.main.datn_sd31.service.PhieuGiamGiaService;
 import com.main.datn_sd31.service.impl.GHNService;
 import com.main.datn_sd31.service.impl.Giohangservice;
 import com.main.datn_sd31.service.impl.Sanphamservice;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class GiohangController {
     private final Sanphamservice sanPhamService;
     private final Sizerepository sizerepository;
     private final Mausacrepository mausacrepository;
-    private final Xuatxurepository xuatxurepository;
+    private final PhieuGiamGiaService phieuGiamGiaService;
     private final Chitietsanphamrepository chitietsanphamRepo;
     private final Hinhanhrepository hinhanhrepository;
     private final Giohangreposiroty giohangreposiroty;
@@ -41,7 +43,6 @@ public class GiohangController {
     private final PhieuGiamGiaRepository phieugiamgiarepository;
     private final NhanVienRepository nhanvienrepository;
     private final HoaDonChiTietRepository hoadonCTreposiroty;
-    private final LichSuHoaDonRepository lichsuhoadonrepository;
 
     @Autowired
     private GHNService ghnService;
@@ -94,10 +95,12 @@ public class GiohangController {
             tongTien = tongTien.add(item.getThanhTien());
         }
 
+
         model.addAttribute("list", newList);
         model.addAttribute("tongTien", tongTien);
 
-        return "/view/giohang/list";
+        System.out.println("▶ Đã vào controller: /gio-hang/hien_thi");
+        return "view/giohang/list";
     }
 
     @PostMapping("/them")
@@ -117,6 +120,55 @@ public class GiohangController {
         gh.setThanhTien(chiTiet.getGiaBan().multiply(BigDecimal.valueOf(soluong)));
 
         giohangreposiroty.save(gh);
+        return "redirect:/gio-hang/hien_thi";
+    }
+
+    @GetMapping("/xoa/{id}")
+    public String xoaSanPhamKhoiGio(@PathVariable("id") Integer id,
+                                    RedirectAttributes redirectAttributes) {
+        try {
+            if (giohangreposiroty.existsById(id)) {
+                giohangreposiroty.deleteById(id);
+                redirectAttributes.addFlashAttribute("success", "Đã xóa sản phẩm khỏi giỏ hàng.");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Sản phẩm không tồn tại trong giỏ hàng.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Xóa thất bại: " + e.getMessage());
+        }
+        return "redirect:/gio-hang/hien_thi";
+    }
+    @GetMapping("/cap-nhat/{id}")
+    public String capNhatSoLuong(
+            @PathVariable("id") Integer id,
+            @RequestParam("action") String action,
+            @RequestParam(value = "newSoluong", required = false) Integer newSoluong,
+            @RequestParam(value = "soluong", required = false) Integer soluong
+    ) {
+        Optional<GioHangChiTiet> optionalItem = giohangreposiroty.findById(id);
+        if (!optionalItem.isPresent()) {
+            return "redirect:/gio-hang/hien_thi";
+        }
+        GioHangChiTiet item = optionalItem.get();
+
+        int soLuongMoi;
+        if (newSoluong != null && newSoluong > 0 && !"increase".equals(action) && !"decrease".equals(action)) {
+            // Nếu nhập tay (không phải bấm + hoặc -)
+            soLuongMoi = newSoluong;
+        } else if ("increase".equals(action)) {
+            soLuongMoi = item.getSoLuong() + 1;
+        } else if ("decrease".equals(action)) {
+            soLuongMoi = Math.max(item.getSoLuong() - 1, 1);
+        } else {
+            soLuongMoi = item.getSoLuong();
+        }
+
+        item.setSoLuong(soLuongMoi);
+        BigDecimal giaBan = item.getChiTietSp().getGiaBan();
+        item.setThanhTien(giaBan.multiply(BigDecimal.valueOf(soLuongMoi)));
+
+        giohangreposiroty.save(item);
+
         return "redirect:/gio-hang/hien_thi";
     }
 
@@ -157,10 +209,27 @@ public class GiohangController {
             List<Map<String, Object>> wards = ghnService.getWards(districtId);
             model.addAttribute("wards", wards);
         }
+        List<PhieuGiamGia> danhSachPhieuGiamGia = phieugiamgiarepository.findAll();
+        model.addAttribute("danhSachPhieuGiamGia", danhSachPhieuGiamGia);
+
+// Xử lý chọn mã giảm tốt nhất
+        String selectedVoucherCode = null;
+        BigDecimal maxDiscount = BigDecimal.ZERO;
+
+        for (PhieuGiamGia phieu : danhSachPhieuGiamGia) {
+            BigDecimal discount = phieuGiamGiaService.tinhTienGiam(phieu.getMa(), tongTien); // <-- Gọi đến service bạn đang dùng
+            if (discount.compareTo(maxDiscount) > 0) {
+                maxDiscount = discount;
+                selectedVoucherCode = phieu.getMa();
+            }
+        }
+
+        model.addAttribute("selectedVoucherCode", selectedVoucherCode);
         return "/view/giohang/thanh-toan";
     }
 
     @PostMapping("/thanh-toan/xac-nhan")
+    @Transactional
     public String xacNhanThanhToan(@RequestParam("phuongThucThanhToan") String phuongThuc,
                                    @RequestParam("selectedId") List<Integer> selectedItemIds,
                                    @RequestParam Map<String, String> formData,
@@ -173,7 +242,13 @@ public class GiohangController {
         String fullAddress = diaChiChiTiet + ", " + formData.get("tenXa") + ", " +
                 formData.get("tenHuyen") + ", " + formData.get("tenTinh");
 
+        KhachHang khachHang = (KhachHang) session.getAttribute("khachHang");
+        if (khachHang == null) {
+            return "redirect:/dang-nhap";
+        }
+
         List<GioHangChiTiet> gioHangChiTiets = giohangreposiroty.findAllById(selectedItemIds);
+        // 4. Lọc sản phẩm khách đã chọn từ giỏ hàng của chính họ
         BigDecimal tongTienGoc = BigDecimal.ZERO;
         for (GioHangChiTiet item : gioHangChiTiets) {
             BigDecimal gia = item.getChiTietSp().getGiaBan();
@@ -212,41 +287,52 @@ public class GiohangController {
             PhieuGiamGia phieu = phieugiamgiarepository.findByMa(formData.get("phieuGiamGia"));
             hoaDon.setPhieuGiamGia(phieu);
         }
-            hoaDon.setTrangThai(3); // Tiền mặt, được coi là sẽ thanh toán khi giao hàng
-
+        hoaDon.setTrangThai(1);
         hoadonreposiroty.save(hoaDon);
-
-        LichSuHoaDon lichSu = new LichSuHoaDon();
-        lichSu.setHoaDon(hoaDon);
-        lichSu.setTrangThai(1);
-        lichSu.setNguoiTao(hoaDon.getNguoiTao());
-        lichSu.setNguoiSua(hoaDon.getNguoiSua());
-        lichSu.setGhiChu("Tạo đơn hàng mới, chờ xác nhận");
-        lichsuhoadonrepository.save(lichSu);
-
-        for (GioHangChiTiet item : gioHangChiTiets) {
-            ChiTietSanPham spct = item.getChiTietSp();
-            int soLuongMua = item.getSoLuong();
-
-            HoaDonChiTiet ct = new HoaDonChiTiet();
-            ct.setHoaDon(hoaDon);
-            ct.setChiTietSanPham(spct);
-            ct.setSoLuong(soLuongMua);
-            ct.setGiaGoc(spct.getGiaBan());
-            ct.setGiaSauGiam(spct.getGiaBan().subtract(tienGiam));
-            ct.setGiaGiam(tienGiam);
-
-            // 👉 Gộp tên sản phẩm + chi tiết
-            String tenSanPham = spct.getSanPham().getTen();
-            String chiTiet = spct.getTenCt();
-            ct.setTenCtsp(tenSanPham + " - " + chiTiet);
-
-            hoadonCTreposiroty.save(ct);
+        if (phuongThuc.equalsIgnoreCase("tien_mat")) {
+            xuLySauKhiDatHang(hoaDon, gioHangChiTiets, tienGiam,2);
+            model.addAttribute("ma",  hoaDon.getMa());
+            model.addAttribute("message", "Đặt hàng tiền mặt thành công!");
         }
-        giohangreposiroty.deleteAll(gioHangChiTiets);
+        if ("chuyen_khoan".equalsIgnoreCase(phuongThuc)) {
+            String ids = gioHangChiTiets.stream()
+                    .map(ct -> String.valueOf(ct.getId()))
+                    .collect(Collectors.joining(","));
+
+            return "redirect:/thanh-toan-vnpay?maHoaDon=" + hoaDon.getMa()+ "&ids=" + ids;
+        }
         model.addAttribute("maHoaDon", hoaDon.getMa());
         return "khachhang/thanhcong";
     }
+    public void xuLySauKhiDatHang(HoaDon hoaDon, List<GioHangChiTiet> gioHangChiTiets, BigDecimal tienGiam, int trangThai) {
+        for (GioHangChiTiet item : gioHangChiTiets) {
+            ChiTietSanPham ctsp = item.getChiTietSp();
+            int soLuong = item.getSoLuong();
+
+            HoaDonChiTiet hdct = new HoaDonChiTiet();
+            hdct.setHoaDon(hoaDon);
+            hdct.setChiTietSanPham(ctsp);
+            hdct.setSoLuong(soLuong);
+            hdct.setGiaGoc(ctsp.getGiaBan());
+            hdct.setGiaGiam(tienGiam);
+            hdct.setGiaSauGiam(ctsp.getGiaBan().subtract(tienGiam));
+            hdct.setTenCtsp(ctsp.getSanPham().getTen() + " - " + ctsp.getTenCt());
+
+            hoadonCTreposiroty.save(hdct);
+        }
+
+        // Xóa khỏi giỏ hàng
+        System.out.println("id san pham gio hang"+gioHangChiTiets);
+        giohangreposiroty.deleteAll(gioHangChiTiets);
+        System.out.println("hoa don id"+hoaDon.getId());
+        HoaDon hd = hoadonreposiroty.findById(hoaDon.getId()).orElse(null);
+
+        hd.setTrangThai(trangThai);
+        hoadonreposiroty.save(hd);
+
+    }
+
+
     @GetMapping("/thanh-toan/location")
     @ResponseBody
     public List<Map<String, Object>> getLocation(

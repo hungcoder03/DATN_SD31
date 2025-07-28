@@ -1,5 +1,6 @@
 package com.main.datn_sd31.controller.client_controller;
 import com.main.datn_sd31.entity.ChiTietSanPham;
+import com.main.datn_sd31.entity.KhachHang;
 import com.main.datn_sd31.entity.MauSac;
 import com.main.datn_sd31.entity.SanPham;
 import com.main.datn_sd31.entity.Size;
@@ -16,6 +17,7 @@ import com.main.datn_sd31.repository.Sizerepository;
 import com.main.datn_sd31.repository.Thuonghieurepository;
 import com.main.datn_sd31.repository.Xuatxurepository;
 import com.main.datn_sd31.service.impl.Sanphamservice;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -55,7 +57,7 @@ public class SanPhamkhachhangController {
     private final Dotgiamgiarepository dotgiamgiarepository;
 
     @GetMapping("/danh-sach")
-    public String hienThiDanhSachSanPham(Model model) {
+    public String hienThiDanhSachSanPham(Model model, HttpSession session) {
         List<SanPham> danhSachSanPham = sanPhamService.getAll();
         List<ChiTietSanPham> chiTiets = chitietsanphamRepo.findAll();
 
@@ -151,6 +153,8 @@ public class SanPhamkhachhangController {
         model.addAttribute("giaGocMap", giaGocMap);
         model.addAttribute("giaKhuyenMaiMap", giaKhuyenMaiMap);
 
+        KhachHang khachHang = (KhachHang) session.getAttribute("khachHang");
+        model.addAttribute("khachHangLogin", khachHang);
         return "khachhang/dssanpham";
     }
 

@@ -16,4 +16,6 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     Optional<KhachHang> findByEmail(String email);
 
 
+    @Query("select n from KhachHang n where n.email=:email")
+    KhachHang findByEmaill(String email);
 }
