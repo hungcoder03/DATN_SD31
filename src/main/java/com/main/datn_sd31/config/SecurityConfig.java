@@ -1,9 +1,13 @@
 package com.main.datn_sd31.config;
 
+import com.main.datn_sd31.security.CustomAuthenticationFailureHandler;
 import com.main.datn_sd31.security.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,18 +19,25 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
     /* ===== 1. Bảo vệ khu vực ADMIN ===== */
     @Bean
     @Order(1)           // Ưu tiên cao nhất
     public SecurityFilterChain adminSecurity(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/admin/**")      // Chỉ áp dụng filter‑chain này cho /admin/**
+                .securityMatcher("/admin/**")
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().hasRole("ADMIN")  // Phải có ROLE_ADMIN
+                        .anyRequest().hasAnyRole("ADMIN", "NHANVIEN")
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/admin", true)
+                        .failureHandler(customAuthenticationFailureHandler)
                         .permitAll()
                 )
                 .logout(logout -> logout
@@ -50,12 +61,13 @@ public class SecurityConfig {
                                 "/khach-hang/quen-mat-khau",
                                 "/khach-hang/public/**"
                         ).permitAll()
-                        .anyRequest().hasRole("CUSTOMER")
+                        .anyRequest().hasRole("KHACHHANG")
                 )
                 .formLogin(form -> form
                         .loginPage("/khach-hang/dang-nhap")
                         .loginProcessingUrl("/khach-hang/dang-nhap")
                         .defaultSuccessUrl("/khach-hang/danh-sach", true)
+                        .failureHandler(customAuthenticationFailureHandler)
                         .permitAll()
                 )
                 .logout(lg -> lg
@@ -75,7 +87,8 @@ public class SecurityConfig {
                                 "/", "/login", "/uploads/**",
                                 "/css/**", "/js/**", "/images/**",
                                 "/vendors/**", "/webjars/**",
-                                "/static/**", "/favicon.ico"
+                                "/static/**", "/favicon.ico",
+                                "/client-static/**" // Cho phép truy cập công khai thư mục client-static
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -90,7 +103,12 @@ public class SecurityConfig {
     /* ===== Bean chung ===== */
     @Bean
     public UserDetailsService userDetailsService() {
-        return new CustomUserDetailsService();      // Phải trả về ROLE_ADMIN hoặc ROLE_CUSTOMER tương ứng
+        return customUserDetailsService;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean

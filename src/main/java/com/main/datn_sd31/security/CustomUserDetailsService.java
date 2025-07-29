@@ -23,27 +23,36 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        /* ==== 1. Thử tìm nhân viên ==== */
+        // 1. Thử tìm nhân viên
         NhanVien nv = nhanVienRepository.findByEmail(email).orElse(null);
         if (nv != null) {
+            String role = "ROLE_NHANVIEN";
+            // Nếu có trường chức vụ hoặc role, phân biệt rõ hơn
+            if (nv.getChucVu() != null) {
+                if (nv.getChucVu().equalsIgnoreCase("Quản lý") || nv.getChucVu().equalsIgnoreCase("ADMIN")) {
+                    role = "ROLE_ADMIN";
+                } else if (nv.getChucVu().equalsIgnoreCase("Nhân viên") || nv.getChucVu().equalsIgnoreCase("NHANVIEN")) {
+                    role = "ROLE_NHANVIEN";
+                }
+            }
             return buildUser(
                     nv.getEmail(),
                     nv.getMatKhau(),
-                    "ROLE_ADMIN"      // hoặc nv.getRole().getName() nếu bạn có bảng Role
+                    role
             );
         }
 
-        /* ==== 2. Thử tìm khách hàng ==== */
+        // 2. Thử tìm khách hàng
         KhachHang kh = khachHangRepository.findByEmail(email).orElse(null);
         if (kh != null) {
             return buildUser(
                     kh.getEmail(),
                     kh.getMatKhau(),
-                    "ROLE_CUSTOMER"
+                    "ROLE_KHACHHANG"
             );
         }
 
-        /* ==== 3. Không tìm thấy ==== */
+        // 3. Không tìm thấy
         throw new UsernameNotFoundException("Không tìm thấy tài khoản");
     }
 
