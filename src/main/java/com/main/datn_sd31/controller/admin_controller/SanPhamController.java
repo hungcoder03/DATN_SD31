@@ -132,7 +132,8 @@ public class SanPhamController {
         SanPham sanPham = sanPhamService.createSanPham(form); // hoặc gọi service
 
         // 2. Tạo thư mục lưu ảnh nếu chưa có
-        String uploadDir = "E:/DATN/DATN_SD31/uploads/";
+        String uploadDir = "C:/DATN_SD31/uploads/";
+//        E:/DATN/DATN_SD31/uploads/
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
@@ -366,7 +367,7 @@ public class SanPhamController {
             ct.setGhiChu(null);
 
             String randomMaVach = "SP" + System.currentTimeMillis();
-            ct.setMaVach(randomMaVach);
+//            ct.setMaVach(randomMaVach);
             if (ct.getGiaBan() == null && ct.getGiaGoc() != null) {
                 ct.setGiaBan(ct.getGiaGoc());
             }

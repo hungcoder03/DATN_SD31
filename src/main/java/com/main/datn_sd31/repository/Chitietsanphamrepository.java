@@ -34,11 +34,12 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
 
     @Query("select n from ChiTietSanPham n where n.sanPham.id =:spId")
     ChiTietSanPham find(Integer spId);
-    @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
-            "WHERE (LOWER(ctsp.sanPham.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR ctsp.maVach LIKE CONCAT('%', :keyword, '%')) " +
-            "AND ctsp.soLuong > 0")
-    List<ChiTietSanPham> findByTenSanPhamContainingIgnoreCase(@Param("keyword") String keyword);
+
+//    @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
+//            "WHERE (LOWER(ctsp.sanPham.ten) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+//            "OR ctsp.maVach LIKE CONCAT('%', :keyword, '%')) " +
+//            "AND ctsp.soLuong > 0")
+//    List<ChiTietSanPham> findByTenSanPhamContainingIgnoreCase(@Param("keyword") String keyword);
 
 
 
@@ -59,10 +60,6 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
     List<ChiTietSanPham> findByTenOrMa(@Param("keyword") String keyword);
 
 
-    // ChiTietSanPhamRepository.java
-    @Query("SELECT ct FROM ChiTietSanPham ct " +
-            "WHERE ct.id = :maVach")
-    ChiTietSanPham findByMaVach(@Param("maVach") String maVach);
     @Query("""
     SELECT
         ctsp.id,

@@ -2,6 +2,7 @@ package com.main.datn_sd31.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -43,20 +44,23 @@ public class KhachHang {
 
     @Size(max = 20)
     @Nationalized
+    @Pattern(regexp = "^[0-9]{9,11}$", message = "Số điện thoại không hợp lệ")
     @Column(name = "so_dien_thoai", length = 20)
     private String soDienThoai;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "ngay_tham_gia")
-    private LocalDateTime ngayThamGia;
+    private LocalDate ngayThamGia;
 
     @Column(name = "gioi_tinh")
     private Boolean gioiTinh;
 
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Email phải đúng định dạng @gmail.com")
     @Size(max = 100)
     @Nationalized
     @Column(name = "email", length = 100)
     private String email;
+
 
     @Size(max = 100)
     @Nationalized

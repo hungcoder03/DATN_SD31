@@ -56,8 +56,9 @@ public class ChiTietSanPham {
 
     @Column(name = "gia_nhap", precision = 18, scale = 2)
     private BigDecimal giaNhap;
-    @Column(name = "ma_vach")
-    private String maVach;
+
+
+
     @Nationalized
     @Lob
     @Column(name = "mo_ta")

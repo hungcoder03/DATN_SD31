@@ -146,21 +146,21 @@ public class BanHangController {
         session.removeAttribute("maGiamGia");
         return "redirect:/admin/ban-hang?cartKey=" + cartKey;
     }
-    @GetMapping("/tim-kiem-san-pham")
-    @ResponseBody
-    public List<Map<String, Object>> timKiemSanPham(@RequestParam("keyword") String keyword) {
-        List<ChiTietSanPham> list = chiTietSanPhamRepository.findByTenSanPhamContainingIgnoreCase(keyword);
-        return list.stream().map(ctsp -> {
-            Map<String, Object> map = new HashMap<>();
-            map.put("idChiTietSp", ctsp.getId());
-            map.put("tenSanPham", ctsp.getSanPham().getTen());
-            map.put("mauSac", ctsp.getMauSac().getTen());
-            map.put("size", ctsp.getSize().getTen());
-            map.put("soluong", ctsp.getSoLuong());
-            map.put("gia", ctsp.getGiaBan());
-            return map;
-        }).collect(Collectors.toList());
-    }
+//    @GetMapping("/tim-kiem-san-pham")
+//    @ResponseBody
+//    public List<Map<String, Object>> timKiemSanPham(@RequestParam("keyword") String keyword) {
+//        List<ChiTietSanPham> list = chiTietSanPhamRepository.findByTenSanPhamContainingIgnoreCase(keyword);
+//        return list.stream().map(ctsp -> {
+//            Map<String, Object> map = new HashMap<>();
+//            map.put("idChiTietSp", ctsp.getId());
+//            map.put("tenSanPham", ctsp.getSanPham().getTen());
+//            map.put("mauSac", ctsp.getMauSac().getTen());
+//            map.put("size", ctsp.getSize().getTen());
+//            map.put("soluong", ctsp.getSoLuong());
+//            map.put("gia", ctsp.getGiaBan());
+//            return map;
+//        }).collect(Collectors.toList());
+//    }
     @PostMapping("/cap-nhat-so-luong")
     public String capNhatSoLuong(@RequestParam("idChiTietSp") Integer id,
                                  @RequestParam("soLuong") Integer soLuong,
@@ -174,32 +174,32 @@ public class BanHangController {
 
         return "redirect:/admin/ban-hang?cartKey=" + cartKey;
     }
-    @GetMapping("/tim-kiem")
-    public String timKiemSanPham(@RequestParam("keyword") String keyword,
-                                 @RequestParam("cartKey") String cartKey,
-                                 Model model) {
-        ChiTietSanPham ketQua = chiTietSanPhamRepository.findByMaVach(keyword);
-        model.addAttribute("ketQua", ketQua);
-        model.addAttribute("ten",ketQua.getTenCt());
-        model.addAttribute("mausac",ketQua.getMauSac().getTen());
-        model.addAttribute("cartKey", cartKey);
-        return "admin/banhang"; // trang bán hàng hiển thị luôn kết quả tìm
-    }
-    @GetMapping("/tim-kiem-theo-ma-vach")
-    @ResponseBody
-    public Map<String, Object> timKiemSanPhamJson(@RequestParam("maVach") String maVach) {
-        Map<String, Object> result = new HashMap<>();
-        ChiTietSanPham sp = chiTietSanPhamRepository.findByMaVach(maVach);
-        if (sp != null) {
-            result.put("tenSanPham", sp.getSanPham().getTen());
-            result.put("mauSac", sp.getMauSac().getTen());
-            result.put("size", sp.getSize().getTen());
-            result.put("soluong", sp.getSoLuong());
-            result.put("gia", sp.getGiaBan());
-            result.put("idChiTietSp", sp.getId()); // Thêm ID nếu cần xử lý tiếp
-        }
-        return result;
-    }
+//    @GetMapping("/tim-kiem")
+//    public String timKiemSanPham(@RequestParam("keyword") String keyword,
+//                                 @RequestParam("cartKey") String cartKey,
+//                                 Model model) {
+////        ChiTietSanPham ketQua = chiTietSanPhamRepository.findByMaVach(keyword);
+////        model.addAttribute("ketQua", ketQua);
+////        model.addAttribute("ten",ketQua.getTenCt());
+////        model.addAttribute("mausac",ketQua.getMauSac().getTen());
+//        model.addAttribute("cartKey", cartKey);
+//        return "admin/banhang"; // trang bán hàng hiển thị luôn kết quả tìm
+//    }
+//    @GetMapping("/tim-kiem-theo-ma-vach")
+//    @ResponseBody
+//    public Map<String, Object> timKiemSanPhamJson(@RequestParam("maVach") String maVach) {
+//        Map<String, Object> result = new HashMap<>();
+//        ChiTietSanPham sp = chiTietSanPhamRepository.findByMaVach(maVach);
+//        if (sp != null) {
+//            result.put("tenSanPham", sp.getSanPham().getTen());
+//            result.put("mauSac", sp.getMauSac().getTen());
+//            result.put("size", sp.getSize().getTen());
+//            result.put("soluong", sp.getSoLuong());
+//            result.put("gia", sp.getGiaBan());
+//            result.put("idChiTietSp", sp.getId()); // Thêm ID nếu cần xử lý tiếp
+//        }
+//        return result;
+//    }
 
     @PostMapping("/them-gio")
     public String themVaoGio(@RequestParam("idChiTietSp") Integer id,
