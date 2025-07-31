@@ -91,11 +91,31 @@
       <div class="flex flex-wrap gap-2">
         <a
                 th:each="lthu : ${loaiThus}"
-                th:href="@{/san-pham/danh-sach(q=${q},danhMucId=${danhMucId},priceRange=${priceRange},loaiThuId=${lthu.id},chatLieuId=${chatLieuId},kieuDangId=${kieuDangId},xuatXuId=${xuatXuId})}"
                 th:text="${lthu.ten}"
-                th:classappend="${loaiThuId == lthu.id ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700'}"
+                th:classappend="${loaiThuId == lthu.id
+                   ? 'bg-pink-600 text-white'
+                   : 'bg-gray-100 text-gray-700'}"
+                th:href="${loaiThuId == lthu.id}
+    ? @{/san-pham/danh-sach(
+         q=${q},
+         danhMucId=${danhMucId},
+         priceRange=${priceRange},
+         chatLieuId=${chatLieuId},
+         kieuDangId=${kieuDangId},
+         xuatXuId=${xuatXuId}
+       )}
+    : @{/san-pham/danh-sach(
+         q=${q},
+         danhMucId=${danhMucId},
+         priceRange=${priceRange},
+         loaiThuId=${lthu.id},
+         chatLieuId=${chatLieuId},
+         kieuDangId=${kieuDangId},
+         xuatXuId=${xuatXuId}
+       )}"
                 class="px-3 py-1 rounded-full border cursor-pointer transition"
         ></a>
+
       </div>
     </div>
 
@@ -106,66 +126,166 @@
       <div class="flex flex-wrap gap-2">
         <a
                 th:each="dm : ${danhMucs}"
-                th:href="@{/san-pham/danh-sach(q=${q},danhMucId=${dm.id},priceRange=${priceRange},loaiThuId=${loaiThuId},chatLieuId=${chatLieuId},kieuDangId=${kieuDangId},xuatXuId=${xuatXuId})}"
                 th:text="${dm.ten}"
-                th:classappend="${danhMucId == dm.id ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700'}"
+                th:classappend="${danhMucId == dm.id
+                       ? 'bg-pink-600 text-white'
+                       : 'bg-gray-100 text-gray-700'}"
+                th:href="${danhMucId == dm.id}
+         ? @{/san-pham/danh-sach(
+             q=${q},
+             priceRange=${priceRange},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${chatLieuId},
+             kieuDangId=${kieuDangId},
+             xuatXuId=${xuatXuId}
+           )}
+         : @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${dm.id},
+             priceRange=${priceRange},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${chatLieuId},
+             kieuDangId=${kieuDangId},
+             xuatXuId=${xuatXuId}
+           )}"
                 class="px-3 py-1 rounded-full border cursor-pointer transition"
         ></a>
       </div>
     </div>
+
     <!-- Chất liệu -->
     <div class="mb-4">
       <h3 class="font-semibold mb-2">Chất liệu</h3>
       <div class="flex flex-wrap gap-2">
         <a
                 th:each="cl : ${chatLieus}"
-                th:href="@{/san-pham/danh-sach(q=${q},danhMucId=${danhMucId},priceRange=${priceRange},loaiThuId=${loaiThuId},chatLieuId=${cl.id},kieuDangId=${kieuDangId},xuatXuId=${xuatXuId})}"
                 th:text="${cl.ten}"
-                th:classappend="${chatLieuId == cl.id ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700'}"
+                th:classappend="${chatLieuId == cl.id
+                       ? 'bg-pink-600 text-white'
+                       : 'bg-gray-100 text-gray-700'}"
+                th:href="${chatLieuId == cl.id}
+         ? @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${danhMucId},
+             priceRange=${priceRange},
+             loaiThuId=${loaiThuId},
+             kieuDangId=${kieuDangId},
+             xuatXuId=${xuatXuId}
+           )}
+         : @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${danhMucId},
+             priceRange=${priceRange},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${cl.id},
+             kieuDangId=${kieuDangId},
+             xuatXuId=${xuatXuId}
+           )}"
                 class="px-3 py-1 rounded-full border cursor-pointer transition"
         ></a>
       </div>
     </div>
+
     <!-- Kiểu dáng -->
     <div class="mb-4">
       <h3 class="font-semibold mb-2">Kiểu dáng</h3>
       <div class="flex flex-wrap gap-2">
         <a
                 th:each="kd : ${kieuDangs}"
-                th:href="@{/san-pham/danh-sach(q=${q},danhMucId=${danhMucId},priceRange=${priceRange},loaiThuId=${loaiThuId},chatLieuId=${chatLieuId},kieuDangId=${kd.id},xuatXuId=${xuatXuId})}"
                 th:text="${kd.ten}"
-                th:classappend="${kieuDangId == kd.id ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700'}"
+                th:classappend="${kieuDangId == kd.id
+                       ? 'bg-pink-600 text-white'
+                       : 'bg-gray-100 text-gray-700'}"
+                th:href="${kieuDangId == kd.id}
+         ? @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${danhMucId},
+             priceRange=${priceRange},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${chatLieuId},
+             xuatXuId=${xuatXuId}
+           )}
+         : @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${danhMucId},
+             priceRange=${priceRange},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${chatLieuId},
+             kieuDangId=${kd.id},
+             xuatXuId=${xuatXuId}
+           )}"
                 class="px-3 py-1 rounded-full border cursor-pointer transition"
         ></a>
       </div>
     </div>
+
     <!-- Xuất xứ -->
     <div class="mb-4">
       <h3 class="font-semibold mb-2">Xuất xứ</h3>
       <div class="flex flex-wrap gap-2">
         <a
                 th:each="xx : ${xuatXus}"
-                th:href="@{/san-pham/danh-sach(q=${q},danhMucId=${danhMucId},priceRange=${priceRange},loaiThuId=${loaiThuId},chatLieuId=${chatLieuId},kieuDangId=${kieuDangId},xuatXuId=${xx.id})}"
                 th:text="${xx.ten}"
-                th:classappend="${danhMucId == xx.id ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700'}"
+                th:classappend="${xuatXuId == xx.id
+                       ? 'bg-pink-600 text-white'
+                       : 'bg-gray-100 text-gray-700'}"
+                th:href="${xuatXuId == xx.id}
+         ? @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${danhMucId},
+             priceRange=${priceRange},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${chatLieuId},
+             kieuDangId=${kieuDangId}
+           )}
+         : @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${danhMucId},
+             priceRange=${priceRange},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${chatLieuId},
+             kieuDangId=${kieuDangId},
+             xuatXuId=${xx.id}
+           )}"
                 class="px-3 py-1 rounded-full border cursor-pointer transition"
         ></a>
       </div>
     </div>
 
+
     <!-- Giá -->
-    <div>
+    <div class="mb-4">
       <h3 class="font-semibold mb-2">Giá</h3>
       <div class="flex flex-wrap gap-2">
         <a
                 th:each="opt : ${priceOptions}"
-                th:href="@{/san-pham/danh-sach(q=${q},danhMucId=${danhMucId},priceRange=${opt.value},loaiThuId=${loaiThuId},chatLieuId=${chatLieuId},kieuDangId=${kieuDangId},xuatXuId=${xuatXuId})}"
                 th:text="${opt.label}"
-                th:classappend="${priceRange == opt.value ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700'}"
+                th:classappend="${priceRange == opt.value
+                       ? 'bg-pink-600 text-white'
+                       : 'bg-gray-100 text-gray-700'}"
+                th:href="${priceRange == opt.value}
+         ? @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${danhMucId},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${chatLieuId},
+             kieuDangId=${kieuDangId},
+             xuatXuId=${xuatXuId}
+           )}
+         : @{/san-pham/danh-sach(
+             q=${q},
+             danhMucId=${danhMucId},
+             priceRange=${opt.value},
+             loaiThuId=${loaiThuId},
+             chatLieuId=${chatLieuId},
+             kieuDangId=${kieuDangId},
+             xuatXuId=${xuatXuId}
+           )}"
                 class="px-3 py-1 rounded-full border cursor-pointer transition"
         ></a>
       </div>
     </div>
+
 
     <!-- Nút HỦY BỘ LỌC -->
     <div class="mt-4 text-right">
