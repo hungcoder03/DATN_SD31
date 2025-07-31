@@ -44,6 +44,8 @@ public class BanHangController {
     private final PhieuGiamGiaRepository phieugiamgiarepository;
     private final GHNService ghnService;
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
+    private final Mausacrepository mausacrepository;
+    private final Sizerepository sizerepository;
 
 
     private List<HoaDonChiTiet> getCart(String cartKey, HttpSession session) {
@@ -141,31 +143,77 @@ public class BanHangController {
     @PostMapping("/xoa-gio")
     public String xoaGioHang(@RequestParam("cartKey") String cartKey, HttpSession session) {
         Map<String, List<HoaDonChiTiet>> carts = (Map<String, List<HoaDonChiTiet>>) session.getAttribute("tatCaGio");
-        if (carts != null) carts.remove(cartKey);
-        session.removeAttribute("phiVanChuyen");
-        session.removeAttribute("maGiamGia");
-        return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+        if (carts != null) {
+            carts.remove(cartKey);
+            session.setAttribute("tatCaGio", carts); // Cập nhật lại session
+
+            // Xóa thông tin liên quan
+            session.removeAttribute("phiVanChuyen");
+            session.removeAttribute("maGiamGia");
+
+            // Nếu còn giỏ, redirect về giỏ đầu tiên
+            if (!carts.isEmpty()) {
+                String newCartKey = carts.keySet().iterator().next(); // giỏ đầu tiên còn lại
+                return "redirect:/admin/ban-hang?cartKey=" + newCartKey;
+            }
+        }
+
+        // Nếu không còn giỏ nào, tạo giỏ mới
+        return "redirect:/admin/ban-hang?cartKey=gio-1";
     }
+
     @GetMapping("/tim-kiem-san-pham")
     @ResponseBody
     public List<Map<String, Object>> timKiemSanPham(@RequestParam("keyword") String keyword) {
-        List<ChiTietSanPham> list = chiTietSanPhamRepository.findByTenSanPhamContainingIgnoreCase(keyword);
-        return list.stream().map(ctsp -> {
+        List<ChiTietSanPham> danhSach = chiTietSanPhamRepository.findBySanPham_TenContainingIgnoreCase(keyword);
+
+        List<Map<String, Object>> ketQua = new ArrayList<>();
+
+        for (ChiTietSanPham ctsp : danhSach) {
             Map<String, Object> map = new HashMap<>();
-            map.put("idChiTietSp", ctsp.getId());
+            map.put("id", ctsp.getId()); // ID của ChiTietSanPham
+            map.put("ma", ctsp.getSanPham().getMa());
             map.put("tenSanPham", ctsp.getSanPham().getTen());
+
+            // Hình ảnh đại diện (lấy cái đầu tiên nếu có)
+            String hinhAnh = ctsp.getSanPham().getHinhAnhs().stream()
+                    .findFirst()
+                    .map(h -> h.getUrl())
+                    .orElse("/images/no-image.png");
+            map.put("hinhAnh", hinhAnh);
+
+            // Thông tin màu, size và tồn kho
             map.put("mauSac", ctsp.getMauSac().getTen());
-            map.put("size", ctsp.getSize().getTen());
-            map.put("soluong", ctsp.getSoLuong());
-            map.put("gia", ctsp.getGiaBan());
-            return map;
-        }).collect(Collectors.toList());
+            map.put("kichThuoc", ctsp.getSize().getTen());
+            map.put("soLuong", ctsp.getSoLuong());
+
+            ketQua.add(map);
+        }
+
+        return ketQua;
     }
+
+
+
+
+
     @PostMapping("/cap-nhat-so-luong")
     public String capNhatSoLuong(@RequestParam("idChiTietSp") Integer id,
                                  @RequestParam("soLuong") Integer soLuong,
                                  @RequestParam("cartKey") String cartKey,
-                                 HttpSession session) {
+                                 HttpSession session,
+                                 RedirectAttributes redirectAttributes) {
+        ChiTietSanPham ctsp = chiTietSanPhamRepository.findWithDetailsById(id);
+        if (ctsp == null) {
+            redirectAttributes.addFlashAttribute("error", "❌ Không tìm thấy sản phẩm.");
+            return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+        }
+
+        if (soLuong > ctsp.getSoLuong()) {
+            redirectAttributes.addFlashAttribute("error", "❌ Số lượng vượt quá tồn kho.");
+            return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+        }
+
         List<HoaDonChiTiet> gio = getCart(cartKey, session);
         gio.stream()
                 .filter(item -> item.getChiTietSanPham().getId().equals(id))
@@ -174,6 +222,7 @@ public class BanHangController {
 
         return "redirect:/admin/ban-hang?cartKey=" + cartKey;
     }
+
     @GetMapping("/tim-kiem")
     public String timKiemSanPham(@RequestParam("keyword") String keyword,
                                  @RequestParam("cartKey") String cartKey,
@@ -207,25 +256,95 @@ public class BanHangController {
                              @RequestParam("cartKey") String cartKey,
                              HttpSession session) {
         ChiTietSanPham ctsp = chiTietSanPhamRepository.findWithDetailsById(id);
+        if (ctsp == null) {
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm");
+        }
+
         List<HoaDonChiTiet> gio = getCart(cartKey, session);
 
-        gio.stream().filter(i -> i.getChiTietSanPham().getId().equals(id)).findFirst().ifPresentOrElse(
-                item -> item.setSoLuong(item.getSoLuong() + soLuong),
-                () -> {
-                    HoaDonChiTiet ct = new HoaDonChiTiet();
-                    ct.setChiTietSanPham(ctsp);
-                    ct.setSoLuong(soLuong);
-                    ct.setGiaGiam(BigDecimal.ZERO);
-                    ct.setGiaSauGiam(ctsp.getGiaBan());
-                    ct.setTrangThai(true);
-                    ct.setNgayTao(LocalDateTime.now());
-                    ct.setNguoiTao(getNhanVien.getCurrentNhanVien().getId());
-                    ct.setTenCtsp(ctsp.getSanPham().getTen() + " - " + ctsp.getMauSac().getTen() + " / " + ctsp.getSize().getTen());
-                    gio.add(ct);
-                });
+        Optional<HoaDonChiTiet> existingItem = gio.stream()
+                .filter(i -> i.getChiTietSanPham().getId().equals(id))
+                .findFirst();
+
+        int tongSoLuongMuonThem = soLuong + existingItem.map(HoaDonChiTiet::getSoLuong).orElse(0);
+        if (tongSoLuongMuonThem > ctsp.getSoLuong()) {
+            throw new IllegalArgumentException("Sản phẩm không đủ tồn kho");
+        }
+
+        if (existingItem.isPresent()) {
+            existingItem.get().setSoLuong(tongSoLuongMuonThem);
+        } else {
+            HoaDonChiTiet ct = new HoaDonChiTiet();
+            ct.setChiTietSanPham(ctsp);
+            ct.setSoLuong(soLuong);
+            ct.setGiaGiam(BigDecimal.ZERO);
+            ct.setGiaSauGiam(ctsp.getGiaBan());
+            ct.setTrangThai(true);
+            ct.setNgayTao(LocalDateTime.now());
+            ct.setNguoiTao(getNhanVien.getCurrentNhanVien().getId());
+            ct.setTenCtsp(ctsp.getSanPham().getTen() + " - " + ctsp.getMauSac().getTen() + " / " + ctsp.getSize().getTen());
+            gio.add(ct);
+        }
 
         return "redirect:/admin/ban-hang?cartKey=" + cartKey;
     }
+
+    @PostMapping("/them-gio-hang")
+    public String themVaoGioBangJson(@RequestBody Map<String, Object> payload,
+                                     HttpSession session) {
+        Integer id = Integer.parseInt(payload.get("idChiTietSp").toString());
+        Integer soLuong = Integer.parseInt(payload.get("soLuong").toString());
+        String cartKey = payload.get("cartKey").toString();
+
+        System.out.println("=== DỮ LIỆU NHẬN ĐƯỢC ===");
+        System.out.println("idChiTietSp: " + id);
+        System.out.println("soLuong: " + soLuong);
+        System.out.println("cartKey: " + cartKey);
+        System.out.println("==========================");
+
+        ChiTietSanPham ctsp = chiTietSanPhamRepository.findWithDetailsById(id);
+        if (ctsp == null) {
+            throw new IllegalArgumentException("Không tìm thấy sản phẩm");
+        }
+
+        List<HoaDonChiTiet> gio = getCart(cartKey, session);
+
+        Optional<HoaDonChiTiet> existingItem = gio.stream()
+                .filter(i -> i.getChiTietSanPham().getId().equals(id))
+                .findFirst();
+
+        int tongSoLuongMuonThem = soLuong + existingItem.map(HoaDonChiTiet::getSoLuong).orElse(0);
+        if (tongSoLuongMuonThem > ctsp.getSoLuong()) {
+            throw new IllegalArgumentException("Sản phẩm không đủ tồn kho");
+        }
+
+        if (existingItem.isPresent()) {
+            existingItem.get().setSoLuong(tongSoLuongMuonThem);
+        } else {
+            HoaDonChiTiet ct = new HoaDonChiTiet();
+            ct.setChiTietSanPham(ctsp);
+            ct.setSoLuong(soLuong);
+            ct.setGiaGiam(BigDecimal.ZERO);
+            ct.setGiaSauGiam(ctsp.getGiaBan());
+            ct.setTrangThai(true);
+            ct.setNgayTao(LocalDateTime.now());
+            ct.setNguoiTao(getNhanVien.getCurrentNhanVien().getId());
+            ct.setTenCtsp(ctsp.getSanPham().getTen() + " - " + ctsp.getMauSac().getTen() + " / " + ctsp.getSize().getTen());
+            gio.add(ct);
+        }
+
+        return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+    }
+
+    @PostMapping("/xoa-san-pham")
+    public String xoaSanPhamTrongGio(@RequestParam("cartKey") String cartKey,
+                                     @RequestParam("idChiTietSp") Integer idChiTietSp,
+                                     HttpSession session) {
+        List<HoaDonChiTiet> gio = getCart(cartKey, session);
+        gio.removeIf(item -> item.getChiTietSanPham().getId().equals(idChiTietSp));
+        return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+    }
+
 
     @PostMapping("/thanh-toan")
     public String thanhToan(@RequestParam("cartKey") String cartKey,
@@ -276,8 +395,6 @@ public class BanHangController {
         hd.setNgaySua(LocalDateTime.now());
         hd.setNguoiSua(1);
         hd.setNguoiTao(1);
-
-
         session.setAttribute("hoaDonTam", hd);
         session.setAttribute("gioTam", gio);
         session.setAttribute("cartKeyTam", cartKey);
@@ -311,7 +428,6 @@ public class BanHangController {
         hd.setNgaySua(LocalDateTime.now());
         hd.setNguoiSua(1);
         hd.setNguoiTao(1);
-
         // 👉 Lưu mã giảm giá nếu có
         String maGiamGia = (String) session.getAttribute("maGiamGia");
         if (maGiamGia != null) {
@@ -339,7 +455,11 @@ public class BanHangController {
         lichSu.setNgaySua(LocalDateTime.now());
         lichSu.setNguoiTao(nv.getId());
         lichSu.setNguoiSua(nv.getId());
-        lichSu.setTrangThai(trangThai ? TrangThaiLichSuHoaDon.HOAN_THANH.getValue() : TrangThaiLichSuHoaDon.CHO_XAC_NHAN.getValue());
+        if (diachi!=null && sdt!=null) {
+            lichSu.setTrangThai(3); // 3
+        } else {
+            lichSu.setTrangThai(8); // 8
+        }
         lichSu.setGhiChu("Tạo hóa đơn và thanh toán" + (phuongThuc.equals("chuyen_khoan") ? " bằng chuyển khoản" : " bằng tiền mặt"));
         lichSuHoaDonRepository.save(lichSu);
 
@@ -356,56 +476,6 @@ public class BanHangController {
 
         return "redirect:/admin/ban-hang";
     }
-    //    @GetMapping("/vnpay/create-payment")
-//    public ResponseEntity<String> createPayment(HttpServletRequest request) {
-//        String vnp_TxnRef = String.valueOf(System.currentTimeMillis());
-//        String vnp_OrderInfo = "Thanh toan don hang test";
-//        String orderType = "other";
-//        String vnp_Amount = String.valueOf(5000000); // 50,000đ * 100
-//        String vnp_Locale = "vn";
-//        String vnp_BankCode = "NCB";
-//        String vnp_IpAddr = request.getRemoteAddr();
-//
-//        String vnp_TmnCode = "HWOXLM32";
-//        String secretKey = "8CPTJKZ7WW953XQYYJDDNSDW0HL22E8Z";
-//        String vnp_ReturnUrl = "http://localhost:8080/vnpay-payment-return";
-//        String vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-//
-//        Map<String, String> vnp_Params = new HashMap<>();
-//        vnp_Params.put("vnp_Version", "2.1.0");
-//        vnp_Params.put("vnp_Command", "pay");
-//        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-//        vnp_Params.put("vnp_Amount", vnp_Amount);
-//        vnp_Params.put("vnp_CurrCode", "VND");
-//        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-//        vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
-//        vnp_Params.put("vnp_OrderType", orderType);
-//        vnp_Params.put("vnp_Locale", vnp_Locale);
-//        vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
-//        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
-//        vnp_Params.put("vnp_CreateDate", new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
-//
-//        List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
-//        Collections.sort(fieldNames);
-//        StringBuilder hashData = new StringBuilder();
-//        StringBuilder query = new StringBuilder();
-//
-//        for (String fieldName : fieldNames) {
-//            String value = vnp_Params.get(fieldName);
-//            if (hashData.length() > 0) {
-//                hashData.append('&');
-//                query.append('&');
-//            }
-//            hashData.append(fieldName).append('=').append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
-//            query.append(fieldName).append('=').append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
-//        }
-//
-//        String vnp_SecureHash = vnpayService.hmacSHA512(secretKey, hashData.toString());
-//        query.append("&vnp_SecureHash=").append(vnp_SecureHash);
-//        String paymentUrl = vnp_Url + "?" + query.toString();
-//
-//        return ResponseEntity.ok(paymentUrl);
-//    }
     @GetMapping("/dia-chi/tinh")
     @ResponseBody
     public List<Map<String, Object>> getTinh() {
@@ -437,6 +507,7 @@ public class BanHangController {
 
         int serviceId = (int) services.get(0).get("service_id");
         Integer fee = ghnService.getShippingFee(fromDistrictId, toDistrictId, toWardCode, weight, serviceId);
+        System.out.println("idChiTietSp: " + fee);
         session.setAttribute("phiVanChuyen", new BigDecimal(fee));
         return ResponseEntity.ok(fee);
     }

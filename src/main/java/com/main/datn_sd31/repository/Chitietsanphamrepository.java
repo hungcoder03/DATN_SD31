@@ -1,7 +1,8 @@
 package com.main.datn_sd31.repository;
 
 import com.main.datn_sd31.entity.ChiTietSanPham;
-import com.main.datn_sd31.entity.SanPham;
+import com.main.datn_sd31.entity.MauSac;
+import com.main.datn_sd31.entity.Size;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,Integer> {
@@ -83,5 +85,12 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
             @Param("endDate") LocalDateTime endDate
     );
 
+    @Query("SELECT DISTINCT ctsp.mauSac FROM ChiTietSanPham ctsp WHERE ctsp.sanPham.id = :sanPhamId")
+    List<MauSac> findDistinctMauSacBySanPhamId(@Param("sanPhamId") Integer sanPhamId);
+
+    @Query("SELECT DISTINCT ctsp.size FROM ChiTietSanPham ctsp WHERE ctsp.sanPham.id = :sanPhamId AND ctsp.mauSac.ten = :tenMau")
+    List<Size> findDistinctSizeBySanPhamIdAndMauSacTen(@Param("sanPhamId") Integer sanPhamId, @Param("tenMau") String tenMau);
+
+    List<ChiTietSanPham> findBySanPham_TenContainingIgnoreCase(String keyword);
 }
 
