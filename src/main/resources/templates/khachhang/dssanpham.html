@@ -14,7 +14,7 @@
         <h1 class="text-2xl font-bold text-pink-600">D&C Fashions</h1>
         <nav class="space-x-6 hidden md:flex text-sm">
             <a href="#" class="hover:text-pink-600">Trang chủ</a>
-            <a th:href="@{/san-pham}" class="hover:text-pink-600">Sản phẩm</a>
+            <a th:href="@{/san-pham/danh-sach}" class="hover:text-pink-600">Sản phẩm</a>
             <a href="#" class="hover:text-pink-600">Blog</a>
             <a href="#" class="hover:text-pink-600">Liên hệ</a>
         </nav>
@@ -128,7 +128,7 @@
                 </div>
 
 
-                <a th:href="@{/khach-hang/chi-tiet/{id}(id=${sp.id})}"
+                <a th:href="@{/san-pham/chi-tiet/{id}(id=${sp.id})}"
                    class="mt-4 inline-block text-center bg-pink-600 text-white py-2 px-4 rounded-full hover:bg-pink-700 transition">
                     Xem chi tiết
                 </a>
