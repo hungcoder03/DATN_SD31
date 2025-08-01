@@ -1,12 +1,12 @@
 package com.main.datn_sd31.controller.client_controller;
 
-import com.main.datn_sd31.entity.ChiTietSanPham;
-import com.main.datn_sd31.entity.MauSac;
-import com.main.datn_sd31.entity.SanPham;
-import com.main.datn_sd31.entity.Size;
+import com.main.datn_sd31.entity.*;
 import com.main.datn_sd31.repository.*;
+import com.main.datn_sd31.service.impl.DanhGiaService;
 import com.main.datn_sd31.service.impl.Sanphamservice;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/san-pham")
 public class ListSanPhamController {
+    private final  DanhGiaRepository danhGiaRepository;
+    private final DanhGiaService danhGiaService;
     private final Sanphamservice sanPhamService;
     private final NhanVienRepository nhanvienRepo;
     private final ChatLieuRepository chatLieuRepo;
@@ -153,58 +155,126 @@ public class ListSanPhamController {
 
 
     @GetMapping("/chi-tiet/{id}")
-    public String xemChiTietSanPham(@PathVariable("id") Integer id, Model model) {
-        List<ChiTietSanPham> danhSachChiTiet = chitietsanphamRepo.findBySanPhamId(id);
-        model.addAttribute("sanPham", sanPhamService.findbyid(id));
+    public String xemChiTietSanPham(
+            @PathVariable("id") Integer id,
+            @RequestParam(value="page", defaultValue="0") int page,
+            @RequestParam(value="star", required=false) Integer star,
+            Model model
+    ) {
+        // --- 1. LOAD SẢN PHẨM, HÌNH, SIZE, MÀU ---
+        SanPham sanPham = sanPhamService.findbyid(id);
+        model.addAttribute("sanPham", sanPham);
         model.addAttribute("dsSanPham", sanPhamService.getAll());
         model.addAttribute("hinhanh", hinhanhrepository.findByhinhanhid(id));
 
-        // Gửi danh sách màu sắc duy nhất
-        List<MauSac> dsMauSac = danhSachChiTiet.stream()
+        List<ChiTietSanPham> chiTiets = chitietsanphamRepo.findBySanPhamId(id);
+
+        // Màu sắc duy nhất
+        List<MauSac> dsMauSac = chiTiets.stream()
                 .map(ChiTietSanPham::getMauSac)
                 .filter(ms -> ms != null && ms.getId() != null)
                 .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(MauSac::getId, Function.identity(), (a, b) -> a),
-                        map -> new ArrayList<>(map.values())
+                        Collectors.toMap(MauSac::getId, Function.identity(), (a,b)->a),
+                        m -> new ArrayList<>(m.values())
                 ));
         model.addAttribute("dsMauSac", dsMauSac);
         model.addAttribute("mauSacCount", dsMauSac.size());
 
-        // Gửi danh sách size duy nhất
-        List<Size> dsSize = danhSachChiTiet.stream()
+        // Size duy nhất
+        List<Size> dsSize = chiTiets.stream()
                 .map(ChiTietSanPham::getSize)
                 .filter(sz -> sz != null && sz.getId() != null)
                 .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(Size::getId, Function.identity(), (a, b) -> a),
-                        map -> new ArrayList<>(map.values())
+                        Collectors.toMap(Size::getId, Function.identity(), (a,b)->a),
+                        m -> new ArrayList<>(m.values())
                 ));
         model.addAttribute("dsSize", dsSize);
         model.addAttribute("sizeCount", dsSize.size());
 
-        // ✅ Gửi danh sách chi tiết với tồn kho - SỬA LỖI ở đây
-        // ✅ Gửi danh sách chi tiết với tồn kho - đã fix null
-        model.addAttribute("dsChiTietSanPham", danhSachChiTiet.stream()
-                .filter(ct -> ct.getSize() != null && ct.getMauSac() != null &&
-                        ct.getSize().getId() != null && ct.getMauSac().getId() != null)
+        // Chi tiết với tồn kho (dùng cho JS update giá + kho)
+        List<Map<String,Object>> dsChiTietMap = chiTiets.stream()
+                .filter(ct -> ct.getSize()!=null && ct.getMauSac()!=null)
                 .map(ct -> {
-                    Map<String, Object> chiTietMap = new HashMap<>();
-                    chiTietMap.put("id", ct.getId());
-                    chiTietMap.put("giaBan", ct.getGiaBan());
-                    Map<String, Object> sizeMap = new HashMap<>();
-                    sizeMap.put("id", ct.getSize().getId());
-                    chiTietMap.put("size", sizeMap);
+                    Map<String,Object> m = new HashMap<>();
+                    m.put("id", ct.getId());
+                    m.put("giaBan", ct.getGiaBan());
+                    m.put("size",   Map.of("id", ct.getSize().getId()));
+                    m.put("mauSac", Map.of("id", ct.getMauSac().getId()));
+                    m.put("soLuongTon", ct.getSoLuong());
+                    return m;
+                }).toList();
+        model.addAttribute("dsChiTietSanPham", dsChiTietMap);
 
-                    Map<String, Object> mauMap = new HashMap<>();
-                    mauMap.put("id", ct.getMauSac().getId());
-                    chiTietMap.put("mauSac", mauMap);
 
-                    chiTietMap.put("soLuongTon", ct.getSoLuong());
-                    return chiTietMap;
-                })
-                .collect(Collectors.toList()));
+        // --- 2. TÍNH TOÁN REVIEW ---
+        // 2.1: Load toàn bộ review (mới nhất trước)
+        List<DanhGia> allReviews = danhGiaService.layDanhGiaChoSanPham(id);
+        model.addAttribute("totalCount", allReviews.size());
+
+        // 2.2: Đếm theo sao
+        Map<Integer, Long> countByStar = Map.of(
+                5, allReviews.stream().filter(r -> r.getSoSao()==5).count(),
+                4, allReviews.stream().filter(r -> r.getSoSao()==4).count(),
+                3, allReviews.stream().filter(r -> r.getSoSao()==3).count(),
+                2, allReviews.stream().filter(r -> r.getSoSao()==2).count(),
+                1, allReviews.stream().filter(r -> r.getSoSao()==1).count()
+        );
+        model.addAttribute("countByStar", countByStar);
+
+        // 2.3: Tính điểm trung bình và format
+        double avg = danhGiaService.tinhDiemTrungBinh(id);
+        // Tách phần nguyên và phần thập phân
+        int base = (int) Math.floor(avg);
+        double frac = avg - base;
+
+        String avgRatingStr = String.format(Locale.FRANCE, "%.1f", avg);
+        int fullStars;
+        boolean halfStar;
+        // Áp theo ngưỡng: <0.3 → không half, [0.3, 0.8) → half, ≥0.8 → làm tròn lên
+        if (frac < 0.3) {
+            fullStars = base;
+            halfStar   = false;
+        } else if (frac < 0.8) {
+            fullStars = base;
+            halfStar   = true;
+        } else {
+            fullStars = base + 1;
+            halfStar   = false;
+        }
+        int emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+        model.addAttribute("avgRatingStr", avgRatingStr);
+        model.addAttribute("fullStars",    fullStars);
+        model.addAttribute("halfStar",     halfStar);
+        model.addAttribute("emptyStars",   emptyStars);
+        model.addAttribute("avgRatingStr", String.format(Locale.FRANCE, "%.1f", avg));
+
+        // --- 3. LỌC THEO STAR VÀ PHÂN TRANG ---
+        List<DanhGia> filtered = (star == null)
+                ? allReviews
+                : allReviews.stream()
+                .filter(r -> r.getSoSao().equals(star))
+                .toList();
+        model.addAttribute("starFilter", star);
+
+        int pageSize = 6;
+        int total = filtered.size();
+        int totalPages = (total + pageSize) / pageSize;
+        int from = page * pageSize;
+        int to   = Math.min(from + pageSize, total);
+        List<DanhGia> pageReviews = (from < total)
+                ? filtered.subList(from, to)
+                : Collections.emptyList();
+
+        model.addAttribute("reviews",      pageReviews);
+        model.addAttribute("currentPage",  page);
+        model.addAttribute("totalPages",   totalPages);
 
         return "khachhang/xemchitiet";
     }
+
+
+
     @GetMapping("/search")
     public String searchSanPham(
             @RequestParam("q") String q,

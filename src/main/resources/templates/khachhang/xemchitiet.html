@@ -204,7 +204,102 @@
             </a>
         </div>
     </div>
+
+    <section class="mt-8">
+        <h3 class="text-xl font-semibold mb-4">ĐÁNH GIÁ SẢN PHẨM</h3>
+
+        <!-- Tổng hợp đánh giá -->
+        <div class="border p-4 mb-6">
+            <!-- Hiển thị điểm trung bình -->
+            <div class="flex items-center gap-2">
+                <span class="text-3xl font-bold" th:text="${avgRatingStr}">0,0</span>
+                <span>/ 5 sao</span>
+            </div>
+
+            <!-- Hiển thị sao -->
+            <div class="mt-2 flex items-center gap-1">
+                <!-- full stars -->
+                <span th:each="i : ${#numbers.sequence(1, fullStars)}"
+                      class="text-yellow-500 text-xl">★</span>
+
+                <!-- half star nếu có -->
+                <span th:if="${halfStar}"
+                      class="text-yellow-500 text-xl">⯪</span>
+
+                <!-- empty stars -->
+                <span th:each="i : ${#numbers.sequence(1, emptyStars)}"
+                      class="text-gray-300 text-xl">★</span>
+            </div>
+
+            <div class="mt-2 space-x-2">
+                <a th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id})}"
+                   th:classappend="${starFilter == null} ? 'bg-pink-600 text-white' : ''"
+                   class="px-3 py-1 border rounded">Tất cả (<span th:text="${totalCount}">0</span>)</a>
+                <a th:each="s : ${#numbers.sequence(5,1,-1)}"
+                   th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id},star=${s})}"
+                   th:classappend="${starFilter == s} ? 'bg-pink-600 text-white' : ''"
+                   class="px-3 py-1 border rounded"
+                   th:text="${s} + ' sao '">5 sao </a>
+            </div>
+
+        </div>
+
+        <!-- Danh sách review -->
+        <div th:each="rv : ${reviews}"
+             class="border-b py-4"
+             th:with="
+       cnt=${rv.soSao != null
+         ? (rv.soSao > 5 ? 5 : rv.soSao)
+         : 0},
+       empties=${5 - cnt}
+     ">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="font-semibold" th:text="${rv.khachHang.ten}">Khách hàng</span>
+                <div class="flex items-center gap-1">
+                    <!-- full stars -->
+                    <span th:each="i : ${#numbers.sequence(1,5)}"
+                          th:text="${i <= (rv.soSao != null ? (rv.soSao > 5 ? 5 : rv.soSao) : 0)} ? '★' : '★'"
+                          th:classappend="${i <= (rv.soSao != null ? (rv.soSao > 5 ? 5 : rv.soSao) : 0)}
+                         ? 'text-yellow-500' : 'text-gray-300'"
+                          class="text-xl">
+                        ★
+                      </span>
+                </div>
+            </div>
+
+            <div class="text-sm text-gray-500 mb-2"
+                 th:text="${#temporals.format(rv.thoiGian, 'dd/MM/yyyy HH:mm')}">
+                01/01/2025 12:00
+            </div>
+            <p class="mb-2" th:text="${rv.noiDung}">Nội dung đánh giá...</p>
+            <div th:if="${rv.hinhAnh}">
+                <img th:src="${rv.hinhAnh}"
+                     class="max-w-xs rounded"
+                     alt="Hình ảnh đánh giá"/>
+            </div>
+        </div>
+
+        <!-- pagination -->
+        <div class="flex justify-center mt-6 space-x-2">
+            <a th:if="${currentPage > 0}"
+               th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id},page=${currentPage-1},star=${starFilter})}"
+               class="px-3 py-1 border rounded">« Trước</a>
+
+            <a th:each="i : ${#numbers.sequence(0,totalPages-1)}"
+               th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id},page=${i},star=${starFilter})}"
+               th:classappend="${i == currentPage} ? 'bg-pink-600 text-white' : ''"
+               class="px-3 py-1 border rounded"
+               th:text="${i+1}">1</a>
+
+            <a th:if="${currentPage < totalPages-1}"
+               th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id},page=${currentPage+1},star=${starFilter})}"
+               class="px-3 py-1 border rounded">Tiếp »</a>
+        </div>
+
+
+    </section>
 </div>
+
 <!-- Bootstrap JS (bao gồm cả Popper) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
