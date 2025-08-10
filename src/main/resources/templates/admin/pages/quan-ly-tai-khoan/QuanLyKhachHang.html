@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Khách Hàng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configure Tailwind to not interfere with existing layout
+        tailwind.config = {
+            corePlugins: {
+                preflight: false, // Disable Tailwind's CSS reset
+            }
+        }
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Custom animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* Modal backdrop */
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        /* Protect admin layout from Tailwind reset */
+        .admin-layout {
+            /* Reset Tailwind's aggressive resets for admin layout */
+        }
+        
+        /* Admin layout handles sidebar positioning */
+        
+        /* Remove margin since admin layout handles this */
+        .main-content {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Override Tailwind's box-sizing if needed */
+        * {
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+<section layout:fragment="content">
+    <!-- Success/Error Messages với Tailwind -->
+    <div th:if="${added}" class="fixed top-20 right-4 z-[9999] fade-in" style="z-index: 9999 !important;">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-2xl">
+            <div class="flex items-center">
+                <i class="bi bi-check-circle-fill mr-2"></i>
+                <span class="font-medium">Thêm khách hàng thành công!</span>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="ml-4 text-green-500 hover:text-green-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div th:if="${updated}" class="fixed top-20 right-4 z-[9999] fade-in" style="z-index: 9999 !important;">
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg shadow-2xl">
+            <div class="flex items-center">
+                <i class="bi bi-check-circle-fill mr-2"></i>
+                <span class="font-medium">Cập nhật khách hàng thành công!</span>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="ml-4 text-blue-500 hover:text-blue-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div th:if="${deleted}" class="fixed top-20 right-4 z-[9999] fade-in" style="z-index: 9999 !important;">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-2xl">
+            <div class="flex items-center">
+                <i class="bi bi-trash-fill mr-2"></i>
+                <span class="font-medium">Xóa khách hàng thành công!</span>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="ml-4 text-red-500 hover:text-red-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div th:if="${error}" class="fixed top-20 right-4 z-[9999] fade-in" style="z-index: 9999 !important;">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-2xl">
+            <div class="flex items-center">
+                <i class="bi bi-exclamation-triangle-fill mr-2"></i>
+                <span class="font-medium" th:text="${error}"></span>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="ml-4 text-red-500 hover:text-red-700">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content w-full p-4">
+        <div class="container max-w-7xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Quản Lý Khách Hàng</h2>
+                            <p class="text-gray-500 mt-1">Quản lý thông tin khách hàng và tài khoản</p>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <a th:href="@{/admin/quanlytaikhoan/khachhang/add}"
+                               class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-150 ease-in-out inline-flex items-center">
+                                <i class="bi bi-person-plus mr-2"></i>
+                                Thêm khách hàng
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Search Results Info -->
+                    <div th:if="${searchKeyword}" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="bi bi-info-circle text-blue-600 mr-2"></i>
+                            <span class="text-blue-800">
+                                Tìm thấy <strong th:text="${#lists.size(khachhangList)}">0</strong> khách hàng 
+                                với từ khóa "<strong th:text="${searchKeyword}"></strong>"
+                            </span>
+                            <a th:href="@{/admin/quanlytaikhoan/khachhang}" 
+                               class="ml-4 text-blue-600 hover:text-blue-800 underline">
+                                Xem tất cả
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Search and Filter -->
+                    <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                        <div class="relative flex-grow">
+                            <form th:action="@{/admin/quanlytaikhoan/khachhang/search}" method="get" class="flex gap-2">
+                                <div class="relative flex-grow">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="bi bi-search text-gray-400"></i>
+                                    </div>
+                                    <input type="text" name="search" 
+                                           class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+                                           placeholder="Nhập tên, SĐT hoặc email..."
+                                           th:value="${param.search}">
+                                </div>
+                                <button type="submit" 
+                                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition duration-150 ease-in-out">
+                                    Tìm kiếm
+                                </button>
+                                <a th:if="${param.search}" th:href="@{/admin/quanlytaikhoan/khachhang}" 
+                                   class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-150 ease-in-out">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    STT
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Thông tin
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Liên hệ
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Ngày sinh
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Trạng thái
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Thao tác
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="kh, stat : ${khachhangList}" class="hover:bg-gray-50 transition-colors duration-150">
+                                <!-- STT -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${stat.count}">
+                                </td>
+                                
+                                <!-- Thông tin khách hàng -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-12 w-12 flex-shrink-0">
+                                            <div class="h-12 w-12 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-lg">
+                                                <span th:text="${#strings.substring(kh.ten, 0, 1)}"></span>
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900" th:text="${kh.ten}"></div>
+                                            <div class="text-sm text-gray-500" th:text="${kh.ma}"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <!-- Liên hệ -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900" th:text="${kh.email}"></div>
+                                    <div class="text-sm text-gray-500" th:text="${kh.soDienThoai}"></div>
+                                </td>
+                                
+                                <!-- Ngày sinh -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900" th:text="${kh.ngaySinh}"></div>
+                                </td>
+                                
+                                <!-- Trạng thái -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span th:if="${kh.trangThai}" 
+                                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        Hoạt động
+                                    </span>
+                                    <span th:unless="${kh.trangThai}" 
+                                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Ngưng hoạt động
+                                    </span>
+                                </td>
+                                
+                                <!-- Thao tác -->
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button th:onclick="'showCustomerDetail(' + ${kh.id} + ')'"
+                                                class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-lg transition duration-150 ease-in-out"
+                                                title="Xem chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <a th:href="@{/admin/quanlytaikhoan/khachhang/sua(id=${kh.id})}" 
+                                           class="text-yellow-600 hover:text-yellow-900 bg-yellow-50 hover:bg-yellow-100 p-2 rounded-lg transition duration-150 ease-in-out"
+                                           title="Chỉnh sửa">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a th:href="@{/admin/quanlytaikhoan/khachhang/delete(id=${kh.id})}" 
+                                           class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition duration-150 ease-in-out"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa khách hàng này?')"
+                                           title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Empty state -->
+                            <tr th:if="${#lists.isEmpty(khachhangList)}">
+                                <td colspan="6" class="px-6 py-12 text-center">
+                                    <div class="text-gray-500">
+                                        <i class="bi bi-people text-4xl mb-4"></i>
+                                        <p class="text-lg font-medium">Không có khách hàng nào</p>
+                                        <p class="text-sm">Hãy thêm khách hàng đầu tiên của bạn</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chi tiết Khách hàng -->
+    <div id="detailModal" class="fixed inset-0 z-[10000] hidden overflow-y-auto" style="z-index: 10000 !important;">
+        <section class="flex justify-center items-center min-h-screen backdrop-blur-md bg-black/30 p-4">
+            <!-- Profile Card Container -->
+            <div class="max-w-md w-full bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl transform hover:scale-[1.02] transition-transform duration-500 ease-in-out p-8 relative overflow-hidden border border-white/10">
+                
+                <!-- Close Button -->
+                <button type="button" onclick="closeDetailModal()" class="absolute top-4 right-4 text-white/80 hover:text-white z-20 p-2">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+                
+                <!-- Decorative Elements -->
+                <div class="absolute -top-20 -right-20 w-40 h-40 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
+                <div class="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
+                
+                <!-- Glow Effect -->
+                <div class="absolute inset-0 bg-gradient-to-br from-green-400/10 via-transparent to-blue-400/10 rounded-3xl"></div>
+                
+                <!-- Profile Image with Floating Effect -->
+                <div class="flex justify-center -mt-20 mb-6 relative z-10 mt-5">
+                    <div class="relative group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-green-400 to-blue-500 rounded-full blur-md group-hover:blur-lg transition-all duration-500"></div>
+                        <div class="w-40 h-40 bg-gradient-to-br from-green-400 to-blue-500 rounded-full border-4 border-white/80 shadow-xl hover:scale-105 transform transition-all duration-400 relative z-10 flex items-center justify-center">
+                            <i class="bi bi-person-fill text-white text-6xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Name and Title with Animated Underline -->
+                <div class="text-center mb-6 relative z-10">
+                    <h2 id="detailName" class="text-3xl font-bold text-white mb-2 tracking-tight">
+                        <span class="relative inline-block group">
+                            Tên khách hàng
+                            <span class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-blue-500 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                        </span>
+                    </h2>
+                    <p class="text-lg font-medium text-green-200 tracking-wider">Khách hàng</p>
+                    <div class="flex justify-center mt-2">
+                        <span id="detailStatus" class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                    </div>
+                </div>
+                
+                <!-- Customer Information -->
+                <div class="text-center text-white/90 mb-8 px-6 relative z-10 space-y-3">
+                    <div class="grid grid-cols-1 gap-3 text-sm">
+                        <div class="bg-white/3 backdrop-blur-md rounded-lg p-3 border border-white/5 hover:bg-white/5 transition-all duration-300">
+                            <span class="text-green-200 font-medium">Mã KH:</span>
+                            <span id="detailMa" class="text-white ml-2">KH001</span>
+                        </div>
+                        <div class="bg-white/3 backdrop-blur-md rounded-lg p-3 border border-white/5 hover:bg-white/5 transition-all duration-300">
+                            <span class="text-green-200 font-medium">Email:</span>
+                            <span id="detailEmail" class="text-white ml-2">email@gmail.com</span>
+                        </div>
+                        <div class="bg-white/3 backdrop-blur-md rounded-lg p-3 border border-white/5 hover:bg-white/5 transition-all duration-300">
+                            <span class="text-green-200 font-medium">SĐT:</span>
+                            <span id="detailSoDienThoai" class="text-white ml-2">0123456789</span>
+                        </div>
+                        <div class="bg-white/3 backdrop-blur-md rounded-lg p-3 border border-white/5 hover:bg-white/5 transition-all duration-300">
+                            <span class="text-green-200 font-medium">Ngày sinh:</span>
+                            <span id="detailNgaySinh" class="text-white ml-2">01/01/1990</span>
+                        </div>
+                        <div class="bg-white/3 backdrop-blur-md rounded-lg p-3 border border-white/5 hover:bg-white/5 transition-all duration-300">
+                            <span class="text-green-200 font-medium">Giới tính:</span>
+                            <span id="detailGioiTinh" class="text-white ml-2">Nam</span>
+                        </div>
+                        <div class="bg-white/3 backdrop-blur-md rounded-lg p-3 border border-white/5 hover:bg-white/5 transition-all duration-300">
+                            <span class="text-green-200 font-medium">Địa chỉ:</span>
+                            <span id="detailDiaChi" class="text-white ml-2">Địa chỉ khách hàng</span>
+                        </div>
+                        <div class="bg-white/3 backdrop-blur-md rounded-lg p-3 border border-white/5 hover:bg-white/5 transition-all duration-300">
+                            <span class="text-green-200 font-medium">Ngày tham gia:</span>
+                            <span id="detailNgayThamGia" class="text-white ml-2">01/01/2023</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-center space-x-4 relative z-10">
+                    <button onclick="closeDetailModal()" class="px-6 py-3 bg-white/5 backdrop-blur-md text-white font-medium rounded-full shadow-lg hover:bg-white/10 transition-all duration-300 transform hover:scale-105 border border-white/10">
+                        <i class="bi bi-x-circle mr-2"></i>Đóng
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Auto hide notifications -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notifications = document.querySelectorAll('.fixed.top-20.right-4');
+            notifications.forEach(function(notification) {
+                setTimeout(function() {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateY(-20px)';
+                    setTimeout(function() {
+                        notification.remove();
+                    }, 300);
+                }, 7000); // Tăng thời gian hiển thị lên 7 giây
+            });
+            
+        });
+
+        // Modal functions
+        function showCustomerDetail(id) {
+            // Show customer detail modal
+            
+            // Show loading state
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Fetch customer data
+            fetch(`/admin/quanlytaikhoan/khachhang/api/detail/${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    populateCustomerDetail(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching customer detail:', error);
+                    alert('Không thể tải thông tin khách hàng. Vui lòng thử lại.');
+                    closeDetailModal();
+                });
+        }
+        
+        function populateCustomerDetail(customer) {
+            // Header info - update name in the span inside h2
+            const nameElement = document.querySelector('#detailName span');
+            nameElement.textContent = customer.ten || 'N/A';
+            
+            // Status badge with glassmorphism style
+            const statusElement = document.getElementById('detailStatus');
+            if (customer.trangThai) {
+                statusElement.textContent = 'Hoạt động';
+                statusElement.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-400/20 text-green-300 border border-green-400/30 backdrop-blur-sm';
+            } else {
+                statusElement.textContent = 'Ngưng hoạt động';
+                statusElement.className = 'px-3 py-1 rounded-full text-sm font-medium bg-red-400/20 text-red-300 border border-red-400/30 backdrop-blur-sm';
+            }
+            
+            // Customer information
+            document.getElementById('detailMa').textContent = customer.ma || 'N/A';
+            document.getElementById('detailEmail').textContent = customer.email || 'N/A';
+            document.getElementById('detailSoDienThoai').textContent = customer.soDienThoai || 'N/A';
+            document.getElementById('detailNgaySinh').textContent = formatDate(customer.ngaySinh) || 'N/A';
+            document.getElementById('detailGioiTinh').textContent = customer.gioiTinh ? 'Nam' : 'Nữ';
+            document.getElementById('detailDiaChi').textContent = customer.diaChi || 'N/A';
+            document.getElementById('detailNgayThamGia').textContent = formatDate(customer.ngayThamGia) || 'N/A';
+            
+            // Store customer ID for future use
+            window.currentCustomerId = customer.id;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN');
+        }
+        
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDetailModal();
+            }
+        });
+    </script>
+
+</section>
+</body>
+</html>

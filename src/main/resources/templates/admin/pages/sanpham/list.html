@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title>Quản lý sản phẩm</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+</head>
+
+<body>
+<section layout:fragment="content">
+    <div>
+        <h1 class="mb-4">Quản lý sản phẩm</h1>
+        <a href="/admin/san-pham/them" class="btn btn-primary mb-3">Thêm sản phẩm</a>
+        <form th:action="@{/admin/san-pham/ap-dung-giam-gia-nhieu}" method="post">
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <select name="dotGiamGiaId" class="form-select" required>
+                        <option value="">-- Chọn đợt giảm giá --</option>
+                        <option th:each="dgg : ${dsDotGiamGia}" th:value="${dgg.id}" th:text="${dgg.ten}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-success">Áp dụng giảm giá</button>
+                </div>
+            </div>
+        </form>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mt-3 mx-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Thông báo thành công -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show mt-3 mx-3" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <table id="productTable" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Mã</th>
+                <th>Tên</th>
+                <th>Mô tả</th>
+                <th>Ngày tạo</th>
+                <th>Ngày sửa</th>
+                <th>Trạng thái</th>
+                <th>Chất liệu</th>
+                <th>Danh mục</th>
+                <th>Thương hiệu</th>
+                <th>Xuất xứ</th>
+                <th>Kiểu dáng</th>
+                <th>Loại thú</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="sp : ${list}">
+                <td th:text="${sp.id}"></td>
+                <td th:text="${sp.ma}"></td>
+                <td th:text="${sp.ten}"></td>
+                <td th:text="${sp.moTa}"></td>
+                <td th:text="${sp.ngayTao}"></td>
+                <td th:text="${sp.ngaySua}"></td>
+                <td th:text="${sp.trangThai ? 'Đang hoạt động' : 'Ngừng bán'}"></td>
+                <td th:text="${sp.chatLieu.ten}"></td>
+                <td th:text="${sp.danhMuc.ten}"></td>
+                <td th:text="${sp.thuongHieu.ten}"></td>
+                <td th:text="${sp.xuatXu.ten}"></td>
+                <td th:text="${sp.kieuDang.ten}"></td>
+                <td th:text="${sp.loaiThu.ten}"></td>
+                <td>
+                    <a th:href="@{'/admin/san-pham/sua/' + ${sp.id}}" class="btn btn-sm btn-warning">Sửa</a>
+                    <a th:href="@{'/admin/san-pham/xem/' + ${sp.id}}" class="btn btn-sm btn-info">Xem</a>
+                    <a th:href="@{'/admin/san-pham/xoa/' + ${sp.id}}" class="btn btn-sm btn-danger"
+                       onclick="return confirm('Bạn có chắc muốn xoá sản phẩm này?')">Xoá</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#productTable').DataTable();
+        });
+    </script>
+</section>
+</body>
+</html>

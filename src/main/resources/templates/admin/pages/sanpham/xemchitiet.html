@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<head>
+    <title>Chi tiết sản phẩm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .mau-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .mau-button {
+            display: inline-block;
+            padding: 10px 15px;
+            border: 1px solid #aaa;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .mau-button:hover {
+            opacity: 0.8;
+        }
+
+        /* Chữ màu đen nếu nền sáng */
+        .mau-button[style*="yellow"],
+        .mau-button[style*="white"] {
+            color: black;
+        }
+
+        .btn-them-mau {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 2px dashed #999;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            min-width: 100px;
+            text-align: center;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .btn-them-mau:hover {
+            background-color: #e9ecef;
+        }
+
+        .chi-tiet-block {
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .btn-quay-lai {
+            border-radius: 20px;
+            padding: 10px 20px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #ccc;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            transition: 0.3s;
+        }
+
+        .btn-quay-lai:hover {
+            background-color: #e2e6ea;
+            color: #000;
+            text-decoration: none;
+        }
+        .btn-quay-lai {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            border-radius: 20px;
+            padding: 10px 20px;
+            box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+            border: 1px solid #ccc;
+            font-weight: bold;
+            background-color: #f8f9fa;
+            z-index: 999;
+            transition: 0.3s ease;
+        }
+
+        .btn-quay-lai:hover {
+            background-color: #e2e6ea;
+            color: #000;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+
+<body>
+<section layout:fragment="content">
+
+    <div>
+
+        <h3 class="mb-4">Các biến thể đã có</h3>
+
+        <!-- Form cập nhật đợt giảm giá -->
+
+        <!-- Bảng chi tiết sản phẩm -->
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Chọn</th>
+                <th>Màu</th>
+                <th>Size</th>
+                <th>Số lượng</th>
+                <th>Giá bán chưa sale</th>
+                <th>Giá nhập</th>
+                <th>Giá bán</th>
+                <th>Đang áp dụng</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ct : ${dsChiTietSanPham}">
+                <td><input type="checkbox" name="chiTietIds" th:value="${ct.id}" /></td>
+                <td th:text="${ct.mauSac.ten}"></td>
+                <td th:text="${ct.size.ten}"></td>
+                <td th:text="${ct.soLuong}"></td>
+                <td th:text="${ct.giaGoc}"></td>
+                <td th:text="${ct.giaNhap}"></td>
+                <td th:text="${ct.giaBan}"></td>
+                <td th:text="${ct.dotGiamGia != null ? ct.dotGiamGia.ten : 'Không'}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Thêm màu -->
+        <h4 class="mt-5">Chọn màu để thêm biến thể còn thiếu:</h4>
+        <div class="mau-wrapper mb-3">
+            <div th:each="mau : ${cacMau}">
+                <a th:href="@{/admin/san-pham/chitietsanpham/them(id=${sanPham.id}, mauId=${mau.id})}"
+                   class="mau-button"
+                   th:style="'background-color:' + ${mau.ten}"
+                   th:text="${mau.ten}"></a>
+            </div>
+
+            <!-- Nút thêm màu mới -->
+            <a th:href="@{/admin/san-pham/xem/{id}(id=${sanPham.id}, themMau=true)}" class="btn-them-mau">+</a>
+        </div>
+
+        <!-- Form thêm màu mới -->
+        <div th:if="${themMau == true}">
+            <form method="post" th:action="@{/admin/san-pham/them-mau}">
+                <input type="hidden" name="sanPhamId" th:value="${sanPham.id}" />
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <input type="text" name="maMau" class="form-control" placeholder="Mã màu (VD: MAU01)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="tenMau" class="form-control" placeholder="Tên màu (VD: red)" />
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary btn-sm">Lưu</button>
+                        <a th:href="@{/admin/san-pham/xem/{id}(id=${sanPham.id})}" class="btn btn-secondary btn-sm">Hủy</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Form thêm biến thể -->
+        <!-- ======================= THÊM BIẾN THỂ ======================= -->
+        <form th:action="@{/admin/san-pham/chitietsanpham/them(sanPhamId=${sanPham.id})}"
+              th:object="${form}"
+              th:if="${form.chiTietList.size() > 0}"
+              class="mt-4"
+              method="post">
+            <h5 class="fw-bold mb-3">
+                Thêm biến thể cho màu:
+                <span th:text="${mauDangChon.ten}"></span>
+            </h5>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Size</th>
+                        <th>Giá gốc</th>
+                        <th>Giá nhập</th>
+                        <th>Số lượng</th>
+                        <th>Xoá</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="ct,iter : *{chiTietList}">
+                        <!-- Số thứ tự -->
+                        <td th:text="${iter.index + 1}"></td>
+
+                        <!-- Tên size hiển thị -->
+                        <td th:text="${ct.size.ten}"></td>
+
+                        <!-- hidden id SP | size | màu để Spring bind đúng -->
+                        <input type="hidden"
+                               th:field="*{chiTietList[__${iter.index}__].sanPham.id}" />
+                        <input type="hidden"
+                               th:field="*{chiTietList[__${iter.index}__].mauSac.id}" />
+                        <input type="hidden"
+                               th:field="*{chiTietList[__${iter.index}__].size.id}" />
+
+                        <!-- Giá & số lượng -->
+                        <td>
+                            <input type="number" min="0" class="form-control form-control-sm text-end"
+                                   th:field="*{chiTietList[__${iter.index}__].giaGoc}" required />
+                        </td>
+                        <td>
+                            <input type="number" min="0" class="form-control form-control-sm text-end"
+                                   th:field="*{chiTietList[__${iter.index}__].giaNhap}" required />
+                        </td>
+                        <td>
+                            <input type="number" min="0" class="form-control form-control-sm text-end"
+                                   th:field="*{chiTietList[__${iter.index}__].soLuong}" required />
+                        </td>
+
+                        <!-- Nút xoá hàng -->
+                        <td>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="this.closest('tr').remove()">
+                                &times;
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">Lưu tất cả</button>
+                <a th:href="@{/admin/san-pham/xem/{id}(id=${sanPham.id})}" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+        <!-- ============================================================ -->
+
+
+        <!-- Nút quay lại -->
+        <a th:href="@{/admin/san-pham/hien_thi}" class="btn btn-light btn-quay-lai">← Quay lại</a>
+
+    </div>
+
+    <script>
+        function xoaBienThe(button) {
+            const block = button.closest('.chi-tiet-block');
+            if (block) block.remove();
+        }
+    </script>
+
+</section>
+</body>
+</html>

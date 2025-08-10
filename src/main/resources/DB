@@ -1,0 +1,340 @@
+USE DATN_SD31_1
+
+CREATE TABLE nhan_vien (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    ngay_sinh DATE ,
+    so_dien_thoai NVARCHAR(20) ,
+    ngay_tham_gia DATE ,
+    chung_minh_thu NVARCHAR(20) ,
+    gioi_tinh BIT ,
+    anh NVARCHAR(MAX) ,
+    email NVARCHAR(100) ,
+    mat_khau NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_sua DATE  DEFAULT GETDATE(),
+    ngay_tao DATE  DEFAULT GETDATE(),
+    chuc_vu NVARCHAR(50) ,
+    trang_thai BIT 
+);
+
+CREATE TABLE khach_hang (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    ngay_sinh DATE ,
+    so_dien_thoai NVARCHAR(20) ,
+    ngay_tham_gia DATE ,
+    gioi_tinh BIT ,
+    email NVARCHAR(100) ,
+    mat_khau NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_sua DATE  DEFAULT GETDATE(),
+    ngay_tao DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+
+CREATE TABLE danh_muc (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+
+CREATE TABLE chat_lieu (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+
+CREATE TABLE thuong_hieu (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+
+CREATE TABLE kieu_dang (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+
+CREATE TABLE xuat_xu (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+
+CREATE TABLE san_pham (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT ,
+    mo_ta NVARCHAR(MAX) ,
+    chat_lieu_id INT ,
+    danh_muc_id INT ,
+    kieu_dang_id INT ,
+    thuong_hieu_id INT ,
+    xuat_xu_id INT ,
+    FOREIGN KEY (chat_lieu_id) REFERENCES chat_lieu(id),
+    FOREIGN KEY (danh_muc_id) REFERENCES danh_muc(id),
+    FOREIGN KEY (kieu_dang_id) REFERENCES kieu_dang(id),
+    FOREIGN KEY (thuong_hieu_id) REFERENCES thuong_hieu(id),
+    FOREIGN KEY (xuat_xu_id) REFERENCES xuat_xu(id),
+    FOREIGN KEY (nguoi_tao) REFERENCES nhan_vien(id),
+);
+
+
+CREATE TABLE size (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+
+CREATE TABLE loai_thu (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+
+CREATE TABLE mau_sac (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT 
+);
+CREATE TABLE phieu_giam_gia (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT ,
+    nhan_vien_id INT ,
+    loai_phieu_giam_gia NVARCHAR(50) ,
+    ngay_bat_dau DATE ,
+    ngay_ket_thuc DATE ,
+    muc_do DECIMAL(5,2) ,
+    giam_toi_da DECIMAL(18,2) ,
+    dieu_kien DECIMAL(18,2) ,
+    so_luong_ton INT ,
+    FOREIGN KEY (nhan_vien_id) REFERENCES nhan_vien(id)
+);
+
+CREATE TABLE dot_giam_gia (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT ,
+    gia_tri_dot_giam_gia DECIMAL(5,2) ,
+    ngay_bat_dau DATE ,
+    ngay_ket_thuc DATE ,
+    loai NVARCHAR(50) ,
+    FOREIGN KEY (nguoi_tao) REFERENCES nhan_vien(id)
+);
+CREATE TABLE thanh_toan (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    phuong_thuc NVARCHAR(100) ,
+    tien_mat DECIMAL(18,2) ,
+    chuyen_khoan DECIMAL(18,2) ,
+    tong_tien DECIMAL(18,2) ,
+    mo_ta NVARCHAR(MAX) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT ,
+);
+CREATE TABLE chi_tiet_san_pham (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ten_ct NVARCHAR(200) ,
+    san_pham_id INT ,
+    size_id INT ,
+    mau_sac_id INT ,
+    loai_thu_id INT ,
+    gia_ban DECIMAL(18,2) ,
+    gia_nhap DECIMAL(18,2) ,
+    QR_code NVARCHAR(100) ,
+    mo_ta NVARCHAR(MAX) ,
+    so_luong INT ,
+    ngay_tao DATE ,
+    ngay_sua DATE ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ghi_chu NVARCHAR(MAX) ,
+    trang_thai BIT ,
+    FOREIGN KEY (san_pham_id) REFERENCES san_pham(id),
+    FOREIGN KEY (size_id) REFERENCES size(id),
+    FOREIGN KEY (mau_sac_id) REFERENCES mau_sac(id),
+    FOREIGN KEY (loai_thu_id) REFERENCES loai_thu(id)
+);
+
+CREATE TABLE hoa_don (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT ,
+    thanh_toan_id INT ,
+    khach_hang_id INT ,
+    nhan_vien_id INT ,
+    phieu_giam_gia_id INT ,
+    ngay_mua DATE ,
+    gia_goc DECIMAL(18,2) ,
+    gia_giam_gia DECIMAL(18,2) ,
+    thanh_tien DECIMAL(18,2) ,
+    loai_hoa_don NVARCHAR(50) ,
+    ten_nguoi_nhan NVARCHAR(100) ,
+    so_dien_thoai NVARCHAR(20) ,
+    email NVARCHAR(100) ,
+    dia_chi NVARCHAR(255) ,
+    ghi_chu NVARCHAR(MAX) ,
+    tien_van_chuyen DECIMAL(18,2) ,
+    FOREIGN KEY (thanh_toan_id) REFERENCES thanh_toan(id),
+    FOREIGN KEY (khach_hang_id) REFERENCES khach_hang(id),
+    FOREIGN KEY (nhan_vien_id) REFERENCES nhan_vien(id),
+    FOREIGN KEY (phieu_giam_gia_id) REFERENCES phieu_giam_gia(id)
+);
+
+
+CREATE TABLE hoa_don_chi_tiet (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT ,
+    hoa_don_id INT ,
+    chi_tiet_san_pham_id INT ,
+    gia_sau_giam DECIMAL(18,2) ,
+    gia_giam DECIMAL(18,2) ,
+    so_luong INT ,
+    FOREIGN KEY (hoa_don_id) REFERENCES hoa_don(id),
+    FOREIGN KEY (chi_tiet_san_pham_id) REFERENCES chi_tiet_san_pham(id)
+);
+
+
+
+
+
+CREATE TABLE chi_tiet_dot_giam_gia (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    trang_thai BIT ,
+    chi_tiet_sp_id INT ,
+    dot_giam_gia_id INT ,
+    gia_tri_dot_giam_gia DECIMAL(5,2) ,
+    FOREIGN KEY (chi_tiet_sp_id) REFERENCES chi_tiet_san_pham(id),
+    FOREIGN KEY (dot_giam_gia_id) REFERENCES dot_giam_gia(id)
+);
+
+CREATE TABLE hinh_anh (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    ma NVARCHAR(50) ,
+    ten NVARCHAR(100) ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT ,
+    san_pham_id INT ,
+    url NVARCHAR(MAX) ,
+    FOREIGN KEY (san_pham_id) REFERENCES san_pham(id)
+);
+
+CREATE TABLE gio_hang (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    trang_thai BIT ,
+    Khach_hang_id INT ,
+    chi_tiet_sp_id INT ,
+    thanh_tien DECIMAL(18,2) ,
+    so_luong INT ,
+    FOREIGN KEY (Khach_hang_id) REFERENCES khach_hang(id),
+    FOREIGN KEY (chi_tiet_sp_id) REFERENCES chi_tiet_san_pham(id)
+);
+
+
+CREATE TABLE sp_yeu_thich (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    san_pham_id INT ,
+    khach_hang_id INT ,
+    thoi_gian_them DATETIME ,
+    FOREIGN KEY (san_pham_id) REFERENCES san_pham(id),
+    FOREIGN KEY (khach_hang_id) REFERENCES khach_hang(id)
+);
+
+CREATE TABLE lich_su_hoa_don (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    nguoi_tao INT ,
+    nguoi_sua INT ,
+    ngay_tao DATE  DEFAULT GETDATE(),
+    ngay_sua DATE  DEFAULT GETDATE(),
+    trang_thai BIT ,
+    hoa_don_id INT ,
+    mo_ta_hoat_dong NVARCHAR(MAX) ,
+    FOREIGN KEY (hoa_don_id) REFERENCES hoa_don(id)
+);
+
+CREATE TABLE danh_gia (
+    id INT IDENTITY(1,1) PRIMARY KEY ,
+    san_pham_id INT ,
+    khach_hang_id INT ,
+    so_sao INT ,
+    noi_dung NVARCHAR(MAX) ,
+    hinh_anh NVARCHAR(MAX) ,
+    thoi_gian DATETIME ,
+    FOREIGN KEY (san_pham_id) REFERENCES san_pham(id),
+    FOREIGN KEY (khach_hang_id) REFERENCES khach_hang(id)
+);

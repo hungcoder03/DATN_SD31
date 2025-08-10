@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Thanh Toán</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .product-img {
+            width: 60px;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        /*CSS Thong bao*/
+        .custom-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 40px 12px 18px; /* hoặc: padding: 12px 18px; */
+            border-radius: 6px;
+            color: white;
+            z-index: 9999;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            min-width: 280px;
+            animation: fadeIn 0.3s ease-in-out;
+            overflow: hidden;
+        }
+
+
+        .custom-toast.success {
+            background-color: #28a745;
+        }
+
+        .custom-toast.error {
+            background-color: #dc3545;
+        }
+
+        .custom-toast .close-btn {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .custom-toast .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.7);
+            animation: progressBar 4s linear forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes progressBar {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /*CSS Thong bao*/
+
+    </style>
+</head>
+<body>
+
+<!-- Success Toast -->
+<div id="customSuccess" class="custom-toast success" style="display:none;">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    <span id="successMsg"></span>
+    <button class="close-btn" onclick="closeToast('customSuccess')">&times;</button>
+    <div class="progress-bar"></div>
+</div>
+
+<!-- Error Toast -->
+<div id="customError" class="custom-toast error" style="display:none;">
+    <i class="bi bi-x-circle-fill me-2"></i>
+    <span id="errorMsg"></span>
+    <button class="close-btn" onclick="closeToast('customError')">&times;</button>
+    <div class="progress-bar"></div>
+</div>
+
+<header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
+        <h1 class="text-2xl font-bold text-pink-600">D&C Fashions</h1>
+        <a href="/" class="text-sm text-gray-600 hover:text-pink-500">← Tiếp tục mua sắm</a>
+    </div>
+</header>
+
+<div class="container mt-5">
+    <h2 class="text-2xl font-bold text-pink-600 mb-4">🔒 Xác Nhận Thanh Toán</h2>
+
+    <!-- Sản phẩm được chọn -->
+    <div class="overflow-x-auto bg-white rounded-xl shadow-md mb-5">
+        <table class="min-w-full text-sm text-left">
+            <thead class="bg-pink-100 text-pink-700 uppercase text-xs">
+            <tr>
+                <th class="p-4">#</th>
+                <th class="p-4">Mã</th>
+                <th class="p-4">Ảnh</th>
+                <th class="p-4">Sản phẩm</th>
+                <th class="p-4">Size</th>
+                <th class="p-4">Màu</th>
+                <th class="p-4">Giá</th>
+                <th class="p-4">SL</th>
+                <th class="p-4">Tổng</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item, iterStat : ${selectedItems}" class="border-b hover:bg-pink-50 transition">
+                <td class="p-4" th:text="${iterStat.count}">1</td>
+                <td class="p-4" th:text="${item.chiTietSp.sanPham.ma}">1</td>
+                <td class="p-4">
+                    <img th:src="@{${item.chiTietSp.sanPham.hinhAnhs[0].url}}" class="w-16 h-16 rounded shadow" />
+                </td>
+                <td class="p-4 font-medium" th:text="${item.chiTietSp.sanPham.ten}">Tên</td>
+                <td class="p-4" th:text="${item.chiTietSp.size.ten}">Size</td>
+                <td class="p-4" th:text="${item.chiTietSp.mauSac.ten}">Màu</td>
+                <td class="p-4 " th:text="${#numbers.formatDecimal(item.chiTietSp.giaBan,0,'COMMA',0,'POINT')} + '₫'">0₫</td>
+                <td class="p-4 text-center" th:text="${item.soLuong}">1</td>
+                <td class="p-4 ext-red-500 font-semibold" th:text="${#numbers.formatDecimal(item.thanhTien,0,'COMMA',0,'POINT')} + '₫'">0₫</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tổng tiền -->
+    <div class="flex justify-end mb-4">
+        <h4 class="text-xl text-danger font-bold">
+            Tổng tiền hàng: <span th:text="${#numbers.formatDecimal(tongTien,0,'COMMA',0,'POINT')} + '₫'">0₫</span>
+        </h4>
+    </div>
+
+    <!-- Form thanh toán -->
+    <form th:action="@{/gio-hang/thanh-toan/xac-nhan}" method="post" class="bg-white p-4 rounded-xl shadow">
+        <th:block th:each="item : ${selectedItems}">
+            <input type="hidden" name="selectedId" th:value="${item.id}" />
+        </th:block>
+        <input type="hidden" name="tongTien" th:value="${tongTien}" />
+        <input type="hidden" id="loaiHoaDon" name="loaiHoaDon" value="Online" />
+        <input type="hidden" id="tienVanChuyenInput" name="tienVanChuyen" value="0" />
+        <input type="hidden" name="tenTinh" id="tenTinhHidden" />
+        <input type="hidden" name="tenHuyen" id="tenHuyenHidden" />
+        <input type="hidden" name="tenXa" id="tenXaHidden" />
+        <input type="hidden" name="tienGiam" id="tienGiamInput" value="0" />
+
+        <!-- Thông tin người nhận -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+                <input type="text" name="tenNguoiNhan" th:value="${khachHang.ten}" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                <input type="tel" name="soDienThoai" th:value="${khachHang.soDienThoai}" class="form-control" required pattern="[0-9]{9,11}" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" name="email" th:value="${khachHang.email}" class="form-control" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Ghi chú</label>
+                <textarea name="ghiChu" rows="1" class="form-control"></textarea>
+            </div>
+        </div>
+
+        <!-- Địa chỉ -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Tỉnh / Thành phố</label>
+                <select name="provinceId" id="provinceSelect" class="form-select">
+                    <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                    <option th:each="province : ${provinces}" th:value="${province.get('ProvinceID')}" th:text="${province.get('ProvinceName')}"></option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Quận / Huyện</label>
+                <select name="districtId" id="districtSelect" class="form-select">
+                    <option value="">-- Chọn Quận / Huyện --</option>
+                    <option th:each="district : ${districts}" th:value="${district['DistrictID']}" th:text="${district['DistrictName']}"></option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Phường / Xã</label>
+                <select name="wardId" id="wardSelect" class="form-select">
+                    <option value="">-- Chọn Phường / Xã --</option>
+                    <option th:each="ward : ${wards}" th:value="${ward.get('WardCode')}" th:text="${ward.get('WardName')}"></option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Phương thức thanh toán -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">Phương thức thanh toán <span class="text-danger">*</span></label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="pttt_cod" value="tien_mat" required>
+                <label class="form-check-label" for="pttt_cod">💵 Tiền mặt khi nhận hàng (COD)</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="pttt_ck" value="chuyen_khoan">
+                <label class="form-check-label" for="pttt_ck">🏦 Chuyển khoản ngân hàng</label>
+            </div>
+        </div>
+
+        <!-- Mã giảm giá -->
+        <div class="mb-3">
+            <label class="form-label">Mã giảm giá</label>
+            <select id="phieuGiamGia" name="phieuGiamGia" class="form-select">
+                <option th:each="phieu : ${danhSachPhieuGiamGia}"
+                        th:value="${phieu.ma}"
+                        th:selected="${phieu.ma == selectedVoucherCode}"
+                        th:text="${phieu.ten + ' - Giảm ' + phieu.mucDo}">
+                </option>
+
+            </select>
+        </div>
+
+        <!-- Tóm tắt thanh toán -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-4 shadow-sm border border-gray-200">
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Tổng tiền hàng:</span>
+                    <strong th:text="${#numbers.formatDecimal(tongTien,0,'COMMA',0,'POINT')} + '₫'">0₫</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Giảm giá:</span>
+                    <strong id="tienGiamText" th:text="${#numbers.formatDecimal(tienGiam,0,'COMMA',0,'POINT')} + '₫'">0₫</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Phí vận chuyển:</span>
+                    <strong id="tienVanChuyenText" th:text="${#numbers.formatDecimal(shippingFee,0,'COMMA',0,'POINT')} + '₫'">0₫</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between bg-light text-danger fw-bold fs-5">
+                    <span>Tiền cần thanh toán:</span>
+                    <strong id="tongThanhToanText" th:text="${tongThanhToan} + '₫'">0₫</strong>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Nút hành động -->
+        <div class="d-flex justify-content-end gap-3">
+            <a th:href="@{/gio-hang/hien_thi}" class="btn btn-outline-secondary">← Quay lại giỏ hàng</a>
+            <button type="submit" class="btn btn-success btn-lg">✅ Xác nhận thanh toán</button>
+        </div>
+    </form>
+</div>
+
+
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        // Khai báo phần tử
+        const phieuGiamGia = document.getElementById("phieuGiamGia");
+        const tienGiamText = document.getElementById("tienGiamText");
+        const tongThanhToanText = document.getElementById("tongThanhToanText");
+        const provinceSelect = document.querySelector('select[name="provinceId"]');
+        const districtSelect = document.querySelector('select[name="districtId"]');
+        const wardSelect = document.querySelector('select[name="wardId"]');
+        const shippingFeeText = document.getElementById("tienVanChuyenText");
+        const shippingFeeInput = document.getElementById("tienVanChuyenInput");
+
+        // Các input hidden lưu tên địa chỉ
+        const tenTinhHidden = document.getElementById("tenTinhHidden");
+        const tenHuyenHidden = document.getElementById("tenHuyenHidden");
+        const tenXaHidden = document.getElementById("tenXaHidden");
+
+        // Tổng tiền gốc từ server
+        const tongTien = /*[[${tongTien}]]*/ 0;
+        let currentDiscount = 0;
+        let currentShippingFee = 0;
+
+        function updateTotalPay() {
+            const total = tongTien - currentDiscount + currentShippingFee;
+            tongThanhToanText.innerText = total.toLocaleString('vi-VN') + "₫";
+        }
+
+        function clearSelect(select, placeholder = "-- Chọn --") {
+            if (!select) return;
+            select.innerHTML = `<option value="">${placeholder}</option>`;
+        }
+
+        function populateSelect(select, items, valueKey, textKey) {
+            if (!select) return;
+            clearSelect(select);
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[valueKey];
+                option.textContent = item[textKey];
+                select.appendChild(option);
+            });
+        }
+
+        // Mã giảm giá
+        phieuGiamGia.addEventListener("change", function () {
+            const maPhieu = this.value;
+            if (!maPhieu) {
+                currentDiscount = 0;
+                tienGiamText.innerText = "0₫";
+                document.getElementById("tienGiamInput").value = 0; // ✅ Gán lại
+                updateTotalPay();
+                return;
+            }
+
+            fetch(`/gio-hang/phieu-giam-gia/tien-giam?maPhieu=${maPhieu}&tongTien=${tongTien}`)
+                .then(res => res.json())
+                .then(tienGiam => {
+                    currentDiscount = tienGiam;
+                    tienGiamText.innerText = tienGiam.toLocaleString('vi-VN') + "₫";
+                    document.getElementById("tienGiamInput").value = tienGiam; // ✅ Gán lại
+                    updateTotalPay();
+                })
+                .catch(() => {
+                    currentDiscount = 0;
+                    tienGiamText.innerText = "0₫";
+                    document.getElementById("tienGiamInput").value = 0; // ✅ Gán lại
+                    updateTotalPay();
+                });
+        });
+
+
+        // Khi chọn tỉnh
+        provinceSelect.addEventListener("change", function () {
+            const provinceId = this.value;
+            const selectedText = this.options[this.selectedIndex]?.text || "";
+            tenTinhHidden.value = selectedText;
+
+            clearSelect(districtSelect, "-- Chọn Quận / Huyện --");
+            clearSelect(wardSelect, "-- Chọn Phường / Xã --");
+            tenHuyenHidden.value = "";
+            tenXaHidden.value = "";
+
+            currentShippingFee = 0;
+            shippingFeeText.innerText = "0₫";
+            shippingFeeInput.value = 0;
+            updateTotalPay();
+
+            if (!provinceId) return;
+
+            fetch(`/gio-hang/thanh-toan/location?provinceId=${provinceId}`)
+                .then(res => res.json())
+                .then(districts => populateSelect(districtSelect, districts, 'DistrictID', 'DistrictName'))
+                .catch(err => console.error('Lỗi lấy districts:', err));
+        });
+
+        // Khi chọn quận/huyện
+        districtSelect.addEventListener("change", function () {
+            const districtId = this.value;
+            const selectedText = this.options[this.selectedIndex]?.text || "";
+            tenHuyenHidden.value = selectedText;
+
+            clearSelect(wardSelect, "-- Chọn Phường / Xã --");
+            tenXaHidden.value = "";
+
+            currentShippingFee = 0;
+            shippingFeeText.innerText = "0₫";
+            shippingFeeInput.value = 0;
+            updateTotalPay();
+
+            if (!districtId) return;
+
+            fetch(`/gio-hang/thanh-toan/location?districtId=${districtId}`)
+                .then(res => res.json())
+                .then(wards => populateSelect(wardSelect, wards, 'WardCode', 'WardName'))
+                .catch(err => console.error('Lỗi lấy wards:', err));
+        });
+
+        // Khi chọn phường/xã
+        wardSelect.addEventListener("change", function () {
+            const wardCode = this.value;
+            const selectedText = this.options[this.selectedIndex]?.text || "";
+            tenXaHidden.value = selectedText;
+
+            updateShippingFee();
+        });
+
+        function updateShippingFee() {
+            const districtId = districtSelect?.value;
+            const wardCode = wardSelect?.value;
+
+            if (!districtId || !wardCode) {
+                currentShippingFee = 0;
+                shippingFeeText.innerText = "0₫";
+                shippingFeeInput.value = 0;
+                updateTotalPay();
+                return;
+            }
+
+            fetch(`/gio-hang/thanh-toan/shipping-fee?districtId=${districtId}&wardCode=${wardCode}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Không thể lấy phí vận chuyển");
+                    return res.json();
+                })
+                .then(fee => {
+                    currentShippingFee = fee;
+                    shippingFeeText.innerText = fee.toLocaleString('vi-VN') + "₫";
+                    shippingFeeInput.value = fee;
+                    updateTotalPay();
+                })
+                .catch(err => {
+                    console.error("Lỗi tính phí ship:", err);
+                    currentShippingFee = 0;
+                    shippingFeeText.innerText = "Không thể tính";
+                    shippingFeeInput.value = 0;
+                    updateTotalPay();
+                });
+        }
+
+        // Khởi tạo lần đầu
+        tienGiamText.innerText = "0₫";
+        shippingFeeText.innerText = "0₫";
+        tongThanhToanText.innerText = tongTien.toLocaleString('vi-VN') + "₫";
+
+        function autoSelectBestVoucher() {
+            const currentValue = phieuGiamGia.value;
+            if (currentValue) return; // Đã có mã được chọn => không auto nữa
+
+            const options = [...phieuGiamGia.options].filter(o => o.value !== "");
+            if (options.length === 0) return;
+
+            let bestVoucher = null;
+            let maxDiscount = 0;
+
+            const promises = options.map(option => {
+                const maPhieu = option.value;
+                return fetch(`/gio-hang/phieu-giam-gia/tien-giam?maPhieu=${maPhieu}&tongTien=${tongTien}`)
+                    .then(res => res.json())
+                    .then(discount => {
+                        if (discount > maxDiscount) {
+                            maxDiscount = discount;
+                            bestVoucher = maPhieu;
+                        }
+                    }).catch(() => {});
+            });
+
+            Promise.all(promises).then(() => {
+                if (bestVoucher) {
+                    phieuGiamGia.value = bestVoucher;
+
+                    // ⚡ GỌI TÍNH GIẢM GIÁ TỰ ĐỘNG
+                    phieuGiamGia.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        autoSelectBestVoucher();
+        // Nếu đã có mã giảm giá được chọn sẵn từ server
+        if (phieuGiamGia.value) {
+            phieuGiamGia.dispatchEvent(new Event('change'));
+        }
+
+    });
+
+</script>
+
+<!--  Thong bao-->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const successMsg = [[${success} == null ? 'null' : '' + ${success} + '']];
+    const errorMsg = [[${error} == null ? 'null' : '' + ${error} + '']];
+
+    function showCustomToast(type, message) {
+        const toastId = type === 'success' ? 'customSuccess' : 'customError';
+        const toastEl = document.getElementById(toastId);
+        const msgEl = document.getElementById(type === 'success' ? 'successMsg' : 'errorMsg');
+        const progressBar = toastEl.querySelector('.progress-bar');
+
+        msgEl.textContent = message;
+        toastEl.style.display = 'block';
+
+        // Khởi động lại animation nếu toast được hiển thị lại
+        progressBar.style.animation = 'none';
+        void progressBar.offsetWidth; // force reflow
+        progressBar.style.animation = null;
+
+        // Auto close sau 4s
+        setTimeout(() => {
+            toastEl.style.display = 'none';
+        }, 4000);
+    }
+
+    function closeToast(toastId) {
+        const toastEl = document.getElementById(toastId);
+        toastEl.style.display = 'none';
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (successMsg && successMsg !== "null") showCustomToast('success', successMsg);
+        if (errorMsg && errorMsg !== "null") showCustomToast('error', errorMsg);
+    });
+    /*]]>*/
+</script>
+<!--  Thong bao-->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
