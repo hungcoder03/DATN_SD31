@@ -5,17 +5,20 @@ import com.main.datn_sd31.entity.MauSac;
 import com.main.datn_sd31.entity.Size;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import jakarta.persistence.criteria.Predicate;
 
 @Repository
-public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,Integer> {
+public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,Integer> , JpaSpecificationExecutor<ChiTietSanPham> {
     @Query("""
         select n from ChiTietSanPham n where n.sanPham.id = :id
     """)
@@ -91,6 +94,34 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
     @Query("SELECT DISTINCT ctsp.size FROM ChiTietSanPham ctsp WHERE ctsp.sanPham.id = :sanPhamId AND ctsp.mauSac.ten = :tenMau")
     List<Size> findDistinctSizeBySanPhamIdAndMauSacTen(@Param("sanPhamId") Integer sanPhamId, @Param("tenMau") String tenMau);
 
-    List<ChiTietSanPham> findBySanPham_TenContainingIgnoreCase(String keyword);
+    @Query("""
+        SELECT ct 
+        FROM ChiTietSanPham ct
+        JOIN ct.sanPham sp
+        JOIN ct.mauSac ms
+        JOIN ct.size sz
+        WHERE LOWER(CONCAT(sp.ten, ' ', ms.ten, ' ', sz.ten)) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    """)
+    List<ChiTietSanPham> searchByKeyword(@Param("keyword") String keyword);
+
+    default List<ChiTietSanPham> searchByKeywordSplit(String keyword) {
+        String[] words = keyword.trim().toLowerCase().split("\\s+");
+        return findAll((root, query, cb) -> {
+            var sp = root.join("sanPham");
+            var ms = root.join("mauSac");
+            var sz = root.join("size");
+
+            var concat = cb.concat(cb.concat(sp.get("ten"), " "), cb.concat(ms.get("ten"), " "));
+            var finalConcat = cb.lower(cb.concat(concat, sz.get("ten")));
+
+            Predicate[] predicates = Arrays.stream(words)
+                    .map(w -> cb.like(finalConcat, "%" + w + "%"))
+                    .toArray(Predicate[]::new);
+
+            return cb.and(predicates);
+        });
+    }
+
+
 }
 

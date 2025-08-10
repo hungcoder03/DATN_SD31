@@ -77,17 +77,18 @@
                         <th class="p-3">Mã</th>
                         <th class="p-3">Ảnh</th>
                         <th class="p-3">Tên Sản phẩm</th>
+                        <th class="p-3">Giá</th>
                     </tr>
                     </thead>
                     <tbody id="ketQuaTimSanPham">
-                    <tr th:each="sp, stat : ${dsSanPham}">
-                        <td class="p-3" th:text="${stat.index + 1}">1</td>
-                        <td class="p-3" th:text="${sp.ma}">SP001</td>
-                        <td class="p-3">
-                            <img th:src="@{${sp.hinhAnhs[0]?.url}}" alt="Ảnh" class="w-12 h-12 object-cover rounded">
-                        </td>
-                        <td class="p-3" th:text="${sp.ten}">SP001</td>
-                    </tr>
+<!--                    <tr th:each="sp, stat : ${dsSanPham}">-->
+<!--                        <td class="p-3" th:text="${stat.index + 1}">1</td>-->
+<!--                        <td class="p-3" th:text="${sp.ma}">SP001</td>-->
+<!--                        <td class="p-3">-->
+<!--                            <img th:src="@{${sp.hinhAnhs[0]?.url}}" alt="Ảnh" class="w-12 h-12 object-cover rounded">-->
+<!--                        </td>-->
+<!--                        <td class="p-3" th:text="${sp.ten}">SP001</td>-->
+<!--                    </tr>-->
                     </tbody>
                 </table>
 
@@ -110,12 +111,13 @@
                     </li>
 
                     <!-- Thêm mới nếu chưa đủ 10 giỏ -->
-                    <li class="nav-item" th:if="${tatCaGio.size() < 10}">
+                    <li class="nav-item" th:if="${nextCartKey != null}">
                         <a class="nav-link text-success"
-                           th:href="@{/admin/ban-hang(cartKey='gio-' + ${tatCaGio.size() + 1})}">
+                           th:href="@{/admin/ban-hang(cartKey=${nextCartKey})}">
                             + Giỏ mới
                         </a>
                     </li>
+
                 </ul>
                 <div class="card p-3">
                     <h4>Giỏ hàng</h4>
@@ -269,7 +271,7 @@
 
                         <input type="hidden" name="cartKey" th:value="${cartKey}" />
 
-                        <button class="btn btn-success w-100 mt-2">Thanh toán</button>
+                        <button type="submit" class="btn btn-success w-100 mt-2" id="btnThanhToan">Thanh toán</button>
                     </form>
 <!--                    <div class="mb-3">-->
 <!--                        <button type="button" class="btn btn-outline-primary" id="btnTaoDonVanChuyen">🚀 Tạo đơn vận chuyển</button>-->
@@ -344,6 +346,12 @@
                 }
             });
         });
+        function updateDiaChiHienThi() {
+            document.getElementById("hiddenTinh").value = document.getElementById("province").options[document.getElementById("province").selectedIndex].text;
+            document.getElementById("hiddenHuyen").value = document.getElementById("district").options[document.getElementById("district").selectedIndex].text;
+            document.getElementById("hiddenXa").value = document.getElementById("ward").options[document.getElementById("ward").selectedIndex].text;
+        }
+
     </script>
 
     <!-- Script -->
@@ -491,6 +499,7 @@
                             <img src="${sp.hinhAnh}" alt="Ảnh" class="w-12 h-12 object-cover rounded">
                         </td>
                         <td class="p-3">${sp.tenSanPham} - ${sp.mauSac} / ${sp.kichThuoc} - SL: ${sp.soLuong}</td>
+                        <td class="p-3">${sp.giaBan}</td>
                         <td class="p-3">
                             <button class="btn btn-primary btn-them-gio"
                                     onclick="themVaoGioHang('${sp.id}')">
@@ -597,7 +606,21 @@
             });
         });
     </script>
+    <script>
+        document.getElementById("btnThanhToan").addEventListener("click", function(event) {
+            let tinh = document.getElementById("province").selectedOptions[0]?.text || "";
+            let huyen = document.getElementById("district").selectedOptions[0]?.text || "";
+            let xa = document.getElementById("ward").selectedOptions[0]?.text || "";
 
+            let diaChi = `${xa}, ${huyen}, ${tinh}`;
+            let tongTien = document.getElementById("tongTien")?.innerText || "0";
+
+            let xacNhan = confirm(`Xác nhận thanh toán\nTổng tiền: ${tongTien}`);
+            if (!xacNhan) {
+                event.preventDefault(); // Ngăn form submit nếu bấm Hủy
+            }
+        });
+    </script>
 
 </section>
 </body>

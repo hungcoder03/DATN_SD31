@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -119,6 +120,9 @@ public class GiohangController {
         gh.setTrangThai(0);
         gh.setThanhTien(chiTiet.getGiaBan().multiply(BigDecimal.valueOf(soluong)));
 
+        if(chiTiet.getSoLuong()<soluong){
+            model.addAttribute("messa", "Số lượng không đủ");
+        }
         giohangreposiroty.save(gh);
         return "redirect:/gio-hang/hien_thi";
     }
@@ -192,7 +196,20 @@ public class GiohangController {
                         .multiply(BigDecimal.valueOf(item.getSoLuong())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        model.addAttribute("danhSachPhieuGiamGia", phieugiamgiarepository.findAll());
+        LocalDate today = LocalDate.now();
+
+        List<PhieuGiamGia> dsPhieuHopLe = phieugiamgiarepository.findAll().stream()
+                // Lọc trạng thái true
+                .filter(p -> Boolean.TRUE.equals(p.getTrangThai()))
+                // Lọc ngày hiệu lực: ngày hiện tại >= ngày bắt đầu (nếu có) và <= ngày kết thúc (nếu có)
+                .filter(p -> {
+                    boolean afterStart = p.getNgayBatDau() == null || !today.isBefore(p.getNgayBatDau());
+                    boolean beforeEnd = p.getNgayKetThuc() == null || !today.isAfter(p.getNgayKetThuc());
+                    return afterStart && beforeEnd;
+                })
+                .collect(Collectors.toList());
+
+        model.addAttribute("danhSachPhieuGiamGia", dsPhieuHopLe);
         model.addAttribute("selectedItems", selectedItems);
         model.addAttribute("tongTien", tongTien);
         model.addAttribute("khachHang", kh);
@@ -321,6 +338,14 @@ public class GiohangController {
             hoadonCTreposiroty.save(hdct);
         }
 
+        if (hoaDon.getPhieuGiamGia() != null) {
+            PhieuGiamGia phieu = hoaDon.getPhieuGiamGia();
+            if (phieu.getSoLuongTon() != null && phieu.getSoLuongTon() > 0) {
+                phieu.setSoLuongTon(phieu.getSoLuongTon() - 1);
+                phieugiamgiarepository.save(phieu);
+            }
+        }
+
         // Xóa khỏi giỏ hàng
         System.out.println("id san pham gio hang"+gioHangChiTiets);
         giohangreposiroty.deleteAll(gioHangChiTiets);
@@ -379,18 +404,34 @@ public class GiohangController {
         PhieuGiamGia phieu = phieugiamgiarepository.findByMa(maPhieu);
         if (phieu == null) return ResponseEntity.ok(BigDecimal.ZERO);
 
+        LocalDate today = LocalDate.now();
+
+        // Kiểm tra ngày hiệu lực
+        if (phieu.getNgayBatDau() != null && today.isBefore(phieu.getNgayBatDau())) {
+            return ResponseEntity.ok(BigDecimal.ZERO);
+        }
+        if (phieu.getNgayKetThuc() != null && today.isAfter(phieu.getNgayKetThuc())) {
+            return ResponseEntity.ok(BigDecimal.ZERO);
+        }
+
+        // Kiểm tra tổng tiền tối thiểu áp dụng giảm giá
+        if (phieu.getDieuKien() != null && tongTien.compareTo(phieu.getDieuKien()) < 0) {
+            return ResponseEntity.ok(BigDecimal.ZERO);
+        }
+
         BigDecimal tienGiam = BigDecimal.ZERO;
 
-        if (phieu.getLoaiPhieuGiamGia()==1) {
+        if (phieu.getLoaiPhieuGiamGia() == 1) {
             tienGiam = tongTien.multiply(phieu.getMucDo())
                     .divide(BigDecimal.valueOf(100));
             if (tienGiam.compareTo(phieu.getGiamToiDa()) > 0) {
                 tienGiam = phieu.getGiamToiDa();
             }
-        } else{
+        } else {
             tienGiam = phieu.getMucDo();
         }
 
         return ResponseEntity.ok(tienGiam);
     }
+
 }
