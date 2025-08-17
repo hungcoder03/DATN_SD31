@@ -180,10 +180,19 @@
                             <div class="col-md-6">
                                 <select class="form-select" name="maGiamGia">
                                     <option value="">-- Mã giảm giá --</option>
-                                    <option th:each="p : ${dsPhieuGiamGia}" th:value="${p.ma}"
-                                            th:text="${p.ma + '-' + (#numbers.formatDecimal(p.mucDo, 0, 'COMMA', 0, 'POINT')) + (p.loaiPhieuGiamGia == 1 ? '%' : 'đ') + ' - giảm tối đa:' + (#numbers.formatDecimal(p.giamToiDa, 0, 'COMMA', 0, 'POINT'))}">
+                                    <option th:each="p : ${dsPhieuGiamGia}"
+                                            th:value="${p.ma}"
+                                            th:selected="${phieuTotNhat != null and p.ma == phieuTotNhat.ma}"
+                                            th:text="${p.ma + ' - '
+                                            + (#numbers.formatDecimal(p.mucDo, 0, 'COMMA', 0, 'POINT'))
+                                            + (p.loaiPhieuGiamGia == 1 ? '%' : 'đ')
+                                            + (p.loaiPhieuGiamGia == 1
+                                                ? ' - giảm tối đa: ' + #numbers.formatDecimal(p.giamToiDa, 0, 'COMMA', 0, 'POINT')
+                                                : '')
+                                            + ' - SL: ' + p.soLuongTon}">
                                     </option>
                                 </select>
+
                             </div>
                             <div class="col-md-3">
                                 <button class="btn btn-secondary" type="submit">Áp dụng mã</button>
@@ -191,6 +200,7 @@
                         </div>
                     </form>
                 </div>
+
 
                 <!-- Thanh toán -->
                 <div class="card p-3">
@@ -222,8 +232,8 @@
                                 <input type="text" name="ten" class="form-control" id="ten" placeholder="Nhập tên người nhận">
                             </div>
                             <div class="mb-3">
-                                <label for="soDienThoai" class="form-label">Số điện thoại:</label>
-                                <input type="text" name="soDienThoai" class="form-control" id="soDienThoai" placeholder="Nhập số điện thoại">
+                                <label for="soDienThoaivc" class="form-label">Số điện thoại vận :</label>
+                                <input type="text" name="soDienThoaivc" class="form-control" id="soDienThoaivc" placeholder="Nhập số điện thoại vận chuyển">
                             </div>
 
                             <div class="mb-3">
@@ -232,6 +242,27 @@
                             </div>
                             <!-- Nút tạo đơn vận chuyển -->
 
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="soDienThoai" class="form-label">Số điện thoại khách hàng:</label>
+                            <div class="input-group">
+                                <input type="text" name="soDienThoai" id="soDienThoai"
+                                       class="form-control" list="dsSoDienThoai"
+                                       placeholder="Nhập hoặc chọn số điện thoại">
+
+                                <button type="button" class="btn btn-outline-primary"
+                                        data-bs-toggle="modal" data-bs-target="#modalThemKhachHang">
+                                    + Thêm KH
+                                </button>
+                            </div>
+
+                            <datalist id="dsSoDienThoai">
+                                <option th:each="kh : ${dsKhachHang}"
+                                        th:value="${kh.soDienThoai}"
+                                        th:text="${kh.ten}">
+                                </option>
+                            </datalist>
                         </div>
 
                         <div th:if="${maGiamGia != null}">
@@ -277,6 +308,33 @@
                     <!--                    <div class="mb-3">-->
                     <!--                        <button type="button" class="btn btn-outline-primary" id="btnTaoDonVanChuyen">🚀 Tạo đơn vận chuyển</button>-->
                     <!--                    </div>-->
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="modalThemKhachHang" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form th:action="@{/admin/ban-hang/them-khach-hang-nhanh}" method="post">
+                        <input type="hidden" name="cartKey" th:value="${cartKey}" />
+                        <div class="modal-header">
+                            <h5 class="modal-title">Thêm khách hàng mới</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-2">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" name="soDienThoai" class="form-control" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Tên khách hàng</label>
+                                <input type="text" name="ten" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Lưu</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -621,6 +679,42 @@
             if (!xacNhan) {
                 event.preventDefault(); // Ngăn form submit nếu bấm Hủy
             }
+        });
+    </script>
+    <script>
+        document.getElementById("formThemKhachHang").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch("/admin/khach-hang/them-nhanh", {
+                method: "POST",
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // 1. Đóng modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById("modalThemKhachHang"));
+                        modal.hide();
+
+                        // 2. Thêm option mới vào datalist
+                        const datalist = document.getElementById("dsSoDienThoai");
+                        const option = document.createElement("option");
+                        option.value = data.khachHang.soDienThoai;
+                        option.text = data.khachHang.ten;
+                        datalist.appendChild(option);
+
+                        // 3. Set input = số điện thoại vừa thêm
+                        document.getElementById("soDienThoai").value = data.khachHang.soDienThoai;
+                    } else {
+                        alert("Thêm khách hàng thất bại!");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Có lỗi xảy ra!");
+                });
         });
     </script>
 

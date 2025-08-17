@@ -217,14 +217,15 @@
         <div class="mb-3">
             <label class="form-label">Mã giảm giá</label>
             <select id="phieuGiamGia" name="phieuGiamGia" class="form-select">
+                <option value="">-- Chọn mã giảm giá --</option>
                 <option th:each="phieu : ${danhSachPhieuGiamGia}"
                         th:value="${phieu.ma}"
-                        th:selected="${phieu.ma == selectedVoucherCode}"
-                        th:text="${phieu.ten + ' - Giảm ' + phieu.mucDo}">
+                        th:selected="${phieuTotNhat != null and phieu.ma == phieuTotNhat.ma}"
+                        th:text="${phieu.ten + ' - Giảm ' + phieu.mucDo + (phieu.loaiPhieuGiamGia == 1 ? '%' : 'đ')}">
                 </option>
-
             </select>
         </div>
+
 
         <!-- Tóm tắt thanh toán -->
         <div class="bg-gray-50 rounded-lg p-4 mb-4 shadow-sm border border-gray-200">

@@ -228,6 +228,28 @@ public class GiohangController {
         return "redirect:/gio-hang/hien_thi";
     }
 
+    public PhieuGiamGia timPhieuTotNhat(List<PhieuGiamGia> dsPhieu, BigDecimal tongTien) {
+        return dsPhieu.stream()
+                .filter(p -> p.getNgayKetThuc().isAfter(LocalDate.now())) // còn hạn
+                .filter(p -> tongTien.compareTo(p.getDieuKien()) >= 0)    // đủ điều kiện
+                .max(Comparator.comparing(p -> {
+                    BigDecimal soTienGiamThucTe = BigDecimal.ZERO; // giá trị mặc định
+
+                    if (p.getLoaiPhieuGiamGia() == 1) {
+                        // Giảm theo %
+                        BigDecimal giamTheoPhanTram = tongTien.multiply(p.getMucDo())
+                                .divide(BigDecimal.valueOf(100));
+                        soTienGiamThucTe = giamTheoPhanTram.min(p.getGiamToiDa());
+                    } else if (p.getLoaiPhieuGiamGia() == 2) {
+                        // Giảm theo số tiền cố định
+                        soTienGiamThucTe = p.getMucDo();
+                    }
+
+                    return soTienGiamThucTe;
+                }))
+                .orElse(null);
+    }
+
     @GetMapping("/thanh-toan")
     public String hienThiTrangThanhToan(
             @RequestParam(value = "selectedId", required = false) List<Integer> selectedIds,
@@ -251,19 +273,14 @@ public class GiohangController {
 //        model.addAttribute("danhSachPhieuGiamGia", phieugiamgiarepository.findAll());
 
         LocalDate today = LocalDate.now();
-
-        List<PhieuGiamGia> dsPhieuHopLe = phieugiamgiarepository.findAll().stream()
-                // Lọc trạng thái true
-                .filter(p -> Boolean.TRUE.equals(p.getTrangThai()))
-                // Lọc ngày hiệu lực: ngày hiện tại >= ngày bắt đầu (nếu có) và <= ngày kết thúc (nếu có)
-                .filter(p -> {
-                    boolean afterStart = p.getNgayBatDau() == null || !today.isBefore(p.getNgayBatDau());
-                    boolean beforeEnd = p.getNgayKetThuc() == null || !today.isAfter(p.getNgayKetThuc());
-                    return afterStart && beforeEnd;
-                })
+        List<PhieuGiamGia> dsPhieuGiamGia = phieugiamgiarepository.findAll().stream()
+                .filter(phieu -> Boolean.TRUE.equals(phieu.getTrangThai()))
+                .filter(phieu -> phieu.getSoLuongTon() != null && phieu.getSoLuongTon() > 0)
+                .filter(phieu -> (phieu.getNgayBatDau() == null || !today.isBefore(phieu.getNgayBatDau())))
+                .filter(phieu -> (phieu.getNgayKetThuc() == null || !today.isAfter(phieu.getNgayKetThuc())))
                 .collect(Collectors.toList());
 
-        model.addAttribute("danhSachPhieuGiamGia", dsPhieuHopLe);
+        model.addAttribute("danhSachPhieuGiamGia", dsPhieuGiamGia);
 
         model.addAttribute("selectedItems", selectedItems);
         model.addAttribute("tongTien", tongTien);
@@ -281,22 +298,12 @@ public class GiohangController {
             List<Map<String, Object>> wards = ghnService.getWards(districtId);
             model.addAttribute("wards", wards);
         }
-        List<PhieuGiamGia> danhSachPhieuGiamGia = phieugiamgiarepository.findAll();
-        model.addAttribute("danhSachPhieuGiamGia", danhSachPhieuGiamGia);
+
 
         // Xử lý chọn mã giảm tốt nhất
-        String selectedVoucherCode = null;
-        BigDecimal maxDiscount = BigDecimal.ZERO;
+        PhieuGiamGia phieuTotNhat = timPhieuTotNhat(dsPhieuGiamGia, tongTien);
+        model.addAttribute("phieuTotNhat", phieuTotNhat);
 
-        for (PhieuGiamGia phieu : danhSachPhieuGiamGia) {
-            BigDecimal discount = phieuGiamGiaService.tinhTienGiam(phieu.getMa(), tongTien); // <-- Gọi đến service bạn đang dùng
-            if (discount.compareTo(maxDiscount) > 0) {
-                maxDiscount = discount;
-                selectedVoucherCode = phieu.getMa();
-            }
-        }
-
-        model.addAttribute("selectedVoucherCode", selectedVoucherCode);
         return "/view/giohang/thanh-toan";
     }
 
@@ -311,7 +318,7 @@ public class GiohangController {
                                    Model model) {
 
         String diaChiChiTiet = formData.get("diaChi");
-        String fullAddress = diaChiChiTiet + ", " + formData.get("tenXa") + ", " +
+        String fullAddress = formData.get("tenXa") + ", " +
                 formData.get("tenHuyen") + ", " + formData.get("tenTinh");
 
         KhachHang khachHang = (KhachHang) session.getAttribute("khachHang");

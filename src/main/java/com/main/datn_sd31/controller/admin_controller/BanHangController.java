@@ -71,6 +71,28 @@ public class BanHangController {
         }
         return null; // Không còn giỏ trống
     }
+    public PhieuGiamGia timPhieuTotNhat(List<PhieuGiamGia> dsPhieu, BigDecimal tongTien) {
+        return dsPhieu.stream()
+                .filter(p -> p.getNgayKetThuc().isAfter(LocalDate.now())) // còn hạn
+                .filter(p -> tongTien.compareTo(p.getDieuKien()) >= 0)    // đủ điều kiện
+                .max(Comparator.comparing(p -> {
+                    BigDecimal soTienGiamThucTe = BigDecimal.ZERO; // giá trị mặc định
+
+                    if (p.getLoaiPhieuGiamGia() == 1) {
+                        // Giảm theo %
+                        BigDecimal giamTheoPhanTram = tongTien.multiply(p.getMucDo())
+                                .divide(BigDecimal.valueOf(100));
+                        soTienGiamThucTe = giamTheoPhanTram.min(p.getGiamToiDa());
+                    } else if (p.getLoaiPhieuGiamGia() == 2) {
+                        // Giảm theo số tiền cố định
+                        soTienGiamThucTe = p.getMucDo();
+                    }
+
+                    return soTienGiamThucTe;
+                }))
+                .orElse(null);
+    }
+
 
     @GetMapping
     public String hienThiSanPham(
@@ -152,6 +174,12 @@ public class BanHangController {
         model.addAttribute("tongTienSauGiam", tongSauGiam);
 
         model.addAttribute("dsPhieuGiamGia", dsPhieuGiamGia);
+
+        PhieuGiamGia phieuTotNhat = timPhieuTotNhat(dsPhieuGiamGia, tongTien);
+        model.addAttribute("phieuTotNhat", phieuTotNhat);
+
+        List<KhachHang> dsKhachHang = khachHangRepository.findAll();
+        model.addAttribute("dsKhachHang", dsKhachHang);
 
         return "admin/pages/banhang/banhang";
     }
@@ -259,6 +287,24 @@ public class BanHangController {
 
         // Nếu không còn giỏ nào, tạo giỏ mới
         return "redirect:/admin/ban-hang?cartKey=gio-1";
+    }
+
+    @PostMapping("/them-khach-hang-nhanh")
+    public String themNhanhKhachHang(@ModelAttribute KhachHang kh,
+                                     @RequestParam("cartKey") String cartKey) {
+        // Tạo mã KH tự động
+        kh.setMa("KH" + System.currentTimeMillis());
+        kh.setNgayThamGia(LocalDateTime.now());
+        kh.setNgayTao(LocalDateTime.now());
+        kh.setTrangThai(true);
+
+        if (kh.getEmail() == null) kh.setEmail("");
+        if (kh.getDiaChi() == null) kh.setDiaChi("");
+
+        khachHangRepository.save(kh);
+
+        // Redirect về đúng giỏ hàng đang mở
+        return "redirect:/admin/ban-hang?cartKey=" + cartKey;
     }
 
     @GetMapping("/tim-kiem-san-pham")
@@ -451,6 +497,7 @@ public class BanHangController {
     @PostMapping("/thanh-toan")
     public String thanhToan(@RequestParam("cartKey") String cartKey,
                             @RequestParam(value = "soDienThoai", required = false) String sdt,
+                            @RequestParam(value = "soDienThoaivc", required = false) String sdtvc,
                             @RequestParam(value = "ten", required = false) String ten,
                             @RequestParam(value = "ghichu", required = false) String ghichu,
                             @RequestParam(value = "giagiam", required = false) BigDecimal giagiam,
@@ -481,7 +528,14 @@ public class BanHangController {
         hd.setNgayTao(LocalDateTime.now());
         hd.setNgayThanhToan(LocalDateTime.now());
         hd.setTenNguoiNhan("Trực tiếp");
-        hd.setKhachHang(khachHangRepository.findById(1).orElse(null));
+        KhachHang kh = khachHangRepository.findSoDienThoai(sdt);
+        if (kh != null) {
+            hd.setKhachHang(kh);
+        } else {
+            KhachHang khachLe = khachHangRepository.findBySoDienThoai("000000000")
+                    .orElse(null);
+            hd.setKhachHang(khachLe);
+        }
         NhanVien nv = getNhanVien.getCurrentNhanVien();
         if (nv == null) {
             ThongBaoUtils.addError(redirect, "Không tìm thấy nhân viên đang đăng nhập.");
@@ -498,10 +552,19 @@ public class BanHangController {
 
         String diachi= diaChiTinh + "-" + diaChiHuyen + "-" + diaChiXa;
 
-        hd.setDiaChi(diachi);
-        hd.setTenNguoiNhan(ten);
-        hd.setGhiChu(ghichu);
-        hd.setSoDienThoai(sdt);
+        String tenn=ten+"/"+sdtvc;
+        if (diachi != null && tenn != null) {
+            hd.setDiaChi(diachi);
+            hd.setTenNguoiNhan(tenn);
+
+            String ghiChuFull = "Đơn hàng vận chuyển \nSố điện thoại người nhận:" + sdtvc;
+            if (ghichu != null && !ghichu.trim().isEmpty()) {
+                ghiChuFull += "\n" + ghichu;
+            }
+
+            hd.setGhiChu(ghiChuFull);
+        }
+
         hd.setGiaGoc(tongTien);
         hd.setGiaGiamGia(giagiam);
         hd.setPhiVanChuyen(phiShip);
@@ -515,11 +578,11 @@ public class BanHangController {
         session.setAttribute("gioTam", gio);
         session.setAttribute("cartKeyTam", cartKey);
 
-        return hoanTatThanhToan(cartKey, gio, sdt,ten,ghichu, giagiam, tongTien, phiShip, phuongThuc,diachi,redirect, session);
+        return hoanTatThanhToan(cartKey, gio, sdt,sdtvc,tenn,ghichu, giagiam, tongTien, phiShip, phuongThuc,diachi,redirect, session);
     }
 
     private String hoanTatThanhToan(String cartKey, List<HoaDonChiTiet> gio,
-                                    String sdt,String ten,String ghichu, BigDecimal giagiam, BigDecimal tongTien,
+                                    String sdt,String sdtvc,String ten,String ghichu, BigDecimal giagiam, BigDecimal tongTien,
                                     BigDecimal phiShip, String phuongThuc,String diachi,
                                     RedirectAttributes redirectAttributes,
                                     HttpSession session) {
@@ -529,7 +592,6 @@ public class BanHangController {
         hd.setNgayTao(LocalDateTime.now());
         hd.setNgayThanhToan(LocalDateTime.now());
 
-        hd.setKhachHang(khachHangRepository.findById(1).orElse(null));
         NhanVien nv = getNhanVien.getCurrentNhanVien();
         if (nv == null) nv = nhanVienRepository.findById(1).orElse(null); // fallback nếu cần
         hd.setNhanVien(nv);
@@ -537,14 +599,32 @@ public class BanHangController {
         hd.setTrangThai(3);
 
         hd.setDiaChi(diachi);
-        if(ten!=null) {
-            hd.setTenNguoiNhan(ten);
-        }else{
-            hd.setTenNguoiNhan("trực tiếp");
+        KhachHang kh = khachHangRepository.findSoDienThoai(sdt);
+        String tenn=ten+"/"+sdtvc;
+
+        if (diachi != null && tenn != null) {
+            hd.setDiaChi(diachi);
+            hd.setTenNguoiNhan(tenn);
+
+            String ghiChuFull = "Đơn hàng vận chuyển \nSố điện thoại người nhận:" + sdtvc;
+            if (ghichu != null && !ghichu.trim().isEmpty()) {
+                ghiChuFull += "\n" + ghichu;
+            }
+
+            hd.setGhiChu(ghiChuFull);
         }
-        hd.setGhiChu(ghichu);
+
+
+        if (kh != null) {
+            hd.setKhachHang(kh);
+            hd.setSoDienThoai(sdt);
+        } else {
+            KhachHang khachLe = khachHangRepository.findBySoDienThoai("000000000")
+                    .orElse(null);
+            hd.setKhachHang(khachLe);
+            hd.setSoDienThoai("Khách lẻ");
+        }
         hd.setPhuongThuc(phuongThuc);
-        hd.setSoDienThoai(sdt);
         hd.setGiaGoc(tongTien);
         hd.setGiaGiamGia(giagiam);
         hd.setPhiVanChuyen(phiShip);
