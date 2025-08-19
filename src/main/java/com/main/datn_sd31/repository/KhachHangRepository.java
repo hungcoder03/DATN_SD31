@@ -31,4 +31,6 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
 
     @Query("select n from KhachHang n where n.soDienThoai=:sdt")
     KhachHang findSoDienThoai(String sdt);
+
+    boolean existsBySoDienThoai(String soDienThoai);
 }

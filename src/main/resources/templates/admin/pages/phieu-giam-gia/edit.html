@@ -211,6 +211,30 @@
                 <input type="number" class="form-control" th:field="*{soLuongTon}" />
                 <div class="text-danger" th:errors="*{soLuongTon}"></div>
             </div>
+            <div class="mb-3">
+                <label>Trạng thái</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input"
+                               type="radio"
+                               th:field="*{trangThai}"
+                               value="true"
+                               id="trangThaiHoatDong"
+                               th:disabled="${phieuGiamGia.ngayKetThuc != null and phieuGiamGia.ngayKetThuc.isBefore(T(java.time.LocalDate).now())}">
+                        <label class="form-check-label" for="trangThaiHoatDong">Hoạt động</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input"
+                               type="radio"
+                               th:field="*{trangThai}"
+                               value="false"
+                               id="trangThaiNgung">
+                        <label class="form-check-label" for="trangThaiNgung">Ngừng hoạt động</label>
+                    </div>
+                </div>
+                <div class="text-danger" th:errors="*{trangThai}"></div>
+            </div>
+
 
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Lưu</button>

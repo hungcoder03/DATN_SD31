@@ -56,9 +56,9 @@
                             <div class="col-md-2">
                                 <button type="button" class="btn btn-outline-secondary w-100" onclick="openScanner()">📷 Quét mã</button>
                             </div>
-                            <div th:if="${error}" class="alert alert-danger" role="alert">
-                                <p th:text="${error}"></p>
-                            </div>
+<!--                            <div th:if="${error}" class="alert alert-danger" role="alert">-->
+<!--                                <p th:text="${error}"></p>-->
+<!--                            </div>-->
 
                             <!-- Nút thêm vào giỏ -->
                             <!--                            <div class="col-md-2">-->
@@ -136,16 +136,25 @@
                             <td th:text="${#numbers.formatDecimal(item.giaSauGiam, 0, 'POINT', 0, 'COMMA')} + ' ₫'"></td>
                             <td>
                                 <form th:action="@{/admin/ban-hang/cap-nhat-so-luong}" method="post"
-                                      onsubmit="return validateSoLuong(this)">
+                                      onsubmit="return validateSoLuong(this)" class="d-flex align-items-center">
                                     <input type="hidden" name="idChiTietSp" th:value="${item.chiTietSanPham.id}" />
                                     <input type="hidden" name="cartKey" th:value="${cartKey}" />
+
+                                    <!-- Nút trừ -->
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            onclick="thayDoiSoLuong(this, -1)">-</button>
+
+                                    <!-- Ô nhập số lượng -->
                                     <input type="number" name="soLuong"
                                            th:value="${item.soLuong}"
                                            min="1"
                                            th:attr="max=${item.chiTietSanPham.soLuong}"
-                                           class="form-control so-luong-input"
-                                           onchange="this.form.submit()"
-                                           required />
+                                           class="form-control text-center mx-1 so-luong-input"
+                                           style="width: 70px;" required />
+
+                                    <!-- Nút cộng -->
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            onclick="thayDoiSoLuong(this, 1)">+</button>
                                 </form>
                             </td>
 
@@ -189,7 +198,8 @@
                                             + (p.loaiPhieuGiamGia == 1
                                                 ? ' - giảm tối đa: ' + #numbers.formatDecimal(p.giamToiDa, 0, 'COMMA', 0, 'POINT')
                                                 : '')
-                                            + ' - SL: ' + p.soLuongTon}">
+                                            + ' - SL: ' + p.soLuongTon
+                                            +'-Điều kiện:'+p.dieuKien}">
                                     </option>
                                 </select>
 
@@ -209,8 +219,31 @@
                         <input type="hidden" name="diaChiTinh" id="hiddenTinh">
                         <input type="hidden" name="diaChiHuyen" id="hiddenHuyen">
                         <input type="hidden" name="diaChiXa" id="hiddenXa">
-
+                        <input type="hidden" id="cartKey" th:value="${cartKey}" />
+                        <input type="hidden" id="phiShip" name="phiShip" value="0" />
                         <!-- Checkbox để bật/tắt tính năng vận chuyển -->
+
+                        <div class="mb-3">
+                            <label for="soDienThoai" class="form-label">Số điện thoại khách hàng:</label>
+                            <div class="input-group">
+                                <input type="text" name="soDienThoai" id="soDienThoai"
+                                       class="form-control" list="dsSoDienThoai"
+                                       placeholder="Nhập hoặc chọn số điện thoại"
+                                        th:value="${soDienThoaiMoi}">
+
+                                <button type="button" class="btn btn-outline-primary"
+                                        data-bs-toggle="modal" data-bs-target="#modalThemKhachHang">
+                                    + Thêm KH
+                                </button>
+                            </div>
+
+                            <datalist id="dsSoDienThoai">
+                                <option th:each="kh : ${dsKhachHang}"
+                                        th:value="${kh.soDienThoai}"
+                                        th:text="${kh.ten}">
+                                </option>
+                            </datalist>
+                        </div>
                         <div class="form-check my-3">
                             <input class="form-check-input" type="checkbox" id="muonVanChuyen">
                             <label class="form-check-label fw-bold" for="muonVanChuyen">
@@ -243,28 +276,6 @@
                             <!-- Nút tạo đơn vận chuyển -->
 
                         </div>
-
-                        <div class="mb-3">
-                            <label for="soDienThoai" class="form-label">Số điện thoại khách hàng:</label>
-                            <div class="input-group">
-                                <input type="text" name="soDienThoai" id="soDienThoai"
-                                       class="form-control" list="dsSoDienThoai"
-                                       placeholder="Nhập hoặc chọn số điện thoại">
-
-                                <button type="button" class="btn btn-outline-primary"
-                                        data-bs-toggle="modal" data-bs-target="#modalThemKhachHang">
-                                    + Thêm KH
-                                </button>
-                            </div>
-
-                            <datalist id="dsSoDienThoai">
-                                <option th:each="kh : ${dsKhachHang}"
-                                        th:value="${kh.soDienThoai}"
-                                        th:text="${kh.ten}">
-                                </option>
-                            </datalist>
-                        </div>
-
                         <div th:if="${maGiamGia != null}">
                             <p>Mã giảm giá đã áp dụng: <strong th:text="${maGiamGia}"></strong></p>
                         </div>
@@ -312,6 +323,17 @@
             </div>
         </div>
         <div class="modal fade" id="modalThemKhachHang" tabindex="-1">
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Hiển thị thông báo lỗi -->
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <div class="modal-dialog">
                 <div class="modal-content">
                     <form th:action="@{/admin/ban-hang/them-khach-hang-nhanh}" method="post">
@@ -338,6 +360,7 @@
                 </div>
             </div>
         </div>
+        <!-- Hiển thị thông báo thành công -->
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
@@ -393,10 +416,12 @@
             wardSelect.addEventListener("change", async function () {
                 const districtId = districtSelect.value;
                 const wardCode = this.value;
+                const cartKey = document.getElementById("cartKey").value;
+
                 if (!districtId || !wardCode) return;
 
                 try {
-                    const response = await fetch(`/admin/ban-hang/phi-ship?toDistrictId=${districtId}&wardCode=${wardCode}`);
+                    const response = await fetch(`/admin/ban-hang/phi-ship?toDistrictId=${districtId}&wardCode=${wardCode}&cartKey=${cartKey}`);
                     const fee = await response.json();
                     shippingFeeElement.innerText = fee.toLocaleString("vi-VN") + " ₫";
                 } catch (error) {
@@ -716,6 +741,27 @@
                     alert("Có lỗi xảy ra!");
                 });
         });
+        function thayDoiSoLuong(button, delta) {
+            let input = button.parentElement.querySelector(".so-luong-input");
+            let form = button.closest("form");
+
+            let min = parseInt(input.min) || 1;
+            let max = parseInt(input.max) || 9999;
+            let value = parseInt(input.value) || 1;
+
+            if (delta > 0 && value >= max) {
+                alert("❌ Số lượng đã đạt tối đa tồn kho (" + max + ").");
+                return; // không submit
+            }
+
+            value += delta;
+            if (value < min) value = min;
+            if (value > max) value = max;
+
+            input.value = value;
+            form.submit();
+        }
+
     </script>
 
 </section>

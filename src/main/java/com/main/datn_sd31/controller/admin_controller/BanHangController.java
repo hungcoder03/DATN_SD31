@@ -98,6 +98,9 @@ public class BanHangController {
     public String hienThiSanPham(
             @RequestParam(value = "idSanPham", required = false) Integer idSanPham,
             @RequestParam(value = "cartKey", defaultValue = "gio-1") String cartKey,
+            @ModelAttribute("successMessage") String successMessage,
+            @ModelAttribute("errorMessage") String errorMessage,
+            @ModelAttribute("soDienThoaiMoi") String soDienThoaiMoi,
             Model model, HttpSession session) {
 
         // Lấy tất cả giỏ từ session
@@ -180,7 +183,15 @@ public class BanHangController {
 
         List<KhachHang> dsKhachHang = khachHangRepository.findAll();
         model.addAttribute("dsKhachHang", dsKhachHang);
-
+        if (successMessage != null) {
+            model.addAttribute("successMessage", successMessage);
+        }
+        if (errorMessage != null) {
+            model.addAttribute("errorMessage", errorMessage);
+        }
+        if (soDienThoaiMoi != null) {
+            model.addAttribute("soDienThoaiMoi", soDienThoaiMoi);
+        }
         return "admin/pages/banhang/banhang";
     }
 
@@ -291,7 +302,14 @@ public class BanHangController {
 
     @PostMapping("/them-khach-hang-nhanh")
     public String themNhanhKhachHang(@ModelAttribute KhachHang kh,
-                                     @RequestParam("cartKey") String cartKey) {
+                                     @RequestParam("cartKey") String cartKey,
+                                     RedirectAttributes redirectAttributes) {
+        // Check số điện thoại trùng
+        if (khachHangRepository.existsBySoDienThoai(kh.getSoDienThoai())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Số điện thoại đã tồn tại!");
+            return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+        }
+
         // Tạo mã KH tự động
         kh.setMa("KH" + System.currentTimeMillis());
         kh.setNgayThamGia(LocalDateTime.now());
@@ -303,9 +321,11 @@ public class BanHangController {
 
         khachHangRepository.save(kh);
 
-        // Redirect về đúng giỏ hàng đang mở
+        redirectAttributes.addFlashAttribute("soDienThoaiMoi", kh.getSoDienThoai());
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm khách hàng thành công!");
         return "redirect:/admin/ban-hang?cartKey=" + cartKey;
     }
+
 
     @GetMapping("/tim-kiem-san-pham")
     @ResponseBody
@@ -351,19 +371,30 @@ public class BanHangController {
             return "redirect:/admin/ban-hang?cartKey=" + cartKey;
         }
 
-        if (soLuong > ctsp.getSoLuong()) {
-            redirectAttributes.addFlashAttribute("error", "❌ Số lượng vượt quá tồn kho.");
+        // Kiểm tra tồn kho
+        Integer tonKho = (ctsp.getSoLuong() == null ? 0 : ctsp.getSoLuong());
+        if (soLuong == null || soLuong <= 0) {
+            redirectAttributes.addFlashAttribute("error", "❌ Số lượng không hợp lệ.");
+            return "redirect:/admin/ban-hang?cartKey=" + cartKey;
+        }
+        if (soLuong > tonKho) {
+            redirectAttributes.addFlashAttribute("error",
+                    "❌ Số lượng vượt quá tồn kho (tồn: " + tonKho + ").");
             return "redirect:/admin/ban-hang?cartKey=" + cartKey;
         }
 
+        // Cập nhật vào giỏ
         List<HoaDonChiTiet> gio = getCart(cartKey, session);
         gio.stream()
-                .filter(item -> item.getChiTietSanPham().getId().equals(id))
+                .filter(item -> item.getChiTietSanPham().getId().intValue() == id)
                 .findFirst()
                 .ifPresent(item -> item.setSoLuong(soLuong));
 
+        redirectAttributes.addFlashAttribute("success", "✅ Cập nhật số lượng thành công");
         return "redirect:/admin/ban-hang?cartKey=" + cartKey;
     }
+
+
 
     @GetMapping("/tim-kiem")
     public String timKiemSanPham(@RequestParam("keyword") String keyword,
@@ -742,6 +773,8 @@ public class BanHangController {
             HttpSession session) {
 
         int fromDistrictId = 3440; // Quận 1 mặc định
+
+        // TODO: Tính khối lượng từ giỏ hàng thay vì fix 1000
         int weight = 1000;
 
         List<Map<String, Object>> services = ghnService.getAvailableServices(fromDistrictId, toDistrictId);
@@ -750,17 +783,19 @@ public class BanHangController {
             return ResponseEntity.ok(0);
         }
 
-        int serviceId = (int) services.get(0).get("service_id");
+        Object serviceIdObj = services.get(0).get("service_id");
+        int serviceId = Integer.parseInt(serviceIdObj.toString());
+
         Integer fee = ghnService.getShippingFee(fromDistrictId, toDistrictId, toWardCode, weight, serviceId);
 
-        if (fee == null || fee < 0) {
-            fee = 0; // tránh null hoặc âm
-        }
+        BigDecimal phiShip = (fee != null && fee >= 0) ? BigDecimal.valueOf(fee) : BigDecimal.ZERO;
 
-        session.setAttribute("phiVanChuyen_" + cartKey, new BigDecimal(fee));
+        session.setAttribute("phiVanChuyen", phiShip);
+        session.setAttribute("phiVanChuyen_" + cartKey, phiShip);
 
-        return ResponseEntity.ok(fee);
+        return ResponseEntity.ok(phiShip.intValue());
     }
+
 
     @PostMapping("/luu-dia-chi")
     @ResponseBody

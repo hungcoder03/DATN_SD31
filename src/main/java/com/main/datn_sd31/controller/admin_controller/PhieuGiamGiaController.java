@@ -92,13 +92,12 @@ public class PhieuGiamGiaController {
         model.addAttribute("phieuGiamGia", entity);
         return "admin/pages/phieu-giam-gia/edit";
     }
-
     @PostMapping("/update")
     public String update(
             @Valid @ModelAttribute("phieuGiamGia") PhieuGiamGia pg,
-             BindingResult result,
-             Model model,
-             RedirectAttributes redirectAttributes
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         if (result.hasErrors()) {
             model.addAttribute("error", "Cập nhật thất bại");
@@ -107,6 +106,20 @@ public class PhieuGiamGiaController {
         }
 
         pg.setNgaySua(LocalDate.now());
+        LocalDate today = LocalDate.now();
+
+        // ✅ Nếu đã hết hạn -> luôn false
+        if (pg.getNgayKetThuc() != null && today.isAfter(pg.getNgayKetThuc())) {
+            pg.setTrangThai(false);
+        }
+        // ✅ Nếu chưa tới ngày bắt đầu -> luôn false
+        else if (pg.getNgayBatDau() != null && today.isBefore(pg.getNgayBatDau())) {
+            pg.setTrangThai(false);
+        }
+        // ✅ Trong khoảng hợp lệ -> GIỮ THEO USER (radio button)
+        // Không cần gán lại, vì giá trị đã được bind từ form
+        // else { giữ nguyên pg.getTrangThai() }
+
         phieuGiamGiaService.save(pg);
         ThongBaoUtils.addSuccess(redirectAttributes, "Cập nhật thành công");
         return "redirect:/admin/phieu-giam-gia";
