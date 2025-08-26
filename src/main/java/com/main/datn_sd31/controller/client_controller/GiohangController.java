@@ -593,7 +593,7 @@ public class GiohangController {
         } else {
             tienGiam = phieu.getMucDo();
         }
-        
+
         if (tienGiam.compareTo(tongTien) > 0) {
             tienGiam = tongTien;
         }
