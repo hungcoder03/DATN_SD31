@@ -25,6 +25,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Tìm nhân viên
         NhanVien nv = nhanVienRepository.findByEmail(email).orElse(null);
         if (nv != null) {
+            // Kiểm tra trạng thái hoạt động của nhân viên
+            if (!nv.getTrangThai()) {
+                throw new DisabledException("Tài khoản nhân viên đã bị khóa. Vui lòng liên hệ quản lý để được hỗ trợ.");
+            }
+            
             String role = "ROLE_NHANVIEN";
             if (nv.getChucVu() != null) {
                 if (nv.getChucVu().equalsIgnoreCase("Quản lý") || nv.getChucVu().equalsIgnoreCase("ADMIN")) {

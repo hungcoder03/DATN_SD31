@@ -78,7 +78,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public NhanVien getCurrentEmployee() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && (hasRole(ROLE_ADMIN) || hasRole(ROLE_NHANVIEN))) {
-            return nhanVienRepository.findByEmail(authentication.getName()).orElse(null);
+            NhanVien nhanVien = nhanVienRepository.findByEmail(authentication.getName()).orElse(null);
+            // Kiểm tra trạng thái hoạt động của nhân viên
+            if (nhanVien != null && !nhanVien.getTrangThai()) {
+                return null; // Trả về null nếu nhân viên bị khóa
+            }
+            return nhanVien;
         }
         return null;
     }

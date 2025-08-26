@@ -42,8 +42,14 @@
             Đăng nhập
         </button>
     </form>
+    <!-- Hiển thị lỗi đăng nhập -->
     <div th:if="${param.error}" class="login-error-message">
-        <span class="error-text" th:text="${param.error}"></span>
+        <span class="error-text" th:if="${param.error == 'account_disabled'}">
+            Tài khoản đã bị khóa. Vui lòng liên hệ quản lý để được hỗ trợ.
+        </span>
+        <span class="error-text" th:unless="${param.error == 'account_disabled'}">
+            Email hoặc mật khẩu không đúng. Vui lòng thử lại.
+        </span>
     </div>
 </div>
 
