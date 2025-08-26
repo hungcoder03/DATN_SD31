@@ -24,6 +24,9 @@
     <link rel="shortcut icon" th:href="@{/images/favicon.png}"/>
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- CSS Fix cho Profile Layout - Giải quyết xung đột Bootstrap vs Tailwind -->
+    <link rel="stylesheet" th:href="@{/css/admin/profile-fix.css}">
 
     <style>
         /* Icon Animation for Main Menu and Submenu */
@@ -97,23 +100,62 @@
             border-radius: 8px;
             margin: 2px 8px;
         }
-
-        .dropdown-item:hover {
-            background: linear-gradient(135deg, #dead6f 0%, #c19b5b 100%);
-            color: white !important;
-            transform: translateX(5px);
-            box-shadow: 0 2px 8px rgba(222, 173, 111, 0.3);
+        
+        /* CRITICAL FIX: Profile Layout - Đảm bảo luôn nằm trên 1 dòng */
+        .navbar .nav-link.dropdown-toggle {
+            display: flex !important;
+            align-items: center !important;
+            white-space: nowrap !important;
+            flex-wrap: nowrap !important;
+            gap: 8px !important;
+            flex-direction: row !important;
         }
-
-        .img-xs.rounded-circle {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            border: 2px solid rgba(255, 255, 255, 0.8);
-            transition: all 0.3s ease;
+        
+        .navbar .nav-link.dropdown-toggle .profile-text {
+            display: inline-block !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            max-width: 200px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.2 !important;
+            vertical-align: middle !important;
         }
-
-        .img-xs.rounded-circle:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        
+        .navbar .nav-link.dropdown-toggle img {
+            flex-shrink: 0 !important;
+            margin: 0 0 0 8px !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        
+        .navbar .nav-link.dropdown-toggle::after {
+            margin: 0 0 0 8px !important;
+            flex-shrink: 0 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        
+        /* Override Tailwind CSS nếu có xung đột */
+        .navbar .nav-link.dropdown-toggle[class*="tw-"] {
+            display: flex !important;
+            align-items: center !important;
+            white-space: nowrap !important;
+            flex-wrap: nowrap !important;
+        }
+        
+        /* Responsive fixes */
+        @media (max-width: 768px) {
+            .navbar .nav-link.dropdown-toggle .profile-text {
+                max-width: 120px !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .navbar .nav-link.dropdown-toggle .profile-text {
+                max-width: 100px !important;
+            }
         }
 
         /*CSS Thong bao*/

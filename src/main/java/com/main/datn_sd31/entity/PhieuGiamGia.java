@@ -39,7 +39,6 @@ public class PhieuGiamGia {
     @Size(max = 50, message = "Mã tối đa 50 ký tự")
     @NotNull
     @Nationalized
-    @NotBlank(message = "Mã không được để trống")
     @Column(name = "ma", nullable = false, length = 50)
     private String ma;
 

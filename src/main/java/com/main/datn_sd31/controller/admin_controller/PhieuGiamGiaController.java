@@ -76,7 +76,16 @@ public class PhieuGiamGiaController {
             return "admin/pages/phieu-giam-gia/create";
         }
 
-        if (phieuGiamGiaRepository.existsByMa(phieuGiamGia.getMa())) {
+        // Tự sinh mã PGG nếu để trống
+        if (phieuGiamGia.getMa() == null || phieuGiamGia.getMa().trim().isEmpty()) {
+            String generated;
+            int attempts = 0;
+            do {
+                generated = "PGG" + String.format("%06d", (int) (Math.random() * 1_000_000));
+                attempts++;
+            } while (phieuGiamGiaRepository.existsByMa(generated) && attempts < 20);
+            phieuGiamGia.setMa(generated);
+        } else if (phieuGiamGia.getMa() != null && !phieuGiamGia.getMa().trim().isEmpty() && phieuGiamGiaRepository.existsByMa(phieuGiamGia.getMa())) {
             model.addAttribute("error", "Mã trùng");
             return "admin/pages/phieu-giam-gia/create";
         }

@@ -1,189 +1,334 @@
 <!DOCTYPE html>
-<!--Cấu hình layout cho Thymleaf-->
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout}">
 <head>
-    <title>Quản lý màu sắc</title>
-    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"-->
-    <!--          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">-->
-
-    <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">-->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f7f7f7;
+    <title>Quản lý Màu Sắc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/custom-colors.css}">
+    <script>
+        tailwind.config = {
+            prefix: 'tw-',
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-dark': '#333333',
+                        'custom-brown': '#997351',
+                        'custom-light': '#F2EFE8',
+                        'custom-brown-light': '#b08a6b',
+                        'custom-brown-dark': '#7a5d3f',
+                    }
+                },
+            },
+            plugins: [],
+        }
+    </script>
+    
+    <script>
+        // Hàm xử lý khi chọn màu từ select
+        function selectColor(hexCode) {
+            if (!hexCode) {
+                // Reset form khi không chọn gì
+                document.getElementById('ten').value = '';
+                document.getElementById('maMau').value = '';
+                document.getElementById('colorPreview').innerHTML = 'Chưa chọn màu';
+                document.getElementById('colorPreview').className = 'tw-w-full tw-h-10 tw-border tw-border-custom-brown/30 tw-rounded-md tw-bg-gray-100 tw-flex tw-items-center tw-justify-center tw-text-sm tw-text-custom-dark';
+                return;
+            }
+            
+            // Lấy tên màu từ option đã chọn
+            const select = document.getElementById('colorSelect');
+            const selectedOption = select.options[select.selectedIndex];
+            const colorName = selectedOption.getAttribute('data-name');
+            
+            // Điền vào form
+            document.getElementById('ten').value = colorName;
+            document.getElementById('maMau').value = hexCode;
+            
+            // Cập nhật preview màu
+            const preview = document.getElementById('colorPreview');
+            preview.innerHTML = colorName;
+            preview.className = 'tw-w-full tw-h-10 tw-border tw-border-custom-brown/30 tw-rounded-md tw-flex tw-items-center tw-justify-center tw-text-sm tw-font-medium';
+            preview.style.backgroundColor = hexCode;
+            
+            // Xác định text color dựa trên độ sáng của background
+            const isLight = isLightColor(hexCode);
+            preview.style.color = isLight ? '#000000' : '#FFFFFF';
+            
+            // Thêm border color nếu là màu trắng hoặc sáng
+            if (hexCode === '#FFFFFF' || hexCode === '#FFF8DC' || hexCode === '#F5F5DC') {
+                preview.style.borderColor = '#D1D5DB';
+            }
         }
 
-        h2 {
-            color: #333;
+        // Hàm kiểm tra màu sáng hay tối (copy từ ColorUtil)
+        function isLightColor(hex) {
+            if (!hex || !hex.startsWith('#')) {
+                return false;
+            }
+            
+            hex = hex.replace("#", "");
+            if (hex.length !== 6) {
+                return false;
+            }
+            
+            try {
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                
+                // Calculate luminance
+                const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                return luminance > 0.5;
+            } catch (e) {
+                return false;
+            }
         }
 
-        form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            width: 100%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+        // Reset form khi load trang
+        function initializeColorForm() {
+            // Nếu đang edit, hiển thị màu hiện tại
+            const currentHex = document.getElementById('maMau').value;
+            const currentName = document.getElementById('ten').value;
+            
+            if (currentHex && currentName) {
+                // Tìm và chọn option tương ứng
+                const select = document.getElementById('colorSelect');
+                for (let i = 0; i < select.options.length; i++) {
+                    if (select.options[i].value === currentHex) {
+                        select.selectedIndex = i;
+                        selectColor(currentHex);
+                        break;
+                    }
+                }
+            }
         }
 
-        input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        button {
-            background-color: #3498db;
-            color: white;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+        // Xử lý khi submit form
+        function validateForm(e) {
+            const colorName = document.getElementById('ten').value.trim();
+            const hexCode = document.getElementById('maMau').value.trim();
+            
+            if (!colorName) {
+                e.preventDefault();
+                alert('Vui lòng chọn màu sắc!');
+                return false;
+            }
+            
+            if (!hexCode) {
+                e.preventDefault();
+                alert('Vui lòng chọn màu sắc!');
+                return false;
+            }
         }
 
-        button:hover {
-            background-color: #2980b9;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background-color: #f0f0f0;
-        }
-
-        .actions a {
-            margin-right: 8px;
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-        }
-
-        .actions a:hover {
-            color: #e74c3c;
-        }
-
-        .date {
-            font-size: 0.9em;
-            color: #555;
-        }
-        .radio-group {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            margin-top: 5px;
-        }
-
-        .radio-item {
-            display: flex;
-            align-items: center;
-        }
-
-        .radio-item input[type="radio"] {
-            margin-right: 5px;
-        }
-
-    </style>
+        // Đảm bảo DOM đã load xong
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeColorForm();
+            
+            // Gắn event listener cho form
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', validateForm);
+            }
+        });
+    </script>
 </head>
-<body>
+<body class="tw-bg-gray-50">
 
 <section layout:fragment="content">
-    <div class="container mt-4">
-        <h2 th:text="${mauSac.id == null} ? 'Thêm màu sắc mới' : 'Cập nhật màu sắc'"></h2>
+    <div class="tw-container tw-mx-auto tw-px-4 tw-py-6 tw-bg-gradient-to-br tw-from-custom-light tw-to-white tw-min-h-screen">
+        <!-- Header -->
+        <div class="tw-mb-8">
+            <h1 class="tw-text-3xl tw-font-bold tw-text-custom-dark tw-mb-2">
+                <span th:text="${mauSac.id == null} ? 'Thêm màu sắc mới' : 'Cập nhật màu sắc'"></span>
+            </h1>
+            <p class="tw-text-custom-brown">Quản lý thông tin màu sắc sản phẩm</p>
+        </div>
 
-        <form th:action="@{/admin/mau-sac/save}" th:object="${mauSac}" method="post">
-            <input type="hidden" th:field="*{id}">
+        <!-- Form -->
+        <div class="tw-bg-custom-light tw-rounded-lg tw-shadow-md tw-p-6 tw-mb-8 tw-border tw-border-custom-brown/20 card-custom fade-in">
+            <form th:action="@{/admin/mau-sac/save}" th:object="${mauSac}" method="post">
+                <input type="hidden" th:field="*{id}">
 
-            <div style="display: flex; gap: 50px; flex-wrap: wrap; margin-bottom: 20px;">
+                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6 tw-mb-6">
+                    <!-- Chọn màu sắc -->
+                    <div>
+                        <label for="colorSelect" class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Chọn màu sắc <span class="tw-text-red-500">*</span>
+                        </label>
+                        <select id="colorSelect" 
+                                class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-custom-brown/30 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-custom-brown focus:tw-border-transparent tw-bg-white"
+                                onchange="selectColor(this.value)">
+                            <option value="">-- Chọn màu sắc --</option>
+                            <optgroup th:each="group : ${availableColors}" th:label="${group.key}">
+                                <option th:each="color : ${group.value}" 
+                                        th:value="${color.hexCode}"
+                                        th:data-name="${color.name}"
+                                        th:text="${color.name + ' (' + color.hexCode + ')'}">
+                                </option>
+                            </optgroup>
+                        </select>
+                    </div>
 
+                    <!-- Tên màu sắc (tự động điền) -->
+                    <div>
+                        <label for="ten" class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Tên màu sắc <span class="tw-text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                               id="ten"
+                               th:field="*{ten}"
+                               placeholder="Tên màu sẽ tự động điền khi chọn"
+                               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-custom-brown/30 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-custom-brown focus:tw-border-transparent tw-bg-white"
+                               required>
+                    </div>
 
-                <div style="flex: 1; min-width: 220px;">
-                    <label for="ten">Tên màu sắc</label>
-                    <input type="text" id="ten" th:field="*{ten}" placeholder="Nhập tên màu sắc" class="form-control" required>
+                    <!-- Mã màu hex (tự động điền) -->
+                    <div>
+                        <label for="maMau" class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Mã màu hex
+                        </label>
+                        <input type="text"
+                               id="maMau"
+                               th:field="*{maMau}"
+                               placeholder="Mã màu sẽ tự động điền khi chọn"
+                               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-custom-brown/30 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-custom-brown focus:tw-border-transparent tw-bg-white"
+                               readonly>
+                    </div>
                 </div>
 
-                <div style="flex: 1; min-width: 220px;">
-                    <label for="ngayTao">Ngày tạo</label>
-                    <input type="text" id="ngayTao" th:field="*{ngayTao}" th:value="${#temporals.format(mauSac.ngayTao, 'dd/MM/yyyy ')}" readonly class="form-control">
+                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6 tw-mb-6">
+                    <!-- Ngày tạo -->
+                    <div>
+                        <label for="ngayTao" class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Ngày tạo
+                        </label>
+                        <input type="text"
+                               id="ngayTao"
+                               th:field="*{ngayTao}"
+                               th:value="${#temporals.format(mauSac.ngayTao, 'dd/MM/yyyy')}"
+                               readonly
+                               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-custom-brown/30 tw-rounded-md tw-bg-custom-light tw-text-custom-brown">
+                    </div>
+
+                    <!-- Ngày sửa -->
+                    <div>
+                        <label for="ngaySua" class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Ngày sửa
+                        </label>
+                        <input type="text"
+                               id="ngaySua"
+                               th:field="*{ngaySua}"
+                               th:value="${#temporals.format(mauSac.ngaySua, 'dd/MM/yyyy')}"
+                               readonly
+                               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-custom-brown/30 tw-rounded-md tw-bg-custom-light tw-text-custom-brown">
+                    </div>
+
+                    <!-- Preview màu đã chọn -->
+                    <div>
+                        <label class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Preview màu
+                        </label>
+                        <div id="colorPreview" 
+                             class="tw-w-full tw-h-10 tw-border tw-border-custom-brown/30 tw-rounded-md tw-bg-gray-100 tw-flex tw-items-center tw-justify-center tw-text-sm tw-text-custom-dark">
+                            Chưa chọn màu
+                        </div>
+                    </div>
                 </div>
 
-                <div style="flex: 1; min-width: 320px;">
-                    <label for="ngaySua">Ngày sửa</label>
-                    <input type="text" id="ngaySua" th:field="*{ngaySua}" th:value="${#temporals.format(mauSac.ngaySua, 'dd/MM/yyyy ')}" readonly class="form-control">
-                </div>
-            </div>
-            <div>
-                <label>Trạng thái</label><br>
-                <div class="radio-group">
-                    <label class="radio-item" for="active">
-                        <input type="radio" th:field="*{trangThai}" th:value="true" id="active">
-                        Hoạt động
+                <!-- Trạng thái -->
+                <div class="tw-mb-6">
+                    <label class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-3">
+                        Trạng thái <span class="tw-text-red-500">*</span>
                     </label>
-
-                    <label class="radio-item" for="inactive">
-                        <input type="radio" th:field="*{trangThai}" th:value="false" id="inactive">
-                        Không hoạt động
-                    </label>
+                    <div class="tw-flex tw-space-x-6">
+                        <label class="tw-flex tw-items-center">
+                            <input type="radio"
+                                   th:field="*{trangThai}"
+                                   th:value="true"
+                                   id="active"
+                                   class="tw-w-4 tw-h-4 tw-text-custom-brown tw-border-custom-brown/30 focus:tw-ring-custom-brown">
+                            <span class="tw-ml-2 tw-text-sm tw-text-custom-dark">Hoạt động</span>
+                        </label>
+                        <label class="tw-flex tw-items-center">
+                            <input type="radio"
+                                   th:field="*{trangThai}"
+                                   th:value="false"
+                                   id="inactive"
+                                   class="tw-w-4 tw-h-4 tw-text-custom-brown tw-border-custom-brown/30 focus:tw-ring-custom-brown">
+                            <span class="tw-ml-2 tw-text-sm tw-text-custom-dark">Không hoạt động</span>
+                        </label>
+                    </div>
                 </div>
+
+                <!-- Buttons -->
+                <div class="tw-flex tw-space-x-4">
+                    <button type="submit"
+                            class="tw-px-6 tw-py-2 tw-bg-custom-brown tw-text-white tw-rounded-md hover:tw-bg-custom-brown-dark focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-custom-brown focus:tw-ring-offset-2 tw-transition-colors btn-custom-primary">
+                        <span th:text="${mauSac.id == null} ? 'Thêm mới' : 'Cập nhật'"></span>
+                    </button>
+                    <a href="/admin/mau-sac"
+                       class="tw-px-6 tw-py-2 tw-bg-custom-dark tw-text-white tw-rounded-md hover:tw-bg-gray-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-custom-dark focus:tw-ring-offset-2 tw-transition-colors btn-custom-secondary">
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Danh sách -->
+        <div class="tw-bg-custom-light tw-rounded-lg tw-shadow-md tw-border tw-border-custom-brown/20 card-custom slide-in">
+            <div class="tw-px-6 tw-py-4 tw-border-b tw-border-custom-brown/20">
+                <h2 class="tw-text-xl tw-font-semibold tw-text-custom-dark">Danh sách Màu Sắc</h2>
             </div>
 
-            <button type="submit" class="btn btn-primary" th:text="${mauSac.id == null} ? 'Thêm mới' : 'Cập nhật'"></button>
-        </form>
-
-        <h2>Danh sách Màu sắc</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>Mã màu sắc</th>
-                <th>Tên màu sắc</th>
-                <th>Ngày tạo</th>
-                <th>Ngày sửa</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="ms : ${mauSacs}">
-                <td th:text="${ms.id}"></td>
-                <td th:text="${ms.ma}"></td>
-                <td th:text="${ms.ten}"></td>
-                <td class="date" th:text="${#temporals.format(ms.ngayTao, 'dd/MM/yyyy ')}"></td>
-                <td class="date" th:text="${#temporals.format(ms.ngaySua, 'dd/MM/yyyy ')}"></td>
-                <td th:text="${ms.trangThai} ? 'Hoạt động' : 'Không hoạt động'"></td>
-                <td class="actions">
-                    <a th:href="@{/admin/mau-sac/edit/{id}(id=${ms.id})}">Sửa</a> |
-                    <a th:href="@{/admin/mau-sac/delete/{id}(id=${ms.id})}"
-                       onclick="return confirm('Bạn có chắc muốn xóa không?')">Xóa</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+            <div class="tw-overflow-x-auto">
+                <table class="tw-min-w-full tw-divide-y tw-divide-custom-brown/20">
+                    <thead class="tw-bg-custom-brown/10">
+                        <tr>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">#</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">Mã màu sắc</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">Tên màu sắc</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-brown tw-uppercase tw-tracking-wider">Ngày tạo</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-brown tw-uppercase tw-tracking-wider">Ngày sửa</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">Trạng thái</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="tw-bg-white tw-divide-y tw-divide-custom-brown/20">
+                        <tr th:each="ms : ${mauSacs}" class="hover:tw-bg-custom-light/50">
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-custom-dark" th:text="${ms.id}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-custom-dark" th:text="${ms.ma}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-custom-dark" th:text="${ms.ten}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-custom-brown" th:text="${#temporals.format(ms.ngayTao, 'dd/MM/yyyy')}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-custom-brown" th:text="${#temporals.format(ms.ngaySua, 'dd/MM/yyyy')}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                                <span th:if="${ms.trangThai}"
+                                      class="tw-inline-flex tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-green-100 tw-text-green-800">
+                                    Hoạt động
+                                </span>
+                                <span th:unless="${ms.trangThai}"
+                                      class="tw-inline-flex tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-red-100 tw-text-red-800">
+                                    Không hoạt động
+                                </span>
+                            </td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-font-medium">
+                                <a th:href="@{/admin/mau-sac/edit/{id}(id=${ms.id})}"
+                                   class="tw-text-custom-brown hover:tw-text-custom-brown-dark tw-mr-4 tw-transition-colors">
+                                    Sửa
+                                </a>
+                                <a th:href="@{/admin/mau-sac/delete/{id}(id=${ms.id})}"
+                                   onclick="return confirm('Bạn có chắc muốn xóa màu sắc này không?')"
+                                   class="tw-text-red-600 hover:tw-text-red-900 tw-transition-colors">
+                                    Xóa
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </section>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
-        crossorigin="anonymous"></script>
 
 </body>
 </html>

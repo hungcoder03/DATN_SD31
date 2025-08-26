@@ -1,0 +1,119 @@
+/* =====================================================
+   PROFILE LAYOUT FIX - Giải quyết xung đột Bootstrap vs Tailwind
+   ===================================================== */
+
+/* Fix chính cho profile dropdown - Đảm bảo luôn nằm trên 1 dòng */
+.navbar .nav-link.dropdown-toggle {
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    flex-direction: row !important;
+    min-height: auto !important;
+    height: auto !important;
+}
+
+/* Fix cho profile text - Không được xuống dòng */
+.navbar .nav-link.dropdown-toggle .profile-text {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 200px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+}
+
+/* Fix cho profile image - Không được xuống dòng */
+.navbar .nav-link.dropdown-toggle img {
+    flex-shrink: 0 !important;
+    margin: 0 0 0 8px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+/* Fix cho dropdown arrow - Không được xuống dòng */
+.navbar .nav-link.dropdown-toggle::after {
+    margin: 0 0 0 8px !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+/* Override Tailwind CSS nếu có xung đột */
+.navbar .nav-link.dropdown-toggle.tw-flex {
+    display: flex !important;
+}
+
+.navbar .nav-link.dropdown-toggle.tw-items-center {
+    align-items: center !important;
+}
+
+/* Responsive fixes */
+@media (max-width: 1200px) {
+    .navbar .nav-link.dropdown-toggle .profile-text {
+        max-width: 180px !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .navbar .nav-link.dropdown-toggle .profile-text {
+        max-width: 150px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar .nav-link.dropdown-toggle .profile-text {
+        max-width: 120px !important;
+    }
+    
+    .navbar .nav-link.dropdown-toggle {
+        gap: 6px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar .nav-link.dropdown-toggle .profile-text {
+        max-width: 100px !important;
+    }
+    
+    .navbar .nav-link.dropdown-toggle {
+        gap: 4px !important;
+    }
+}
+
+/* Fix cho trường hợp Tailwind override */
+.navbar .nav-link.dropdown-toggle[class*="tw-"] {
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    flex-wrap: nowrap !important;
+}
+
+/* Đảm bảo không có float hoặc position absolute */
+.navbar .nav-link.dropdown-toggle * {
+    float: none !important;
+    position: static !important;
+}
+
+/* Fix cho navbar container */
+.navbar-nav .nav-item {
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Override bất kỳ CSS nào có thể gây xuống dòng */
+.navbar .nav-link.dropdown-toggle,
+.navbar .nav-link.dropdown-toggle * {
+    box-sizing: border-box !important;
+}
+
+/* Fix cho trường hợp có clearfix */
+.navbar .nav-link.dropdown-toggle::before,
+.navbar .nav-link.dropdown-toggle::after {
+    content: none !important;
+    display: none !important;
+} 

@@ -3,6 +3,9 @@ package com.main.datn_sd31.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.List;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 public class ColorUtil {
     
@@ -122,5 +125,90 @@ public class ColorUtil {
      */
     public static String getContrastTextColor(String backgroundColor) {
         return isLightColor(backgroundColor) ? "#000000" : "#FFFFFF";
+    }
+    
+    /**
+     * Get tất cả màu có sẵn để hiển thị trong select
+     */
+    public static Map<String, String> getAllAvailableColors() {
+        return new HashMap<>(COLOR_NAME_MAP);
+    }
+    
+    /**
+     * Get tên màu từ hex code
+     */
+    public static String getColorNameFromHex(String hexColor) {
+        if (!isValidHexColor(hexColor)) {
+            return null;
+        }
+        
+        // Tìm tên màu tương ứng với hex code
+        for (Map.Entry<String, String> entry : COLOR_NAME_MAP.entrySet()) {
+            if (entry.getValue().equalsIgnoreCase(hexColor)) {
+                return entry.getKey();
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Get danh sách màu đã được sắp xếp theo nhóm
+     */
+    public static Map<String, List<ColorOption>> getGroupedColors() {
+        Map<String, List<ColorOption>> grouped = new LinkedHashMap<>();
+        
+        // Màu cơ bản
+        List<ColorOption> basicColors = Arrays.asList(
+            new ColorOption("Đỏ", "#DC2626"),
+            new ColorOption("Xanh", "#2563EB"),
+            new ColorOption("Xanh lá", "#16A34A"),
+            new ColorOption("Vàng", "#EAB308"),
+            new ColorOption("Cam", "#EA580C"),
+            new ColorOption("Tím", "#9333EA"),
+            new ColorOption("Hồng", "#EC4899"),
+            new ColorOption("Nâu", "#A16207"),
+            new ColorOption("Đen", "#000000"),
+            new ColorOption("Trắng", "#FFFFFF"),
+            new ColorOption("Xám", "#6B7280")
+        );
+        grouped.put("Màu cơ bản", basicColors);
+        
+        // Màu nâng cao
+        List<ColorOption> advancedColors = Arrays.asList(
+            new ColorOption("Be", "#F5F5DC"),
+            new ColorOption("Kem", "#FFF8DC"),
+            new ColorOption("Navy", "#1E3A8A"),
+            new ColorOption("Đỏ đô", "#7F1D1D"),
+            new ColorOption("Xanh ô liu", "#65A30D"),
+            new ColorOption("Khaki", "#F0E68C"),
+            new ColorOption("Xanh ngọc", "#06B6D4"),
+            new ColorOption("Indigo", "#4F46E5"),
+            new ColorOption("Magenta", "#D946EF")
+        );
+        grouped.put("Màu nâng cao", advancedColors);
+        
+        return grouped;
+    }
+    
+    /**
+     * Inner class để đại diện cho một option màu
+     */
+    public static class ColorOption {
+        private String name;
+        private String hexCode;
+        
+        public ColorOption(String name, String hexCode) {
+            this.name = name;
+            this.hexCode = hexCode;
+        }
+        
+        public String getName() { return name; }
+        public String getHexCode() { return hexCode; }
+        
+        @Override
+        public String toString() {
+            return name + " (" + hexCode + ")";
+        }
     }
 } 

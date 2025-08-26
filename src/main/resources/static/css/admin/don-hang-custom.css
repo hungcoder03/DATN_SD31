@@ -1,0 +1,554 @@
+/* =====================================================
+   DON HANG CUSTOM COLORS - Override Bootstrap colors
+   ===================================================== */
+
+/* Custom color variables */
+:root {
+    --custom-dark: #333333;
+    --custom-brown: #997351;
+    --custom-light: #F2EFE8;
+    --custom-brown-light: #b08a6a;
+    --custom-brown-dark: #7a5d41;
+}
+
+/* TIMELINE STATUS COLORS - Restore proper colors for each status */
+.timeline-step .icon {
+    background: #6c757d !important; /* Default gray */
+    color: white !important;
+}
+
+/* Success status - Green */
+.timeline-step.step-success .icon {
+    background: #28a745 !important;
+    color: white !important;
+}
+
+/* Warning status - Yellow */
+.timeline-step.step-warning .icon {
+    background: #ffc107 !important;
+    color: #212529 !important;
+}
+
+/* Cancelled status - Red */
+.timeline-step.step-cancelled .icon {
+    background: #dc3545 !important;
+    color: white !important;
+}
+
+/* Info status - Blue */
+.timeline-step.step-info .icon {
+    background: #0d6efd !important;
+    color: white !important;
+}
+
+/* Timeline labels and dates */
+.timeline-step .label {
+    color: #495057 !important;
+    font-weight: 600 !important;
+}
+
+.timeline-step .date-label {
+    color: #6c757d !important;
+}
+
+/* Timeline arrows */
+.timeline-step:not(:last-child)::after {
+    color: #dee2e6 !important;
+}
+
+/* EXCLUDE TIMELINE FROM BROWN THEME OVERRIDES */
+.timeline,
+.timeline-container {
+    /* Keep timeline container styling */
+    background-color: inherit !important;
+}
+
+/* Override Bootstrap primary colors */
+.btn-primary {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--custom-brown-dark) !important;
+    border-color: var(--custom-brown-dark) !important;
+    color: white !important;
+}
+
+.btn-primary:focus {
+    background-color: var(--custom-brown-dark) !important;
+    border-color: var(--custom-brown-dark) !important;
+    box-shadow: 0 0 0 0.25rem rgba(153, 115, 81, 0.25) !important;
+    color: white !important;
+}
+
+/* Override Bootstrap success colors */
+.btn-success {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.btn-success:hover {
+    background-color: var(--custom-brown-dark) !important;
+    border-color: var(--custom-brown-dark) !important;
+    color: white !important;
+}
+
+/* Override Bootstrap info colors */
+.btn-info {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.btn-info:hover {
+    background-color: var(--custom-brown-dark) !important;
+    border-color: var(--custom-brown-dark) !important;
+    color: white !important;
+}
+
+/* Override Bootstrap outline buttons */
+.btn-outline-primary {
+    color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.btn-outline-primary:focus {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+/* Override Bootstrap danger colors */
+.btn-danger {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+
+.btn-danger:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+    color: white !important;
+}
+
+/* Override Bootstrap warning colors */
+.btn-warning {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800 !important;
+    border-color: #d39e00 !important;
+    color: #212529 !important;
+}
+
+/* Override Bootstrap secondary colors */
+.btn-secondary {
+    background-color: var(--custom-dark) !important;
+    border-color: var(--custom-dark) !important;
+    color: white !important;
+}
+
+.btn-secondary:hover {
+    background-color: #1a1a1a !important;
+    border-color: #1a1a1a !important;
+    color: white !important;
+}
+
+/* Override text colors */
+.text-primary {
+    color: var(--custom-brown) !important;
+}
+
+.text-success {
+    color: var(--custom-brown) !important;
+}
+
+.text-info {
+    color: var(--custom-brown) !important;
+}
+
+/* Override link colors */
+a {
+    color: var(--custom-brown) !important;
+}
+
+a:hover {
+    color: var(--custom-brown-dark) !important;
+}
+
+/* Override form control focus */
+.form-control:focus {
+    border-color: var(--custom-brown) !important;
+    box-shadow: 0 0 0 0.25rem rgba(153, 115, 81, 0.25) !important;
+}
+
+.form-select:focus {
+    border-color: var(--custom-brown) !important;
+    box-shadow: 0 0 0 0.25rem rgba(153, 115, 81, 0.25) !important;
+}
+
+/* Override pagination */
+.page-link {
+    color: var(--custom-brown) !important;
+    border-color: #dee2e6 !important;
+}
+
+.page-link:hover {
+    color: white !important;
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+/* Override table header background */
+#billTable thead th,
+table thead th {
+    background-color: var(--custom-light) !important;
+    color: var(--custom-dark) !important;
+    border-color: var(--custom-brown) !important;
+}
+
+/* Override filter section background */
+.filter-section {
+    background-color: var(--custom-light) !important;
+    border: 1px solid rgba(153, 115, 81, 0.2) !important;
+}
+
+/* Override action button colors */
+.action-btn.info {
+    color: var(--custom-brown) !important;
+}
+
+.action-btn.info:hover {
+    background-color: rgba(153, 115, 81, 0.1) !important;
+}
+
+/* Override DataTables styling */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--custom-brown-dark) !important;
+    border-color: var(--custom-brown-dark) !important;
+    color: white !important;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--custom-brown) !important;
+    box-shadow: 0 0 0 0.25rem rgba(153, 115, 81, 0.25) !important;
+}
+
+/* Override alert colors */
+.alert-primary {
+    background-color: rgba(153, 115, 81, 0.1) !important;
+    border-color: var(--custom-brown) !important;
+    color: var(--custom-dark) !important;
+}
+
+.alert-success {
+    background-color: rgba(153, 115, 81, 0.1) !important;
+    border-color: var(--custom-brown) !important;
+    color: var(--custom-dark) !important;
+}
+
+/* Override badge colors */
+.badge.bg-primary {
+    background-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.badge.bg-success {
+    background-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.badge.bg-info {
+    background-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+/* Override card colors */
+.card-header {
+    background-color: var(--custom-light) !important;
+    border-bottom-color: var(--custom-brown) !important;
+}
+
+/* Override modal colors */
+.modal-header {
+    background-color: var(--custom-light) !important;
+    border-bottom-color: var(--custom-brown) !important;
+}
+
+.modal-footer {
+    background-color: var(--custom-light) !important;
+    border-top-color: var(--custom-brown) !important;
+}
+
+/* Override dropdown colors */
+.dropdown-item:hover {
+    background-color: var(--custom-light) !important;
+}
+
+.dropdown-item.active {
+    background-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+/* Override progress bar */
+.progress-bar {
+    background-color: var(--custom-brown) !important;
+}
+
+/* Override list group */
+.list-group-item.active {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+/* Override breadcrumb */
+.breadcrumb-item.active {
+    color: var(--custom-brown) !important;
+}
+
+/* Override nav tabs */
+.nav-tabs .nav-link.active {
+    color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) var(--custom-brown) white !important;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: var(--custom-light) var(--custom-light) var(--custom-brown) !important;
+}
+
+/* Override nav pills */
+.nav-pills .nav-link.active {
+    background-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+/* Override tooltip */
+.tooltip-inner {
+    background-color: var(--custom-dark) !important;
+}
+
+.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: var(--custom-dark) !important;
+}
+
+/* Override popover */
+.popover-header {
+    background-color: var(--custom-light) !important;
+    border-bottom-color: var(--custom-brown) !important;
+}
+
+/* Override spinner */
+.spinner-border.text-primary {
+    color: var(--custom-brown) !important;
+}
+
+/* Override custom scrollbar */
+.table-section::-webkit-scrollbar-thumb,
+.timeline-container::-webkit-scrollbar-thumb {
+    background: var(--custom-brown) !important;
+}
+
+.table-section::-webkit-scrollbar-thumb:hover,
+.timeline-container::-webkit-scrollbar-thumb:hover {
+    background: var(--custom-brown-dark) !important;
+}
+
+/* Override filter buttons */
+.filter-buttons a {
+    color: var(--custom-brown) !important;
+}
+
+.filter-buttons a:hover {
+    color: white !important;
+    background-color: var(--custom-brown) !important;
+}
+
+/* Override table hover effect */
+#billTable tbody tr:hover,
+table tbody tr:hover {
+    background-color: rgba(153, 115, 81, 0.05) !important;
+}
+
+/* Override action button hover */
+.action-btn:hover {
+    background-color: rgba(153, 115, 81, 0.1) !important;
+}
+
+/* Override container background */
+.container {
+    background-color: #fff !important;
+}
+
+/* Override body background */
+body {
+    background-color: var(--custom-light) !important;
+}
+
+/* Override headings */
+h2, h3, strong {
+    color: var(--custom-dark) !important;
+}
+
+/* Override table borders */
+table td, table th {
+    border-color: rgba(153, 115, 81, 0.2) !important;
+}
+
+/* Override status badges */
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--custom-dark) !important;
+    color: white !important;
+}
+
+/* Additional elements with custom brown color */
+.btn-outline-success {
+    color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+}
+
+.btn-outline-success:hover {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.btn-outline-success:focus {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.btn-outline-info {
+    color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+}
+
+.btn-outline-info:hover {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+.btn-outline-info:focus {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    color: white !important;
+}
+
+/* Override any remaining blue elements */
+[class*="text-primary"],
+[class*="bg-primary"]:not(.btn-danger):not(.btn-warning):not(.badge.bg-danger):not(.badge.bg-warning) {
+    color: var(--custom-brown) !important;
+    background-color: var(--custom-brown) !important;
+}
+
+/* Override any remaining blue borders */
+[class*="border-primary"] {
+    border-color: var(--custom-brown) !important;
+}
+
+/* Override any remaining blue shadows */
+[class*="shadow"] {
+    box-shadow: 0 0.125rem 0.25rem rgba(153, 115, 81, 0.075) !important;
+}
+
+/* Override any remaining blue focus rings */
+[class*="focus"] {
+    box-shadow: 0 0 0 0.25rem rgba(153, 115, 81, 0.25) !important;
+}
+
+/* Override any remaining blue gradients */
+[class*="gradient"] {
+    background: linear-gradient(45deg, var(--custom-brown), var(--custom-brown-dark)) !important;
+}
+
+/* Override any remaining blue transitions */
+[class*="transition"] {
+    transition: all 0.15s ease-in-out !important;
+}
+
+/* Override any remaining blue states */
+.btn:active,
+.btn:focus {
+    background-color: var(--custom-brown-dark) !important;
+    border-color: var(--custom-brown-dark) !important;
+    box-shadow: 0 0 0 0.25rem rgba(153, 115, 81, 0.25) !important;
+    color: white !important;
+}
+
+/* Override any remaining blue active states */
+.btn.active {
+    background-color: var(--custom-brown-dark) !important;
+    border-color: var(--custom-brown-dark) !important;
+    color: white !important;
+}
+
+/* Override any remaining blue disabled states */
+.btn:disabled {
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+    opacity: 0.65 !important;
+    color: white !important;
+}
+
+/* Specific fixes for filter buttons and pagination */
+.btn.active,
+.btn:active,
+.btn:focus,
+.page-item.active .page-link,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dropdown-item.active,
+.list-group-item.active,
+.nav-pills .nav-link.active {
+    color: white !important;
+    background-color: var(--custom-brown) !important;
+    border-color: var(--custom-brown) !important;
+}
+
+/* Ensure text is white on brown backgrounds */
+[class*="bg-primary"]:not(.btn-danger):not(.btn-warning):not(.badge.bg-danger):not(.badge.bg-warning) {
+    color: white !important;
+}
+
+/* Fix for any button with brown background */
+.btn[style*="background-color: #997351"],
+.btn[style*="background-color: rgb(153, 115, 81)"],
+.btn[style*="background-color: rgba(153, 115, 81"] {
+    color: white !important;
+} 

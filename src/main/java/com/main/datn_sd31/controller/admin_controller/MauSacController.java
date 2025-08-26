@@ -3,6 +3,7 @@ package com.main.datn_sd31.controller.admin_controller;
 import com.main.datn_sd31.entity.MauSac;
 import com.main.datn_sd31.entity.ThuongHieu;
 import com.main.datn_sd31.repository.Mausacrepository;
+import com.main.datn_sd31.util.ColorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +23,7 @@ public class MauSacController {
     public String hienThi(Model model) {
         model.addAttribute("mauSacs", mauSacRepository.findAll());
         model.addAttribute("mauSac", new MauSac()); // Form rỗng để thêm mới
+        model.addAttribute("availableColors", ColorUtil.getGroupedColors()); // Danh sách màu có sẵn
         return "admin/pages/thuoc-tinh/mau-sac";
     }
 
@@ -31,6 +33,7 @@ public class MauSacController {
         MauSac mauSac = mauSacRepository.findById(id).orElse(null);
         model.addAttribute("mauSacs", mauSacRepository.findAll());
         model.addAttribute("mauSac", mauSac); // Truyền object để binding lại form
+        model.addAttribute("availableColors", ColorUtil.getGroupedColors()); // Danh sách màu có sẵn
         return "admin/pages/thuoc-tinh/mau-sac";
     }
 
