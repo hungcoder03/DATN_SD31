@@ -27,6 +27,7 @@ import com.main.datn_sd31.repository.Thuonghieurepository;
 import com.main.datn_sd31.repository.Xuatxurepository;
 import com.main.datn_sd31.service.impl.Sanphamservice;
 import com.main.datn_sd31.service.ChiTietSanPhamService;
+import com.main.datn_sd31.util.ThongBaoUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -641,11 +642,83 @@ public class SanPhamController {
 
 
 
+    @PostMapping("/cap-nhat-chi-tiet/so-luong")
+    public String capNhatSoLuong(@RequestParam("id") Integer id,
+                                 @RequestParam("soLuongm") int soLuong,
+                                 RedirectAttributes redirect) {
+        ChiTietSanPham ct = chitietsanphamRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm"));
+
+        ct.setSoLuong(soLuong);
+
+        // Cập nhật giá bán nếu không có đợt giảm giá
+        if (ct.getDotGiamGia() == null) {
+            ct.setGiaBan(ct.getGiaGoc());
+        }
+
+        chitietsanphamRepo.save(ct);
+        ThongBaoUtils.addSuccess(redirect, "Cập nhật số lượng thành công!");
+        return "redirect:/admin/san-pham/xem/" + ct.getSanPham().getId();
+    }
+
+    @PostMapping("/cap-nhat-chi-tiet/gia-goc")
+    public String capNhatGiaGoc(@RequestParam("id") Integer id,
+                                @RequestParam("giaGoc") BigDecimal giaGoc,
+                                RedirectAttributes redirect) {
+        ChiTietSanPham ct = chitietsanphamRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm"));
+
+
+        // Cập nhật giá bán dựa theo đợt giảm giá
+        BigDecimal giaSauGiam = giaGoc;
+        if (ct.getDotGiamGia() != null) {
+            if ("phan_tram".equalsIgnoreCase(ct.getDotGiamGia().getLoai())) {
+                BigDecimal phanTramGiam = ct.getDotGiamGia().getGiaTriDotGiamGia();
+                if (phanTramGiam != null) {
+                    BigDecimal tiLe = BigDecimal.ONE.subtract(phanTramGiam.divide(BigDecimal.valueOf(100)));
+                    giaSauGiam = giaGoc.multiply(tiLe);
+                }
+            } else if ("tien_mat".equalsIgnoreCase(ct.getDotGiamGia().getLoai())) {
+                BigDecimal soTienGiam = ct.getDotGiamGia().getGiaTriDotGiamGia();
+                if (soTienGiam != null) {
+                    giaSauGiam = giaGoc.subtract(soTienGiam);
+                }
+            }
+            if (giaSauGiam.compareTo(BigDecimal.ZERO) < 0) {
+                giaSauGiam = BigDecimal.ZERO;
+            }
+        }
+        if(giaGoc.compareTo(ct.getGiaNhap()) < 0){
+            ThongBaoUtils.addError(redirect, "update không thành công giá gốc lớn hơn giá nhập");
+        }else{
+            ct.setGiaGoc(giaGoc);
+            ct.setGiaBan(giaSauGiam);
+            chitietsanphamRepo.save(ct);
+            ThongBaoUtils.addSuccess(redirect, "Cập nhật giá nhập thành công!");
+        }
+        return "redirect:/admin/san-pham/xem/" + ct.getSanPham().getId();
+    }
+    @PostMapping("/cap-nhat-chi-tiet/gia-nhap")
+    public String capNhatGiaNhap(@RequestParam("id") Integer id,
+                                 @RequestParam("giaNhap") BigDecimal giaNhap,
+                                 RedirectAttributes redirect,RedirectAttributes redirectAttributes) {
+        ChiTietSanPham ct = chitietsanphamRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm"));
+
+        if(giaNhap.compareTo(ct.getGiaGoc()) > 0){
+            ThongBaoUtils.addError(redirectAttributes, "update không thành công giá nhập nhỏ hơn giá gốc");
+        }else{
+            ct.setGiaNhap(giaNhap);
+            chitietsanphamRepo.save(ct);
+            ThongBaoUtils.addSuccess(redirectAttributes, "Cập nhật giá nhập thành công!");
+        }
+        return "redirect:/admin/san-pham/xem/" + ct.getSanPham().getId();
+    }
 
 
     @PostMapping("/cap-nhat-chi-tiet")
     public String capNhatChiTietSanPham(@RequestParam("id") Integer id,
-                                        @RequestParam("soLuong") int soLuong,
+                                        @RequestParam("soLuongm") int soLuong,
                                         @RequestParam("giaGoc") BigDecimal giaGoc,
                                         @RequestParam("giaNhap") BigDecimal giaNhap,
                                         RedirectAttributes redirect) {
