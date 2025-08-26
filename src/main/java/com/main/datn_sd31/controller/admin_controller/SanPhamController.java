@@ -643,20 +643,57 @@ public class SanPhamController {
 
 
 
-
-    @PostMapping("/admin/san-pham/cap-nhat-so-luong")
-    public String capNhatSoLuongChiTiet(@RequestParam("id") Integer id,
+    @PostMapping("/cap-nhat-chi-tiet")
+    public String capNhatChiTietSanPham(@RequestParam("id") Integer id,
                                         @RequestParam("soLuong") int soLuong,
+                                        @RequestParam("giaGoc") BigDecimal giaGoc,
+                                        @RequestParam("giaNhap") BigDecimal giaNhap,
                                         RedirectAttributes redirect) {
         ChiTietSanPham ct = chitietsanphamRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết sản phẩm"));
 
+        // Cập nhật số lượng, giá gốc, giá nhập
         ct.setSoLuong(soLuong);
+        ct.setGiaGoc(giaGoc);
+        ct.setGiaNhap(giaNhap);
+
+        // Xử lý giá bán
+        if (ct.getDotGiamGia() == null) {
+            // Không có đợt giảm giá → giá bán = giá gốc
+            ct.setGiaBan(giaGoc);
+        } else {
+            BigDecimal giaSauGiam = giaGoc; // mặc định là giá gốc
+
+            if ("phan_tram".equalsIgnoreCase(ct.getDotGiamGia().getLoai())) {
+                // Giảm theo phần trăm
+                BigDecimal phanTramGiam = ct.getDotGiamGia().getGiaTriDotGiamGia(); // ví dụ 10 = 10%
+                if (phanTramGiam != null) {
+                    BigDecimal tiLe = BigDecimal.ONE.subtract(phanTramGiam.divide(BigDecimal.valueOf(100)));
+                    giaSauGiam = giaGoc.multiply(tiLe);
+                }
+            } else if ("tien_mat".equalsIgnoreCase(ct.getDotGiamGia().getLoai())) {
+                // Giảm trực tiếp số tiền
+                BigDecimal soTienGiam = ct.getDotGiamGia().getGiaTriDotGiamGia(); // ví dụ 50000
+                if (soTienGiam != null) {
+                    giaSauGiam = giaGoc.subtract(soTienGiam);
+                }
+            }
+
+            // Trường hợp giá sau giảm nhỏ hơn 0 thì set về 0 để tránh lỗi
+            if (giaSauGiam.compareTo(BigDecimal.ZERO) < 0) {
+                giaSauGiam = BigDecimal.ZERO;
+            }
+
+            ct.setGiaBan(giaSauGiam);
+        }
+
         chitietsanphamRepo.save(ct);
 
-        redirect.addFlashAttribute("message", "Cập nhật số lượng thành công!");
+        redirect.addFlashAttribute("message", "Cập nhật chi tiết thành công!");
         return "redirect:/admin/san-pham/xem/" + ct.getSanPham().getId();
     }
+
+
 
     @PostMapping("/tao-ma-ngau-nhien")
     @ResponseBody

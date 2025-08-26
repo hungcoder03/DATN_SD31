@@ -152,6 +152,7 @@
                     <!--                    <th>Loại phiếu</th>-->
                     <th>Mức giảm</th>
                     <th>Giảm tối đa</th>
+                    <th>Loại phiếu</th>
                     <th>Điều kiện</th>
                     <th>Số lượng</th>
                     <th>Ngày bắt đầu</th>
@@ -176,6 +177,8 @@
                     </td>
 
                     <td th:text="${#numbers.formatInteger(item.giamToiDa, 0, 'POINT') + ' đ'}"></td>
+
+                    <td th:text="${item.loaiPhieuGiamGia==1?'Phần trăm':'Tiền mặt'}"></td>
 
                     <td th:text="${#numbers.formatInteger(item.dieuKien, 0, 'POINT') + ' đ'}"></td>
 

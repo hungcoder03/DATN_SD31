@@ -369,6 +369,29 @@ public class BanHangController {
                                      @RequestParam("cartKey") String cartKey,
                                      RedirectAttributes redirectAttributes) {
         // Check số điện thoại trùng
+        if (kh.getId() == null) {
+            // Lấy thương hiệu có mã lớn nhất
+            KhachHang last = khachHangRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
+
+            if (last != null && last.getMa() != null && last.getMa().startsWith("KH")) {
+                try {
+                    // Cắt phần số sau "KH"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            // Format mã theo dạng TH001, TH002...
+            kh.setMa(String.format("KH%03d", nextNumber));
+
+        } else {
+            // === SỬA ===
+            KhachHang existing = khachHangRepository.findById(kh.getId()).orElse(null);
+            if (existing != null) {
+                kh.setMa(existing.getMa()); // Giữ nguyên mã khi sửa
+            }
+        }
         if (khachHangRepository.existsBySoDienThoai(kh.getSoDienThoai())) {
             ThongBaoUtils.addError(redirectAttributes, "Số điện thoại đã tồn tại!");
             redirectAttributes.addFlashAttribute("soDienThoaiMoi", kh.getSoDienThoai());

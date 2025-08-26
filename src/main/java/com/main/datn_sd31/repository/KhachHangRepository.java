@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     @Query("select k from KhachHang k where k.id = :id")
     KhachHang find(@Param("id") Integer id);
-
+    KhachHang findTopByOrderByMaDesc();
     Optional<KhachHang> findByEmail(String email);
     Optional<KhachHang> findBySoDienThoai(String soDienThoai);
     List<KhachHang> findByMa(String ma);

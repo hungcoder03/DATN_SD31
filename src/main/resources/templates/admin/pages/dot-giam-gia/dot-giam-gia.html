@@ -209,7 +209,7 @@
                         <td class="tw-px-6 tw-py-4" th:text="${item.ma}"></td>
                         <td class="tw-px-6 tw-py-4" th:text="${item.ten}"></td>
                         <td class="tw-px-6 tw-py-4 price" th:attr="data-value=${item.giaTriDotGiamGia}, data-loai=${item.loai}"></td>
-                        <td class="tw-px-6 tw-py-4" th:text="${item.loai == 'phan_tram' ? 'Phần trăm' : 'Tiền mặt'}"></td>
+                        <td class="tw-px-6 tw-py-4" th:text="${item.loai == 'phan_tram'|| item.loai == 'PHAN_TRAM' ? 'Phần trăm' : 'Tiền mặt'}"></td>
                         <td class="tw-px-6 tw-py-4" th:text="${#temporals.format(item.ngayBatDau, 'dd/MM/yyyy HH:mm')}"></td>
                         <td class="tw-px-6 tw-py-4" th:text="${#temporals.format(item.ngayKetThuc, 'dd/MM/yyyy HH:mm')}"></td>
                         <td class="tw-px-6 tw-py-4">
@@ -411,7 +411,24 @@
             loadProducts();
         });
         /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.price').forEach(function (el) {
+                const value = parseFloat(el.dataset.value);
+                const loai = el.dataset.loai;
+                if (isNaN(value)) return;
+
+                if (loai && loai.toLowerCase() === 'phan_tram') {
+                    el.textContent = Math.round(value) + '%';
+                    el.classList.add("tw-text-green-600","tw-font-medium");
+                } else {
+                    el.textContent = new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+                    el.classList.add("tw-text-green-600","tw-font-medium");
+                }
+            });
+        });
+
     </script>
+
 </section>
 </body>
 </html>

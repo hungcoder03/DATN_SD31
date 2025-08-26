@@ -52,10 +52,10 @@
                         <label for="ten" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
                             Tên thương hiệu <span class="tw-text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="ten" 
-                               th:field="*{ten}" 
-                               placeholder="Nhập tên thương hiệu" 
+                        <input type="text"
+                               id="ten"
+                               th:field="*{ten}"
+                               placeholder="Nhập tên thương hiệu"
                                class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-warm-yellow-500 focus:tw-border-transparent"
                                required>
                     </div>
@@ -65,24 +65,35 @@
                         <label for="ngayTao" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
                             Ngày tạo
                         </label>
-                        <input type="text" 
-                               id="ngayTao" 
-                               th:field="*{ngayTao}" 
-                               th:value="${#temporals.format(thuongHieu.ngayTao, 'dd/MM/yyyy')}" 
-                               readonly 
+                        <input type="text"
+                               id="ngayTao"
+                               th:field="*{ngayTao}"
+                               th:value="${#temporals.format(thuongHieu.ngayTao, 'dd/MM/yyyy')}"
+                               readonly
                                class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-bg-gray-50 tw-text-gray-500">
                     </div>
 
+                <div style="flex: 1; min-width: 320px;">
+                    <label for="ngaySua">Ngày sửa</label>
+                    <input type="text" id="ngaySua" th:field="*{ngaySua}" th:value="${#temporals.format(thuongHieu.ngaySua, 'dd/MM/yyyy ')}" readonly class="form-control">
+                </div>
+            </div>
+            <div>
+                <label>Trạng thái</label><br>
+                <div class="radio-group">
+                    <label class="radio-item" for="active">
+                        <input type="radio" th:field="*{trangThai}" th:value="true" id="active" checked>
+                        Hoạt động
                     <!-- Ngày sửa -->
                     <div>
                         <label for="ngaySua" class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
                             Ngày sửa
                         </label>
-                        <input type="text" 
-                               id="ngaySua" 
-                               th:field="*{ngaySua}" 
-                               th:value="${#temporals.format(thuongHieu.ngaySua, 'dd/MM/yyyy')}" 
-                               readonly 
+                        <input type="text"
+                               id="ngaySua"
+                               th:field="*{ngaySua}"
+                               th:value="${#temporals.format(thuongHieu.ngaySua, 'dd/MM/yyyy')}"
+                               readonly
                                class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md tw-bg-gray-50 tw-text-gray-500">
                     </div>
                 </div>
@@ -94,17 +105,17 @@
                     </label>
                     <div class="tw-flex tw-space-x-6">
                         <label class="tw-flex tw-items-center">
-                            <input type="radio" 
-                                   th:field="*{trangThai}" 
-                                   th:value="true" 
+                            <input type="radio"
+                                   th:field="*{trangThai}"
+                                   th:value="true"
                                    id="active"
                                    class="tw-w-4 tw-h-4 tw-text-warm-yellow-600 tw-border-gray-300 focus:tw-ring-warm-yellow-500">
                             <span class="tw-ml-2 tw-text-sm tw-text-gray-700">Hoạt động</span>
                         </label>
                         <label class="tw-flex tw-items-center">
-                            <input type="radio" 
-                                   th:field="*{trangThai}" 
-                                   th:value="false" 
+                            <input type="radio"
+                                   th:field="*{trangThai}"
+                                   th:value="false"
                                    id="inactive"
                                    class="tw-w-4 tw-h-4 tw-text-warm-yellow-600 tw-border-gray-300 focus:tw-ring-warm-yellow-500">
                             <span class="tw-ml-2 tw-text-sm tw-text-gray-700">Không hoạt động</span>
@@ -114,11 +125,11 @@
 
                 <!-- Buttons -->
                 <div class="tw-flex tw-space-x-4">
-                    <button type="submit" 
+                    <button type="submit"
                             class="tw-px-6 tw-py-2 tw-bg-warm-yellow-600 tw-text-white tw-rounded-md hover:tw-bg-warm-yellow-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-warm-yellow-500 focus:tw-ring-offset-2 tw-transition-colors">
                         <span th:text="${thuongHieu.id == null} ? 'Thêm mới' : 'Cập nhật'"></span>
                     </button>
-                    <a href="/admin/thuong-hieu" 
+                    <a href="/admin/thuong-hieu"
                        class="tw-px-6 tw-py-2 tw-bg-gray-500 tw-text-white tw-rounded-md hover:tw-bg-gray-600 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-gray-500 focus:tw-ring-offset-2 tw-transition-colors">
                         Hủy
                     </a>
@@ -131,7 +142,7 @@
             <div class="tw-px-6 tw-py-4 tw-border-b tw-border-gray-200">
                 <h2 class="tw-text-xl tw-font-semibold tw-text-gray-900">Danh sách Thương hiệu</h2>
             </div>
-            
+
             <div class="tw-overflow-x-auto">
                 <table class="tw-min-w-full tw-divide-y tw-divide-gray-200">
                     <thead class="tw-bg-gray-50">
@@ -153,17 +164,17 @@
                             <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500" th:text="${#temporals.format(th.ngayTao, 'dd/MM/yyyy')}"></td>
                             <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500" th:text="${#temporals.format(th.ngaySua, 'dd/MM/yyyy')}"></td>
                             <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap">
-                                <span th:if="${th.trangThai}" 
+                                <span th:if="${th.trangThai}"
                                       class="tw-inline-flex tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-green-100 tw-text-green-800">
                                     Hoạt động
                                 </span>
-                                <span th:unless="${th.trangThai}" 
+                                <span th:unless="${th.trangThai}"
                                       class="tw-inline-flex tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-red-100 tw-text-red-800">
                                     Không hoạt động
                                 </span>
                             </td>
                             <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-font-medium">
-                                <a th:href="@{/admin/thuong-hieu/edit/{id}(id=${th.id})}" 
+                                <a th:href="@{/admin/thuong-hieu/edit/{id}(id=${th.id})}"
                                    class="tw-text-warm-yellow-600 hover:tw-text-warm-yellow-900 tw-mr-4 tw-transition-colors">
                                     Sửa
                                 </a>
