@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface Dotgiamgiarepository extends JpaRepository<DotGiamGia,Integer>, JpaSpecificationExecutor<DotGiamGia> {
     // Kiểm tra mã đợt giảm giá đã tồn tại hay chưa
     boolean existsByMa(String ma);
-
+    DotGiamGia findTopByOrderByMaDesc();
     boolean existsByMaAndIdNot(@Size(max = 50) @NotNull String ma, Integer id);
 }
