@@ -383,7 +383,7 @@ public class QuanLyTaiKhoan {
     // Cập nhật nhân viên
     @PostMapping("/nhanvien/update")
     public String updateNhanVien(
-            @Valid @ModelAttribute("nhanvien") NhanVien nv,  // thêm @Valid
+            @ModelAttribute("nhanvien") NhanVien nv,
             BindingResult result,
             @RequestParam(value = "newPassword", required = false) String newPassword,
             @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
