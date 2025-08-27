@@ -234,48 +234,61 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
             return new KetQuaCapNhatTrangThai(false, "Trạng thái mới không được trùng với trạng thái hiện tại");
         }
 
-        //Cho phép thay đổi các trạng thái tiếp theo
+        String message = null;
         boolean hopLe = switch (trangThaiHienTai) {
-            case CHO_XAC_NHAN ->
-                    trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN ||
-                    trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+            case CHO_XAC_NHAN -> {
+                if (hoaDonDTO.getTrangThaiHoaDonInteger() == 1) {
+                    message = "Hóa đơn đang chờ thanh toán, không thể chuyển về trạng thái này";
+                    yield false;
+                }
+                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN ||
+                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+            }
             case XAC_NHAN -> {
                 if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH
                         && "Chưa thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
+                    message = "Không thể hoàn thành khi chưa thanh toán";
                     yield false;
-                } else if (hoaDonDTO.getDiaChi() == null || hoaDonDTO.getDiaChi().isEmpty()) {
-                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH;
+                } else if (hoaDonDTO.getPhiVanChuyen().equals(BigDecimal.ZERO)) {
+                    message = "Không thể hoàn thành vì chưa có địa chỉ giao hàng";
+                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
                 }
-                yield
-                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.CHO_GIAO_HANG ||
-                                trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.CHO_GIAO_HANG ||
+                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+            }
+            case DA_GIAO -> {
+                if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH &&
+                        !"Đã thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
+                    message = "Không thể hoàn thành vì hóa đơn chưa được thanh toán";
+                    yield false;
+                }
+                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH ||
+                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
             }
             case CHO_GIAO_HANG ->
                     trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_GIAO ||
-                    trangThaiMoiEnum == TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG;
-            case DA_GIAO -> {
-                if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH && !"Đã thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
-                    yield false;
-                }
-                yield
-                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH ||
-                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
-            }
+                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG;
             case GIAO_KHONG_THANH_CONG -> {
+                message = "Đơn giao không thành công, chỉ có thể hủy hoặc xác nhận hoàn hàng";
                 yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY ||
-                      trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
+                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
             }
             case YEU_CAU_HOAN_HANG ->
                     trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG ||
-                    trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH;
+                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH;
             case XAC_NHAN_HOAN_HANG ->
                     trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_HOAN;
-            case HOAN_THANH, HUY, DA_HOAN  -> false;
+            case HOAN_THANH, HUY, DA_HOAN -> {
+                message = "Đơn hàng đã kết thúc, không thể thay đổi trạng thái nữa";
+                yield false;
+            }
         };
 
         if (!hopLe) {
-            return new KetQuaCapNhatTrangThai(false, "Trạng thái mới không hợp lệ theo luồng xử lý");
+            return new KetQuaCapNhatTrangThai(false,
+                    message != null ? message : "Trạng thái mới không hợp lệ theo luồng xử lý");
         }
+
 
         List<HoaDonChiTietDTO> hdctList = hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(maHoaDon);
 
