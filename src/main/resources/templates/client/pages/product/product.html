@@ -337,10 +337,17 @@
                             <div th:each="sp : ${danhSachSanPham}" class="tw-bg-white tw-rounded-2xl tw-shadow-sm tw-border tw-border-gray-100 tw-overflow-hidden tw-group tw-transition-all tw-duration-300 hover:tw-shadow-lg hover:tw-shadow-gray-200/50 hover:tw-scale-[1.02] tw-cursor-pointer">
                                 <a th:href="@{'/san-pham/chi-tiet/' + ${sp.id}}" class="tw-block tw-relative tw-aspect-square tw-bg-gradient-to-br tw-from-gray-50 tw-to-gray-100 tw-overflow-hidden">
                                     <img th:each="img : ${sp.hinhAnhs}" th:if="${img.loaiAnh == 0}" th:src="@{${img.url}}" th:alt="${sp.ten}" class="tw-w-full tw-h-full tw-object-cover tw-transition-all tw-duration-500 group-hover:tw-scale-110 group-hover:tw-rotate-1"/>
-                                    
-                                    <!-- Discount Badge with Apple-style design -->
-                                    <div th:if="${sp.dotGiamGia != null}" class="tw-absolute tw-top-3 tw-left-3 tw-bg-gradient-to-r tw-from-red-500 tw-to-pink-500 tw-text-white tw-text-xs tw-font-semibold tw-rounded-full tw-px-3 tw-py-1.5 tw-shadow-lg tw-shadow-red-500/25 tw-backdrop-blur-sm tw-border tw-border-white/20">
-                                        <span th:text="${sp.dotGiamGia.giaTriDotGiamGia} + '% OFF'">-20% OFF</span>
+
+                                    <div th:if="${sp.dotGiamGia != null}"
+                                         class="tw-absolute tw-top-3 tw-left-3 tw-bg-gradient-to-r tw-from-red-500 tw-to-pink-500
+                                            tw-text-white tw-text-xs tw-font-semibold tw-rounded-full tw-px-3 tw-py-1.5
+                                            tw-shadow-lg tw-shadow-red-500/25 tw-backdrop-blur-sm tw-border tw-border-white/20">
+
+                                    <span th:text="${sp.dotGiamGia.loai == 'tien_mat'
+                                                    ? @utils.formatCurrency(sp.dotGiamGia.giaTriDotGiamGia) + ' VNĐ OFF'
+                                                    : @utils.formatCurrency(sp.dotGiamGia.giaTriDotGiamGia) + '% OFF'}">
+                                        -20% OFF
+                                    </span>
                                     </div>
                                     
                                     <!-- Wishlist Button with Apple-style design -->

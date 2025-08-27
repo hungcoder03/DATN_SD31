@@ -58,7 +58,7 @@ public class HoaDonUtils {
     }
 
     public boolean choPhepDanhGiaDonHang(TrangThaiLichSuHoaDon trangThai, Integer idCtsp, Integer idKhachHang) {
-        System.out.println("Khong Cho phep: " + danhGiaService.checkDanhGiaExist(idCtsp, idKhachHang));
+//        System.out.println("Khong Cho phep: " + danhGiaService.checkDanhGiaExist(idCtsp, idKhachHang));
         if (danhGiaService.checkDanhGiaExist(idCtsp, idKhachHang)) {
             return false;
         }
