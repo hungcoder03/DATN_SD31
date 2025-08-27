@@ -31,7 +31,7 @@ public class DotGiamGiaAutoService {
     @Scheduled(fixedRate = 60000) // Chạy mỗi phút
     public void autoUpdateDotGiamGiaStatus() {
         try {
-            log.info("Bắt đầu job tự động cập nhật trạng thái đợt giảm giá...");
+//            log.info("Bắt đầu job tự động cập nhật trạng thái đợt giảm giá...");
             
             List<DotGiamGia> allDots = dotGiamGiaRepository.findAll();
             LocalDateTime now = LocalDateTime.now();
@@ -69,7 +69,7 @@ public class DotGiamGiaAutoService {
             
             // Lưu tất cả thay đổi
             dotGiamGiaRepository.saveAll(allDots);
-            log.info("Hoàn thành job tự động cập nhật trạng thái đợt giảm giá");
+//            log.info("Hoàn thành job tự động cập nhật trạng thái đợt giảm giá");
             
         } catch (Exception e) {
             log.error("Lỗi trong job tự động cập nhật trạng thái đợt giảm giá: {}", e.getMessage(), e);

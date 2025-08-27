@@ -396,7 +396,7 @@
                     </thead>
                     <tbody>
                     <tr th:each="hoaDon, index : ${hoaDonList}">
-                        <td th:text="${index.count}"></td>
+                        <td th:text="${index.index + 1 + (pageInfo.currentPage * pageInfo.size)}"></td>
                         <td th:text="${hoaDon.ma}"></td>
                         <td th:text="${hoaDon.tenKH != null ? hoaDon.tenKH : 'Khách lẻ' }"></td>
                         <td th:text="${hoaDon.trangThaiLichSuHoaDonMoTa}"></td>
