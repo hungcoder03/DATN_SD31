@@ -2,197 +2,137 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout}">
 <head>
-    <title>Admin pannel</title>
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body>
 <section layout:fragment="content">
-    <form method="get" th:action="@{/admin/thong-ke}">
-        <div class="row mb-3">
-            <!-- Chọn loại thời gian -->
-            <div class="col-md-3">
-                <select class="form-control" id="typeCalendarSelect">
-                    <option value="ngay" th:selected="${typeCalendar == 'ngay'}">Theo ngày</option>
-                    <option value="tuan" th:selected="${typeCalendar == 'tuan'}">Theo tuần</option>
-                    <option value="thang" th:selected="${typeCalendar == 'thang'}">Theo tháng</option>
-                    <option value="nam" th:selected="${typeCalendar == 'nam'}">Theo năm</option>
-                    <option value="custom" th:selected="${typeCalendar == 'custom'}">Tùy chỉnh</option>
-                </select>
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Filter -->
+        <form method="get" th:action="@{/admin/thong-ke}" class="bg-white rounded-xl shadow p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Loại thời gian</label>
+                    <select class="block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" id="typeCalendarSelect">
+                        <option value="ngay" th:selected="${typeCalendar == 'ngay'}">Theo ngày</option>
+                        <option value="tuan" th:selected="${typeCalendar == 'tuan'}">Theo tuần</option>
+                        <option value="thang" th:selected="${typeCalendar == 'thang'}">Theo tháng</option>
+                        <option value="nam" th:selected="${typeCalendar == 'nam'}">Theo năm</option>
+                        <option value="custom" th:selected="${typeCalendar == 'custom'}">Tùy chỉnh</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
+                    <input type="date" class="block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" name="startDate"
+                           th:value="${#temporals.format(startDate, 'yyyy-MM-dd')}" id="startDateInput" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
+                    <input type="date" class="block w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" name="endDate"
+                           th:value="${#temporals.format(endDate, 'yyyy-MM-dd')}" id="endDateInput" />
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Lọc</button>
+                    <a th:href="@{/admin/thong-ke}" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Reset</a>
+                </div>
             </div>
+            <input type="hidden"  name="typeCalendar" value="custom" id="typeCalendarHidden"/>
+        </form>
 
-            <!-- Ngày bắt đầu -->
-            <div class="col-md-3">
-                <input type="date" class="form-control" name="startDate"
-                       th:value="${#temporals.format(startDate, 'yyyy-MM-dd')}" id="startDateInput" />
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="text-sm text-gray-500">Đơn thành công</div>
+                <div class="text-2xl font-bold text-gray-800" th:text="${donThanhCong}">0</div>
+                <div class="text-xs text-gray-400 mt-1">Thống kê [[${labelThoiGian}]]</div>
             </div>
-
-            <!-- Ngày kết thúc -->
-            <div class="col-md-3">
-                <input type="date" class="form-control" name="endDate"
-                       th:value="${#temporals.format(endDate, 'yyyy-MM-dd')}" id="endDateInput" />
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="text-sm text-gray-500">Đơn trả</div>
+                <div class="text-2xl font-bold text-gray-800" th:text="${donTra}">0</div>
+                <div class="text-xs text-gray-400 mt-1">[[${labelThoiGian}]]</div>
             </div>
-
-            <!-- Submit -->
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary w-100">Lọc</button>
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="text-sm text-gray-500">Đơn hủy</div>
+                <div class="text-2xl font-bold text-gray-800" th:text="${donHuy}">0</div>
+                <div class="text-xs text-gray-400 mt-1">[[${labelThoiGian}]]</div>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="text-sm text-gray-500">Doanh thu</div>
+                <div class="text-2xl font-bold text-gray-800" th:text="${@utils.formatCurrency(doanhThu)}">0 ₫</div>
+                <div class="text-xs text-gray-400 mt-1">[[${labelThoiGian}]]</div>
             </div>
         </div>
 
-        <!-- Ẩn trường này để set về custom nếu chọn ngày -->
-        <input type="hidden"  name="typeCalendar" value="custom" id="typeCalendarHidden"/>
-    </form>
-
-    <div class="row">
-        <!-- Doanh thu -->
-        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 grid-margin stretch-card">
-            <div class="card card-statistics">
-                <div class="card-body">
-                    <div class="clearfix">
-
-                        <div class="float-left">
-                            <i class="mdi mdi-check-circle-outline text-primary icon-lg"></i>
-                        </div>
-                        <div class="float-right">
-                            <p class="mb-0 text-right">Đơn thành công</p>
-                            <h3 class="font-weight-medium text-right mb-0" th:text="${donThanhCong}"></h3>
-                        </div>
-                    </div>
-                    <p class="text-muted mt-3 mb-0">
-                        <i class="mdi mdi-calendar mr-1"></i> Thống kê [[${labelThoiGian}]]
-                    </p>
+        <!-- Charts Row 1: Revenue line + Payment donut -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow p-4 lg:col-span-2">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-gray-800">Doanh thu theo thời gian</h3>
                 </div>
+                <canvas id="revenueChart" height="120"></canvas>
+            </div>
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-gray-800">Phương thức thanh toán</h3>
+                </div>
+                <canvas id="paymentMethodChart" height="120"></canvas>
             </div>
         </div>
 
-        <!-- Đơn thành công -->
-        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 grid-margin stretch-card">
-            <div class="card card-statistics">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <div class="float-left">
-                            <i class="mdi mdi-close-circle text-danger icon-lg"></i>
-                        </div>
-                        <div class="float-right">
-                            <p class="mb-0 text-right">Đơn trả</p>
-                            <h3 class="font-weight-medium text-right mb-0" th:text="${donTra}"></h3>
-                        </div>
-                    </div>
-                    <p class="text-muted mt-3 mb-0">
-                        <i class="mdi mdi-check mr-1"></i> [[${labelThoiGian}]]
-                    </p>
+        <!-- Charts Row 2: Orders vs Revenue -->
+        <div class="grid grid-cols-1 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-semibold text-gray-800">Số đơn vs Doanh thu</h3>
                 </div>
+                <canvas id="ordersRevenueChart" height="120"></canvas>
             </div>
         </div>
 
-        <!-- Đơn hủy -->
-        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 grid-margin stretch-card">
-            <div class="card card-statistics">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <div class="float-left">
-                            <i class="mdi mdi-close-circle text-danger icon-lg"></i>
-                        </div>
-                        <div class="float-right">
-                            <p class="mb-0 text-right">Đơn hủy</p>
-                            <h3 class="font-weight-medium text-right mb-0" th:text="${donHuy}"></h3>
-                        </div>
-                    </div>
-                    <p class="text-muted mt-3 mb-0">
-                        <i class="mdi mdi-cancel mr-1"></i> [[${labelThoiGian}]]
-                    </p>
-                </div>
+        <!-- Top products table (kept) -->
+        <div class="bg-white rounded-xl shadow p-4 mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="text-lg font-semibold text-gray-800">Top sản phẩm</h4>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-700">
+                        <tr>
+                            <th class="p-3 text-left">#</th>
+                            <th class="p-3 text-left">Mã Sản phẩm</th>
+                            <th class="p-3 text-left">Sản phẩm</th>
+                            <th class="p-3 text-left">Đã bán</th>
+                            <th class="p-3 text-left">Số lượng tồn</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topProductsBody" class="divide-y divide-gray-100">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Top customers table -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="text-lg font-semibold text-gray-800">Top khách hàng theo doanh thu</h4>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-700">
+                        <tr>
+                            <th class="p-3 text-left">#</th>
+                            <th class="p-3 text-left">Khách hàng</th>
+                            <th class="p-3 text-left">Số đơn</th>
+                            <th class="p-3 text-left">Tổng chi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topCustomersBody" class="divide-y divide-gray-100">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <div class="row mt-3">
-        <!-- Đơn trả -->
-        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 grid-margin stretch-card">
-            <div class="card card-statistics">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <div class="float-left">
-                            <i class="mdi mdi-cash-multiple text-success icon-lg"></i>
-                        </div>
-                        <div class="float-right">
-                            <p class="mb-0 text-right">Doanh thu</p>
-                            <h3 class="font-weight-medium text-right mb-0" th:text="${@utils.formatCurrency(doanhThu)}"></h3>
-                        </div>
-
-                    </div>
-                    <p class="text-muted mt-3 mb-0">
-                        <i class="mdi mdi-cancel mr-1"></i> [[${labelThoiGian}]]
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tổng sản phẩm -->
-        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 grid-margin stretch-card">
-            <div class="card card-statistics">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <div class="float-left">
-                            <i class="mdi mdi-cube-outline text-warning icon-lg"></i>
-                        </div>
-                        <div class="float-right">
-                            <p class="mb-0 text-right">Sản phẩm</p>
-                            <h3 class="font-weight-medium text-right mb-0" th:text="${tongSanPham}"></h3>
-                        </div>
-                    </div>
-                    <p class="text-muted mt-3 mb-0">
-                        <i class="mdi mdi-package-variant mr-1"></i> Tính đến hiện tại
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-12 grid-margin">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Orders</h4>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr>
-                                <th>
-                                    #
-                                </th>
-                                <th>
-                                    Mã Sản phẩm
-                                </th>
-                                <th>
-                                    Sản phẩm
-                                </th>
-                                <th>
-                                    Đã bán
-                                </th>
-                                <th>
-                                    Số lượng tồn
-                                </th>
-<!--                                <th>-->
-<!--                                    Giá bán-->
-<!--                                </th>-->
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="sp,index : ${sanPhamThongKeList}"
-                                th:classappend="${sp.soLuongTon == 0} ? 'bg-danger-subtle' : ''">
-                                <td th:text="${index.count}"></td>
-                                <td th:text="${sp.maSp}"></td>
-                                <td th:text="${sp.tenCt}"></td>
-                                <td th:text="${sp.soLuongDaBan}"></td>
-                                <td th:text="${sp.soLuongTon}"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <script>
         const typeCalendarSelect = document.getElementById("typeCalendarSelect");
@@ -200,59 +140,34 @@
         const startDateInput = document.getElementById("startDateInput");
         const endDateInput = document.getElementById("endDateInput");
 
-        // Khi chọn ngày/tháng/năm/... từ dropdown
         typeCalendarSelect.addEventListener("change", function () {
             const today = new Date();
             let startDate, endDate;
-
             switch (this.value) {
                 case "ngay":
-                    startDate = endDate = today;
-                    break;
+                    startDate = endDate = today; break;
                 case "tuan":
-                    const dayOfWeek = today.getDay(); // 0: CN, 1: T2, ..., 6: T7
+                    const dayOfWeek = today.getDay();
                     const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-                    startDate = new Date(today);
-                    startDate.setDate(today.getDate() + diffToMonday);
-                    endDate = new Date(startDate);
-                    endDate.setDate(startDate.getDate() + 6);
-                    break;
+                    startDate = new Date(today); startDate.setDate(today.getDate() + diffToMonday);
+                    endDate = new Date(startDate); endDate.setDate(startDate.getDate() + 6); break;
                 case "thang":
                     startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                    break;
+                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0); break;
                 case "nam":
                     startDate = new Date(today.getFullYear(), 0, 1);
-                    endDate = new Date(today.getFullYear(), 11, 31);
-                    break;
-                case "custom":
-                    // Không làm gì
-                    return;
+                    endDate = new Date(today.getFullYear(), 11, 31); break;
+                case "custom": return;
             }
-
-            // Format yyyy-MM-dd
             startDateInput.value = startDate.toISOString().split('T')[0];
             endDateInput.value = endDate.toISOString().split('T')[0];
-
-            // Đồng bộ hidden input với giá trị select
             typeCalendarHidden.value = this.value;
         });
-
-        // Khi chọn ngày thủ công => chuyển dropdown sang custom
-        startDateInput.addEventListener("change", function () {
-            typeCalendarSelect.value = "custom";
-            typeCalendarHidden.value = "custom";
-        });
-        endDateInput.addEventListener("change", function () {
-            typeCalendarSelect.value = "custom";
-            typeCalendarHidden.value = "custom";
-        });
+        startDateInput.addEventListener("change", function () { typeCalendarSelect.value = "custom"; typeCalendarHidden.value = "custom"; });
+        endDateInput.addEventListener("change", function () { typeCalendarSelect.value = "custom"; typeCalendarHidden.value = "custom"; });
     </script>
 
-
-
-
-
+    <script th:src="@{/js/dashboard.js}"></script>
 </section>
 </body>
 </html>

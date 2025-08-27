@@ -1,8 +1,10 @@
 package com.main.datn_sd31.service.impl;
 
 import com.main.datn_sd31.dto.thong_ke_dto.ThongKeSanPhamDTO;
+import com.main.datn_sd31.dto.thong_ke_dto.TopCustomerDTO;
 import com.main.datn_sd31.entity.HoaDon;
 import com.main.datn_sd31.entity.HoaDonChiTiet;
+import com.main.datn_sd31.entity.KhachHang;
 import com.main.datn_sd31.repository.Chitietsanphamrepository;
 import com.main.datn_sd31.repository.HoaDonChiTietRepository;
 import com.main.datn_sd31.repository.HoaDonRepository;
@@ -79,4 +81,28 @@ public class ThongKeServiceIpml implements ThongKeService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<TopCustomerDTO> getTopCustomersByRevenue(LocalDateTime start, LocalDateTime end, int limit) {
+        List<HoaDon> hoaDons = hoaDonRepository.findHoaDonByNgayAndTrangThai(start, end, 3);
+        java.util.Map<Integer, TopCustomerDTO> map = new java.util.HashMap<>();
+        for (HoaDon hd : hoaDons) {
+            KhachHang kh = hd.getKhachHang();
+            if (kh == null) continue;
+            int id = kh.getId();
+            TopCustomerDTO agg = map.getOrDefault(id, TopCustomerDTO.builder()
+                    .id(id)
+                    .ten(kh.getTen())
+                    .soDon(0L)
+                    .tongChi(java.math.BigDecimal.ZERO)
+                    .build());
+            agg.setSoDon(agg.getSoDon() + 1);
+            java.math.BigDecimal chi = hd.getThanhTien().subtract(hd.getPhiVanChuyen());
+            agg.setTongChi(agg.getTongChi().add(chi));
+            map.put(id, agg);
+        }
+        return map.values().stream()
+                .sorted((a,b) -> b.getTongChi().compareTo(a.getTongChi()))
+                .limit(limit)
+                .collect(java.util.stream.Collectors.toList());
+    }
 }
