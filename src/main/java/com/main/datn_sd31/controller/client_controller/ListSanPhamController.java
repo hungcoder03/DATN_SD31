@@ -199,14 +199,10 @@ public class ListSanPhamController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            System.out.println("=== ENTERING PRODUCT DETAIL CONTROLLER ===");
-            System.out.println("Product ID: " + id);
             
             // --- 1. LOAD SẢN PHẨM, HÌNH, SIZE, MÀU ---
             SanPham sanPham = sanPhamService.findByIdActive(id);
-            System.out.println("SanPham found: " + (sanPham != null));
             if (sanPham == null) {
-                System.out.println("SanPham is null, redirecting...");
                 return "redirect:/san-pham/danh-sach";
             }
         
@@ -227,8 +223,6 @@ public class ListSanPhamController {
         
         // Kiểm tra nếu không có ChiTietSanPham hoặc sản phẩm không hoạt động
         if (chiTiets.isEmpty() || !sanPham.getTrangThai()) {
-            // Tạm thời comment redirect để debug
-            System.out.println("WARNING: No ChiTietSanPham found for product ID: " + id + " or product is inactive");
             // redirectAttributes.addFlashAttribute("error", "Sản phẩm này chưa có thông tin chi tiết hoặc đã ngưng hoạt động!");
             // return "redirect:/san-pham/danh-sach";
         }
@@ -275,21 +269,7 @@ public class ListSanPhamController {
         model.addAttribute("dsMauSac", dsMauSac);
         model.addAttribute("mauSacCount", dsMauSac.size());
         
-        // Debug logging
-        System.out.println("=== DEBUG PRODUCT DETAIL ===");
-        System.out.println("Total ChiTietSanPham: " + chiTiets.size());
-        System.out.println("Size count: " + dsSize.size());
-        System.out.println("Color count: " + dsMauSac.size());
-        System.out.println("GiaBanMin: " + giaBanMin);
-        System.out.println("GiaGocMin: " + giaGocMin);
-        chiTiets.forEach(ct -> {
-            System.out.println("ChiTiet ID: " + ct.getId() + 
-                             ", Size: " + (ct.getSize() != null ? ct.getSize().getTen() : "NULL") +
-                             ", Color: " + (ct.getMauSac() != null ? ct.getMauSac().getTen() : "NULL") +
-                             ", GiaBan: " + ct.getGiaBan() +
-                             ", SoLuong: " + ct.getSoLuong());
-        });
-        System.out.println("=== END DEBUG ===");
+
 
         // Chi tiết với tồn kho (dùng cho JS update giá + kho)
         List<Map<String,Object>> dsChiTietMap = chiTiets.stream()
@@ -403,7 +383,7 @@ public class ListSanPhamController {
         model.addAttribute("currentPage",  page);
         model.addAttribute("totalPages",   totalPages);
 
-        System.out.println("=== RETURNING TEMPLATE ===");
+
 
         SanPham sp = sanPhamService.findbyid(id);
 //            System.out.println("tim thay sp");
@@ -671,7 +651,6 @@ public class ListSanPhamController {
                         // Auto-generate color based on name if not set
                         String generatedColor = generateColorFromName(mauSac.getTen());
                         mauSac.setMaMau(generatedColor);
-                        System.out.println("Generated color for '" + mauSac.getTen() + "': " + generatedColor);
                     }
                 })
                 .collect(Collectors.toList());

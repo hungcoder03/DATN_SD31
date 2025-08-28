@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -257,6 +259,58 @@ public class ThongKeController {
         body.put("profit", profit);
         body.put("margin", margin);
         return ResponseEntity.ok(body);
+    }
+
+    @GetMapping(value = "/api/export/profit-series.csv")
+    @ResponseBody
+    public ResponseEntity<byte[]> exportProfitSeriesCsv(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        LocalDate start = startDate;
+        LocalDate end = endDate;
+        StringBuilder sb = new StringBuilder();
+        sb.append("date,revenue,cogs,profit,margin_percent\n");
+        LocalDate d = start;
+        DateTimeFormatter dfIso = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        while (!d.isAfter(end)) {
+            LocalDateTime from = d.atStartOfDay();
+            LocalDateTime to = d.atTime(23, 59, 59);
+            var list = hoaDonRepository.findHoaDonByNgayAndTrangThai(from, to, 3);
+            java.math.BigDecimal rev = java.math.BigDecimal.ZERO;
+            java.math.BigDecimal cost = java.math.BigDecimal.ZERO;
+            if (list != null) {
+                for (var hd : list) {
+                    if (hd.getThanhTien() != null) rev = rev.add(hd.getThanhTien());
+                    if (hd.getHoaDonChiTiets() != null) {
+                        for (var ct : hd.getHoaDonChiTiets()) {
+                            java.math.BigDecimal giaNhap = java.math.BigDecimal.ZERO;
+                            if (ct.getChiTietSanPham() != null && ct.getChiTietSanPham().getGiaNhap() != null) {
+                                giaNhap = ct.getChiTietSanPham().getGiaNhap();
+                            }
+                            java.math.BigDecimal lineCost = giaNhap.multiply(java.math.BigDecimal.valueOf(ct.getSoLuong() != null ? ct.getSoLuong() : 0));
+                            cost = cost.add(lineCost);
+                        }
+                    }
+                }
+            }
+            java.math.BigDecimal prof = rev.subtract(cost);
+            double mar = rev.compareTo(java.math.BigDecimal.ZERO) > 0
+                    ? prof.divide(rev, java.math.MathContext.DECIMAL64).doubleValue() * 100d
+                    : 0d;
+            sb.append(d.format(dfIso)).append(',')
+              .append(rev).append(',')
+              .append(cost).append(',')
+              .append(prof).append(',')
+              .append(String.format(java.util.Locale.US, "%.2f", mar))
+              .append('\n');
+            d = d.plusDays(1);
+        }
+        byte[] bytes = sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("text", "csv"));
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=profit_series.csv");
+        return ResponseEntity.ok().headers(headers).body(bytes);
     }
 
     @GetMapping("/api/order-channels")

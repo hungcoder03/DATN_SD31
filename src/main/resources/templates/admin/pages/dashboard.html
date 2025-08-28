@@ -3,7 +3,8 @@
       layout:decorate="~{admin/layout}">
 <head>
     <title>Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Sử dụng Tailwind CSS qua CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 
 </head>
 <body>
@@ -35,6 +36,7 @@
                 <div class="flex gap-2">
                     <button type="submit" class="flex-1 px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Lọc</button>
                     <a th:href="@{/admin/thong-ke}" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Reset</a>
+                    <a id="btnExportCsv" href="#" class="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Export CSV</a>
                 </div>
             </div>
             <input type="hidden"  name="typeCalendar" value="custom" id="typeCalendarHidden"/>
@@ -68,13 +70,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
             <div class="bg-white rounded-xl shadow p-4 lg:col-span-2">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-lg font-semibold text-gray-800">Doanh thu theo thời gian</h3>
+                    <h3 class="text-lg font-semibold text-gray-800">Phân tích lợi nhuận</h3>
                 </div>
                 <canvas id="revenueChart" height="120"></canvas>
             </div>
             <div class="bg-white rounded-xl shadow p-4">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-lg font-semibold text-gray-800">Phương thức thanh toán</h3>
+                    <h3 class="text-lg font-semibold text-gray-800">Khách hàng mua qua kênh</h3>
                 </div>
                 <canvas id="paymentMethodChart" height="120"></canvas>
             </div>
@@ -165,6 +167,16 @@
         });
         startDateInput.addEventListener("change", function () { typeCalendarSelect.value = "custom"; typeCalendarHidden.value = "custom"; });
         endDateInput.addEventListener("change", function () { typeCalendarSelect.value = "custom"; typeCalendarHidden.value = "custom"; });
+
+        const btnExport = document.getElementById("btnExportCsv");
+        if (btnExport) {
+            btnExport.addEventListener('click', function(e){
+                e.preventDefault();
+                const from = startDateInput.value; const to = endDateInput.value;
+                const url = `/admin/thong-ke/api/export/profit-series.csv?startDate=${from}&endDate=${to}`;
+                window.location.href = url;
+            });
+        }
     </script>
 
     <script th:src="@{/js/dashboard.js}"></script>

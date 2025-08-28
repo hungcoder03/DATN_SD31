@@ -4,8 +4,10 @@ import com.main.datn_sd31.entity.ChiTietSanPham;
 import com.main.datn_sd31.entity.DotGiamGia;
 import com.main.datn_sd31.repository.Chitietsanphamrepository;
 import com.main.datn_sd31.repository.Dotgiamgiarepository;
+import com.main.datn_sd31.service.DotGiamGiaAutoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,9 +28,11 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/admin/dot-giam-gia")
 @RequiredArgsConstructor
+@Slf4j
 public class dotGiamGiaController {
 
     private final Dotgiamgiarepository dotGiamGiaRepository;
+    private final DotGiamGiaAutoService dotGiamGiaAutoService;
 
     //  Cập nhật trạng thái tự động theo thời gian (đơn giản hóa vì đã có service riêng)
     private void capNhatTrangThaiTuDong() {
@@ -41,7 +45,14 @@ public class dotGiamGiaController {
             if (now.isBefore(dgg.getNgayBatDau())) {
                 dgg.setTrangThai(0); // Chuẩn bị áp dụng
             } else if (now.isAfter(dgg.getNgayKetThuc())) {
-                dgg.setTrangThai(2); // Ngừng hoạt động
+                // Nếu sang trạng thái ngừng hoạt động thì khôi phục giá ngay
+                if (dgg.getTrangThai() == null || dgg.getTrangThai() != 2) {
+                    dgg.setTrangThai(2); // Ngừng hoạt động
+                    // Khôi phục giá bán = giá gốc và gỡ liên kết đợt
+                    dotGiamGiaAutoService.restoreOriginalPricesForExpiredDot(dgg.getId());
+                } else {
+                    dgg.setTrangThai(2);
+                }
             } else {
                 dgg.setTrangThai(1); // Đang hoạt động
             }
@@ -142,35 +153,41 @@ public class dotGiamGiaController {
             return res;
         }
 
+        // Build Specification for keyword and applied filters
+        Specification<ChiTietSanPham> spec = Specification.where(null);
+
+        if (keyword != null && !keyword.isBlank()) {
+            String k = keyword.trim().toLowerCase();
+            spec = spec.and((root, q, cb) -> {
+                var sp = root.join("sanPham");
+                var tenCt = cb.lower(root.get("tenCt"));
+                var maSp = cb.lower(sp.get("ma"));
+                var tenSp = cb.lower(sp.get("ten"));
+                String like = "%" + k + "%";
+                return cb.or(
+                        cb.like(tenCt, like),
+                        cb.like(maSp, like),
+                        cb.like(tenSp, like)
+                );
+            });
+        }
+
+        if ("APPLIED".equalsIgnoreCase(applied)) {
+            spec = spec.and((root, q, cb) -> cb.equal(root.join("dotGiamGia").get("id"), dotId));
+        } else if ("APPLIED_OTHER".equalsIgnoreCase(applied)) {
+            spec = spec.and((root, q, cb) -> cb.and(
+                    cb.isNotNull(root.get("dotGiamGia")),
+                    cb.notEqual(root.join("dotGiamGia").get("id"), dotId)
+            ));
+        } else if ("NOT_APPLIED".equalsIgnoreCase(applied)) {
+            spec = spec.and((root, q, cb) -> cb.isNull(root.get("dotGiamGia")));
+        }
+
         Pageable pageable = PageRequest.of(page, size);
-        Page<ChiTietSanPham> pageData = chiTietSanPhamRepo.findAll(pageable);
+        Page<ChiTietSanPham> pageData = chiTietSanPhamRepo.findAll(spec, pageable);
 
-//        List<ChiTietSanPham> filtered = chiTietSanPhamRepo.findAll();
-        // Lọc đơn giản theo keyword
-        List<ChiTietSanPham> filtered = pageData.getContent()
-                .stream()
-                .filter(ct -> {
-                    if (keyword == null || keyword.isBlank()) return true;
-                    String k = keyword.toLowerCase();
-                    String ten = Optional.ofNullable(ct.getTenCt()).orElse("");
-                    String ma = Optional.ofNullable(ct.getSanPham().getMa()).orElse("");
-                    String tenSp = ct.getSanPham() != null ? Optional.ofNullable(ct.getSanPham().getTen()).orElse("") : "";
-                    return ten.toLowerCase().contains(k) || ma.toLowerCase().contains(k) || tenSp.toLowerCase().contains(k);
-                })
-                .filter(ct -> {
-                    boolean isAppliedToThis = ct.getDotGiamGia() != null && Objects.equals(ct.getDotGiamGia().getId(), dotId);
-                    boolean isAppliedOther = ct.getDotGiamGia() != null && !Objects.equals(ct.getDotGiamGia().getId(), dotId);
-
-                    if ("APPLIED".equalsIgnoreCase(applied)) return isAppliedToThis;
-                    if ("APPLIED_OTHER".equalsIgnoreCase(applied)) return isAppliedOther;
-                    if ("NOT_APPLIED".equalsIgnoreCase(applied)) return ct.getDotGiamGia() == null;
-                    return true; // ALL
-                })
-                .collect(Collectors.toList());
-
-        // Map ra DTO đơn giản cho UI
         List<Map<String, Object>> content = new ArrayList<>();
-        for (ChiTietSanPham ct : filtered) {
+        for (ChiTietSanPham ct : pageData.getContent()) {
             BigDecimal base = Optional.ofNullable(ct.getGiaBan()).orElse(Optional.ofNullable(ct.getGiaGoc()).orElse(BigDecimal.ZERO));
             BigDecimal discounted = calcDiscountedPrice(base, dot);
             Map<String, Object> item = new HashMap<>();
@@ -188,8 +205,6 @@ public class dotGiamGiaController {
                 }
             }
             item.put("applied", appliedStatus);
-//            item.put("applied", ct.getDotGiamGia() != null && Objects.equals(ct.getDotGiamGia().getId(), dotId));
-//            System.out.println("SP " + ct.getId() + " -> dot=" + (ct.getDotGiamGia() != null ? ct.getDotGiamGia().getId() : null) + " applied=" + appliedStatus);
             content.add(item);
         }
 
@@ -263,9 +278,14 @@ public class dotGiamGiaController {
             if (ct.getDotGiamGia() == null || !Objects.equals(ct.getDotGiamGia().getId(), dotId)) { skipped.add(ct.getId()); continue; }
             
             // Khôi phục giá gốc khi bỏ áp dụng đợt giảm giá
-            ct.setGiaBan(ct.getGiaGoc());
+            java.math.BigDecimal oldGiaBan = ct.getGiaBan();
+            java.math.BigDecimal newGiaBan = ct.getGiaGoc();
+            ct.setGiaBan(newGiaBan);
             ct.setDotGiamGia(null);
             removed++;
+            // Log chi tiết từng biến thể
+            log.info("Unapply dot: set giaBan=giaGoc for CTSP id={}, dotId={}, oldGiaBan={}, newGiaBan={}",
+                    ct.getId(), dotId, oldGiaBan, newGiaBan);
         }
         chiTietSanPhamRepo.saveAll(list);
 
@@ -426,6 +446,10 @@ public class dotGiamGiaController {
         capNhatTrangThaiTuDong();
         boolean isNew = (dotGiamGia.getId() == null);
         dotGiamGiaRepository.save(dotGiamGia);
+        // Nếu trạng thái là 2 sau khi lưu, khôi phục giá ngay
+        if (dotGiamGia.getTrangThai() != null && dotGiamGia.getTrangThai() == 2) {
+            dotGiamGiaAutoService.restoreOriginalPricesForExpiredDot(dotGiamGia.getId());
+        }
         redirectAttributes.addFlashAttribute("success", isNew ? "Thêm đợt giảm giá thành công!" : "Cập nhật đợt giảm giá thành công!");
         // Điều chỉnh luồng: nếu yêu cầu quay về danh sách (từ trang thêm), redirect về list; ngược lại về trang sửa
         if (Boolean.TRUE.equals(backToList)) {

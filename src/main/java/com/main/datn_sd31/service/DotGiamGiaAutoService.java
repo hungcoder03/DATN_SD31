@@ -79,7 +79,7 @@ public class DotGiamGiaAutoService {
     /**
      * Khôi phục giá gốc cho tất cả sản phẩm thuộc đợt giảm giá đã hết hạn
      */
-    private void restoreOriginalPricesForExpiredDot(Integer dotId) {
+    public void restoreOriginalPricesForExpiredDot(Integer dotId) {
         try {
             // Sử dụng Pageable để lấy tất cả sản phẩm
             Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
@@ -88,10 +88,15 @@ public class DotGiamGiaAutoService {
             
             if (!affectedProducts.isEmpty()) {
                 for (ChiTietSanPham ct : affectedProducts) {
+                    BigDecimal oldGiaBan = ct.getGiaBan();
+                    BigDecimal newGiaBan = ct.getGiaGoc();
                     // Khôi phục giá gốc
-                    ct.setGiaBan(ct.getGiaGoc());
+                    ct.setGiaBan(newGiaBan);
                     // Bỏ liên kết với đợt giảm giá
                     ct.setDotGiamGia(null);
+                    // Log chi tiết từng biến thể
+                    log.info("Restore giaBan=giaGoc for CTSP id={}, dotId={}, oldGiaBan={}, newGiaBan={}",
+                            ct.getId(), dotId, oldGiaBan, newGiaBan);
                 }
                 
                 chiTietSanPhamRepo.saveAll(affectedProducts);
