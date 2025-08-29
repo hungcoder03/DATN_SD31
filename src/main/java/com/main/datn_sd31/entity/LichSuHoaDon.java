@@ -51,8 +51,8 @@ public class LichSuHoaDon {
     @Column(name = "ghi_chu", nullable = false)
     private String ghiChu;
 
-    @Column(name = "ly_do_giao_khong_thanh_cong")
-    private Integer lyDoGiaoKhongThanhCong;
+//    @Column(name = "ly_do_giao_khong_thanh_cong")
+//    private Integer lyDoGiaoKhongThanhCong;
 
     @Transient
     public String getTrangThaiMoTa() {

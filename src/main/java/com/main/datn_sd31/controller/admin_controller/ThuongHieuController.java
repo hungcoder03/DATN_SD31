@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Controller
@@ -39,21 +40,37 @@ public class ThuongHieuController {
     @PostMapping("/save")
     public String save(@ModelAttribute ThuongHieu thuongHieu) {
         if (thuongHieu.getId() == null) {
-            // THÊM MỚI
+            // === THÊM MỚI ===
             thuongHieu.setNgayTao(LocalDateTime.now());
+
+            // Lấy thương hiệu có mã lớn nhất
+            ThuongHieu last = thuongHieuRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
+
+            if (last != null && last.getMa() != null && last.getMa().startsWith("TH")) {
+                try {
+                    // Cắt phần số sau "TH"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            // Format mã theo dạng TH001, TH002...
+            thuongHieu.setMa(String.format("TH%03d", nextNumber));
+
         } else {
-            // SỬA: Lấy bản gốc để giữ nguyên ngày tạo
+            // === SỬA ===
             ThuongHieu existing = thuongHieuRepository.findById(thuongHieu.getId()).orElse(null);
             if (existing != null) {
                 thuongHieu.setNgayTao(existing.getNgayTao());
+                thuongHieu.setMa(existing.getMa()); // Giữ nguyên mã khi sửa
             }
         }
-
-        // Ngày sửa luôn được cập nhật
         thuongHieu.setNgaySua(LocalDateTime.now());
         thuongHieuRepository.save(thuongHieu);
         return "redirect:/admin/thuong-hieu"; // Trở lại trang chính
     }
+
 
     // Xóa
     @GetMapping("/delete/{id}")

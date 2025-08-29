@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -30,6 +31,6 @@ public class SpYeuThich {
     private KhachHang khachHang;
 
     @Column(name = "thoi_gian_them")
-    private Instant thoiGianThem;
+    private LocalDateTime thoiGianThem;
 
 }

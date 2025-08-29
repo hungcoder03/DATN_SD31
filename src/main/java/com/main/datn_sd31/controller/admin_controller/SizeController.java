@@ -1,6 +1,7 @@
 package com.main.datn_sd31.controller.admin_controller;
 
 import com.main.datn_sd31.entity.Size;
+import com.main.datn_sd31.entity.ThuongHieu;
 import com.main.datn_sd31.repository.Sizerepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -39,16 +40,32 @@ public class SizeController {
         if (size.getId() == null) {
             // THÊM MỚI
             size.setNgayTao(LocalDateTime.now());
+            Size last = sizeRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
+
+            if (last != null && last.getMa() != null && last.getMa().startsWith("SZZ")) {
+                try {
+                    // Cắt phần số sau "TH"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            // Format mã theo dạng TH001, TH002...
+            size.setMa(String.format("SZ%03d", nextNumber));
         } else {
             // SỬA: Lấy bản gốc để giữ nguyên ngày tạo
             Size existing = sizeRepository.findById(size.getId()).orElse(null);
             if (existing != null) {
                 size.setNgayTao(existing.getNgayTao());
+                size.setMa(existing.getMa()); // Giữ nguyên mã khi sửa
+
             }
         }
 
         // Ngày sửa luôn được cập nhật
         size.setNgaySua(LocalDateTime.now());
+
         sizeRepository.save(size);
         return "redirect:/admin/size"; // Trở lại trang chính
     }

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{client/layout}">
+
+<head>
+    <title>Thông tin tài khoản - Waggy Pet Shop</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="profile-card">
+                <h3>Hồ Sơ Của Tôi</h3>
+                <hr>
+
+                <!-- Họ tên -->
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label field-label">Họ và tên:</label>
+                    <div class="col-sm-10">
+                        <p class="form-control-plaintext" th:text="${khachHang.ten}">Tên</p>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label field-label">Email:</label>
+                    <div class="col-sm-10">
+                        <p class="form-control-plaintext" th:text="${khachHang.email}">email@gmail.com</p>
+                    </div>
+                </div>
+
+                <!-- Số điện thoại -->
+                <form method="post" action="/tai-khoan/cap-nhat-sdt" class="row mb-3">
+                    <label class="col-sm-2 col-form-label field-label">Số điện thoại:</label>
+                    <div class="col-sm-6">
+                        <input type="text" name="soDienThoai" class="form-control" th:value="${khachHang.soDienThoai}" required>
+                    </div>
+                    <div class="col-sm-4">
+                        <button type="submit" class="btn btn-primary">Cập nhật SĐT</button>
+                    </div>
+                </form>
+
+                <!-- Địa chỉ -->
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label field-label">Địa chỉ:</label>
+                    <div class="col-sm-10">
+                        <!-- Nếu chưa có địa chỉ -->
+                        <div th:if="${khachHang.diaChi == null or #strings.isEmpty(khachHang.diaChi)}">
+                            <button id="btnHienForm" type="button" class="btn btn-warning">Thêm địa chỉ</button>
+                        </div>
+
+                        <!-- Nếu đã có địa chỉ -->
+                        <div th:unless="${khachHang.diaChi == null or #strings.isEmpty(khachHang.diaChi)}">
+                            <p class="form-control-plaintext mb-2" th:text="${khachHang.diaChi}"></p>
+                            <button id="btnSuaDiaChi" type="button" class="btn btn-sm btn-primary me-2">Sửa</button>
+                            <form method="post" action="/tai-khoan/xoa-dia-chi" class="d-inline">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                            </form>
+                        </div>
+
+                        <!-- Form thêm/sửa địa chỉ -->
+                        <form method="post" action="/tai-khoan/cap-nhat-dia-chi" id="formDiaChi" class="mt-3 d-none" onsubmit="return buildFullAddress()">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-4">
+                                    <select id="province" class="form-select" name="province">
+                                        <option value="">-- Chọn tỉnh --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="district" class="form-select" name="district">
+                                        <option value="">-- Chọn huyện --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="ward" class="form-select" name="ward">
+                                        <option value="">-- Chọn xã --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Nhập cụ thể -->
+                            <div class="mb-3">
+                                <input type="text" class="form-control" name="chiTiet" id="chiTiet" placeholder="Số nhà, tên đường..." required>
+                            </div>
+
+                            <!-- Hidden để gộp -->
+                            <input type="hidden" id="hiddenTinh" name="tinh">
+                            <input type="hidden" id="hiddenHuyen" name="huyen">
+                            <input type="hidden" id="hiddenXa" name="xa">
+
+                            <button type="submit" class="btn btn-success">Lưu địa chỉ</button>
+                        </form>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", async function () {
+                const btnHienForm = document.getElementById("btnHienForm");
+                const btnSuaDiaChi = document.getElementById("btnSuaDiaChi");
+                const formDiaChi = document.getElementById("formDiaChi");
+
+                async function fetchData(url) {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error("Lỗi khi fetch dữ liệu");
+                    return await response.json();
+                }
+
+                async function hienFormDiaChi() {
+                    formDiaChi.classList.remove("d-none");
+                    if (btnHienForm) btnHienForm.classList.add("d-none");
+                    if (btnSuaDiaChi) btnSuaDiaChi.classList.add("d-none");
+
+                    const provinceSelect = document.getElementById("province");
+                    const districtSelect = document.getElementById("district");
+                    const wardSelect = document.getElementById("ward");
+
+                    // Load tỉnh
+                    const provinces = await fetchData("/tai-khoan/dia-chi/tinh");
+                    provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh --</option>';
+                    provinces.forEach(p => {
+                        provinceSelect.innerHTML += `<option value="${p.ProvinceID}">${p.ProvinceName}</option>`;
+                    });
+
+                    provinceSelect.addEventListener("change", async function () {
+                        const provinceId = this.value;
+                        districtSelect.innerHTML = '<option value="">-- Chọn huyện --</option>';
+                        wardSelect.innerHTML = '<option value="">-- Chọn xã --</option>';
+                        if (!provinceId) return;
+                        const districts = await fetchData(`/tai-khoan/dia-chi/huyen?provinceId=${provinceId}`);
+                        districts.forEach(d => {
+                            districtSelect.innerHTML += `<option value="${d.DistrictID}">${d.DistrictName}</option>`;
+                        });
+                    });
+
+                    districtSelect.addEventListener("change", async function () {
+                        const districtId = this.value;
+                        wardSelect.innerHTML = '<option value="">-- Chọn xã --</option>';
+                        if (!districtId) return;
+                        const wards = await fetchData(`/tai-khoan/dia-chi/xa?districtId=${districtId}`);
+                        wards.forEach(w => {
+                            wardSelect.innerHTML += `<option value="${w.WardCode}">${w.WardName}</option>`;
+                        });
+                    });
+                }
+
+                if (btnHienForm) {
+                    btnHienForm.addEventListener("click", hienFormDiaChi);
+                }
+
+                if (btnSuaDiaChi) {
+                    btnSuaDiaChi.addEventListener("click", hienFormDiaChi);
+                }
+
+                window.buildFullAddress = function () {
+                    const tinh = document.getElementById("province").selectedOptions[0]?.text || "";
+                    const huyen = document.getElementById("district").selectedOptions[0]?.text || "";
+                    const xa = document.getElementById("ward").selectedOptions[0]?.text || "";
+
+                    document.getElementById("hiddenTinh").value = tinh;
+                    document.getElementById("hiddenHuyen").value = huyen;
+                    document.getElementById("hiddenXa").value = xa;
+                    return true;
+                };
+            });
+        </script>
+    </div>
+</body>
+
+</html> 

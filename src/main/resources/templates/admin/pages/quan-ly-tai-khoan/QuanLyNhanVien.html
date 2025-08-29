@@ -395,8 +395,8 @@
                 })
                 .catch(error => {
                     console.error('Error fetching employee detail:', error);
-                    alert('Không thể tải thông tin nhân viên. Vui lòng thử lại.');
-                    closeDetailModal();
+                    // alert('Không thể tải thông tin nhân viên. Vui lòng thử lại.');
+                    // closeDetailModal();
                 });
         }
         
@@ -424,7 +424,7 @@
                 avatarElement.src = '/images/default-avatar.png';
             }
             avatarElement.onerror = function() {
-                this.src = '/images/default-avatar.png';
+                this.src = '/images/faces-clipart/pic-4.png';
             };
             
             // Employee information

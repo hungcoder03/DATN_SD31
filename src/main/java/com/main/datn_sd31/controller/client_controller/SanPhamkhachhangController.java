@@ -1,5 +1,6 @@
 package com.main.datn_sd31.controller.client_controller;
 import com.main.datn_sd31.entity.ChiTietSanPham;
+import com.main.datn_sd31.entity.DotGiamGia;
 import com.main.datn_sd31.entity.KhachHang;
 import com.main.datn_sd31.entity.MauSac;
 import com.main.datn_sd31.entity.SanPham;
@@ -58,8 +59,11 @@ public class SanPhamkhachhangController {
 
     @GetMapping("/danh-sach")
     public String hienThiDanhSachSanPham(Model model, HttpSession session) {
-        List<SanPham> danhSachSanPham = sanPhamService.getAll();
-        List<ChiTietSanPham> chiTiets = chitietsanphamRepo.findAll();
+        List<SanPham> danhSachSanPham = sanPhamService.getAllActive();
+        // Chỉ lấy chi tiết của sản phẩm đang hoạt động
+        List<ChiTietSanPham> chiTiets = chitietsanphamRepo.findAll().stream()
+            .filter(ct -> ct.getSanPham() != null && ct.getSanPham().getTrangThai())
+            .collect(Collectors.toList());
 
         Map<Integer, BigDecimal> giaGocMap = chiTiets.stream()
                 .collect(Collectors.groupingBy(ct -> ct.getSanPham().getId(),
@@ -145,6 +149,23 @@ public class SanPhamkhachhangController {
         model.addAttribute("giaBanMaxMap", giaBanMaxMap);
         model.addAttribute("giaBanMinMap", giaBanMinMap);
         model.addAttribute("giaGocMinMap", giaGocMinMap);
+        // Set thuộc tính dotGiamGia cho mỗi sản phẩm
+        Map<Integer, DotGiamGia> dotGiamGiaMap = chiTiets.stream()
+            .filter(ct -> ct.getDotGiamGia() != null)
+            .collect(Collectors.groupingBy(
+                ct -> ct.getSanPham().getId(),
+                Collectors.collectingAndThen(
+                    Collectors.maxBy(Comparator.comparing(
+                        ct -> ct.getDotGiamGia().getGiaTriDotGiamGia())),
+                    opt -> opt.map(ChiTietSanPham::getDotGiamGia).orElse(null)
+                )
+            ));
+
+        // Set dotGiamGia cho mỗi sản phẩm
+        danhSachSanPham.forEach(sanPham -> {
+            sanPham.setDotGiamGia(dotGiamGiaMap.get(sanPham.getId()));
+        });
+
         model.addAttribute("phanTramGiamMap", phanTramGiamMap);
         model.addAttribute("danhSachSanPham", danhSachSanPham);
         model.addAttribute("giagoc", giaGocThapNhatMap);
@@ -155,63 +176,12 @@ public class SanPhamkhachhangController {
 
         KhachHang khachHang = (KhachHang) session.getAttribute("khachHang");
         model.addAttribute("khachHangLogin", khachHang);
-        return "khachhang/dssanpham";
+        return "client/pages/product/search";
     }
 
 
 
-    @GetMapping("/chi-tiet/{id}")
-    public String xemChiTietSanPham(@PathVariable("id") Integer id, Model model) {
-        List<ChiTietSanPham> danhSachChiTiet = chitietsanphamRepo.findBySanPhamId(id);
-        model.addAttribute("sanPham", sanPhamService.findbyid(id));
-        model.addAttribute("dsSanPham", sanPhamService.getAll());
-        model.addAttribute("hinhanh", hinhanhrepository.findByhinhanhid(id));
-
-        // Gửi danh sách màu sắc duy nhất
-        List<MauSac> dsMauSac = danhSachChiTiet.stream()
-                .map(ChiTietSanPham::getMauSac)
-                .filter(ms -> ms != null && ms.getId() != null)
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(MauSac::getId, Function.identity(), (a, b) -> a),
-                        map -> new ArrayList<>(map.values())
-                ));
-        model.addAttribute("dsMauSac", dsMauSac);
-        model.addAttribute("mauSacCount", dsMauSac.size());
-
-        // Gửi danh sách size duy nhất
-        List<Size> dsSize = danhSachChiTiet.stream()
-                .map(ChiTietSanPham::getSize)
-                .filter(sz -> sz != null && sz.getId() != null)
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(Size::getId, Function.identity(), (a, b) -> a),
-                        map -> new ArrayList<>(map.values())
-                ));
-        model.addAttribute("dsSize", dsSize);
-        model.addAttribute("sizeCount", dsSize.size());
-
-        // ✅ Gửi danh sách chi tiết với tồn kho - SỬA LỖI ở đây
-        // ✅ Gửi danh sách chi tiết với tồn kho - đã fix null
-        model.addAttribute("dsChiTietSanPham", danhSachChiTiet.stream()
-                .filter(ct -> ct.getSize() != null && ct.getMauSac() != null &&
-                        ct.getSize().getId() != null && ct.getMauSac().getId() != null)
-                .map(ct -> {
-                    Map<String, Object> chiTietMap = new HashMap<>();
-                    chiTietMap.put("id", ct.getId());
-                    chiTietMap.put("giaBan", ct.getGiaBan());
-                    Map<String, Object> sizeMap = new HashMap<>();
-                    sizeMap.put("id", ct.getSize().getId());
-                    chiTietMap.put("size", sizeMap);
-
-                    Map<String, Object> mauMap = new HashMap<>();
-                    mauMap.put("id", ct.getMauSac().getId());
-                    chiTietMap.put("mauSac", mauMap);
-
-                    chiTietMap.put("soLuongTon", ct.getSoLuong());
-                    return chiTietMap;
-                })
-                .collect(Collectors.toList()));
-
-        return "khachhang/xemchitiet";
-    }
+    // Endpoint này đã được di chuyển sang ListSanPhamController để tránh conflict
+    // @GetMapping("/chi-tiet/{id}") - REMOVED
 
 }

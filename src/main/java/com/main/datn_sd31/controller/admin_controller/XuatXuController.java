@@ -1,6 +1,7 @@
 package com.main.datn_sd31.controller.admin_controller;
 
 
+import com.main.datn_sd31.entity.ThuongHieu;
 import com.main.datn_sd31.entity.XuatXu;
 import com.main.datn_sd31.repository.Xuatxurepository;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +41,33 @@ public class XuatXuController {
         if (xuatXu.getId() == null) {
             // THÊM MỚI
             xuatXu.setNgayTao(LocalDateTime.now());
+            XuatXu last = xuatXuRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
+
+            if (last != null && last.getMa() != null && last.getMa().startsWith("XX")) {
+                try {
+                    // Cắt phần số sau "TH"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            // Format mã theo dạng TH001, TH002...
+            xuatXu.setMa(String.format("XX%03d", nextNumber));
+
         } else {
             // SỬA: Lấy bản gốc để giữ nguyên ngày tạo
             XuatXu existing = xuatXuRepository.findById(xuatXu.getId()).orElse(null);
             if (existing != null) {
                 xuatXu.setNgayTao(existing.getNgayTao());
+                xuatXu.setMa(existing.getMa()); // Giữ nguyên mã khi sửa
+
             }
         }
 
         // Ngày sửa luôn được cập nhật
         xuatXu.setNgaySua(LocalDateTime.now());
+
         xuatXuRepository.save(xuatXu);
         return "redirect:/admin/xuat-xu"; // Trở lại trang chính
     }

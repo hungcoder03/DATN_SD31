@@ -1,16 +1,8 @@
 package com.main.datn_sd31.controller.admin_controller;
 
 import com.main.datn_sd31.controller.client_controller.GiohangController;
-import com.main.datn_sd31.entity.ChiTietSanPham;
-import com.main.datn_sd31.entity.GioHangChiTiet;
-import com.main.datn_sd31.entity.HoaDon;
-import com.main.datn_sd31.entity.HoaDonChiTiet;
-import com.main.datn_sd31.entity.KhachHang;
-import com.main.datn_sd31.entity.LichSuHoaDon;
-import com.main.datn_sd31.repository.Giohangreposiroty;
-import com.main.datn_sd31.repository.HoaDonChiTietRepository;
-import com.main.datn_sd31.repository.HoaDonRepository;
-import com.main.datn_sd31.repository.LichSuHoaDonRepository;
+import com.main.datn_sd31.entity.*;
+import com.main.datn_sd31.repository.*;
 import com.main.datn_sd31.service.impl.VnpayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -49,6 +41,8 @@ public class VnpayController {
 
     @Autowired
     private HoaDonChiTietRepository hoaDonChiTietRepository;
+    @Autowired
+    private PhieuGiamGiaRepository phieuGiamGiaRepository;
 
     @GetMapping("/thanh-toan-vnpay")
     public void thanhToan(@RequestParam("maHoaDon") String maHoaDon,
@@ -63,7 +57,7 @@ public class VnpayController {
         long amount = hoaDon.getThanhTien().longValue();
 //        long amount = 50000L; // 50.000 VNĐ
         String orderInfo = "Thanh toan test VNPay";
-        String paymentUrl = vnpayService.createPaymentUrl(request, amount, orderInfo,maHoaDon,ids);
+        String paymentUrl = vnpayService.createPaymentUrl(request, amount, orderInfo, maHoaDon, ids);
         response.sendRedirect(paymentUrl);
     }
 
@@ -82,7 +76,7 @@ public class VnpayController {
 
         if (hoaDon == null) {
             model.addAttribute("error", "Hóa đơn không tồn tại.");
-            return "khachhang/thanhcong";
+            return "client/pages/payment/success";
         }
         List<GioHangChiTiet> gioHangChiTiets = new ArrayList<>();
         if (ids != null && !ids.isEmpty()) {
@@ -95,16 +89,8 @@ public class VnpayController {
         BigDecimal tienGiam = hoaDon.getGiaGiamGia() != null ? hoaDon.getGiaGiamGia() : BigDecimal.ZERO;
         if ("00".equals(responseCode) && "00".equals(transactionStatus)) {
 
-            hoaDonRepository.capNhatTrangThaiHoaDon(3,maHoaDon);
-            // Lưu lịch sử
-            LichSuHoaDon lichSu = new LichSuHoaDon();
-            lichSu.setHoaDon(hoaDon);
-            lichSu.setTrangThai(1);
-            lichSu.setNguoiTao(hoaDon.getNguoiTao());
-            lichSu.setNguoiSua(hoaDon.getNguoiSua());
-            lichSu.setGhiChu("Đặt hàng thành công");
-            lichSu.setNgayTao(LocalDateTime.now());
-            lichSuHoaDonRepository.save(lichSu);
+            hoaDonRepository.capNhatTrangThaiHoaDon(3, maHoaDon);
+//
 
             for (GioHangChiTiet item : gioHangChiTiets) {
                 ChiTietSanPham ctsp = item.getChiTietSp();
@@ -114,9 +100,9 @@ public class VnpayController {
                 hdct.setHoaDon(hoaDon);
                 hdct.setChiTietSanPham(ctsp);
                 hdct.setSoLuong(soLuong);
-                hdct.setGiaGoc(ctsp.getGiaBan());
-                hdct.setGiaGiam(tienGiam);
-                hdct.setGiaSauGiam(ctsp.getGiaBan().subtract(tienGiam));
+                hdct.setGiaGoc(ctsp.getGiaGoc());
+                hdct.setGiaSauGiam(ctsp.getGiaBan());
+                hdct.setGiaGiam(ctsp.getGiaGoc().subtract(ctsp.getGiaBan()));
                 hdct.setTenCtsp(ctsp.getSanPham().getTen() + " - " + ctsp.getTenCt());
 
                 hoaDonChiTietRepository.save(hdct);
@@ -126,13 +112,42 @@ public class VnpayController {
 
             model.addAttribute("ma", maHoaDon);
             model.addAttribute("message", "Thanh toán VNPay thành công!");
-            return "/khachhang/thanhcong";
+            return "/client/pages/payment/success";
         } else {
-            hoaDon.setTrangThai(5);
+            // --- 2. Lưu chi tiết hóa đơn (để báo cáo đơn hủy) ---
+            for (GioHangChiTiet item : gioHangChiTiets) {
+                ChiTietSanPham ctsp = item.getChiTietSp();
+                int soLuong = item.getSoLuong();
+
+                HoaDonChiTiet hdct = new HoaDonChiTiet();
+                hdct.setHoaDon(hoaDon);
+                hdct.setChiTietSanPham(ctsp);
+                hdct.setSoLuong(soLuong);
+                hdct.setGiaGoc(ctsp.getGiaGoc());
+                hdct.setGiaSauGiam(ctsp.getGiaBan());
+                hdct.setGiaGiam(ctsp.getGiaGoc().subtract(ctsp.getGiaBan()));
+                hdct.setTenCtsp(ctsp.getSanPham().getTen() + " - " + ctsp.getTenCt());
+
+                hoaDonChiTietRepository.save(hdct);
+            }
+
+            // --- 3. Cập nhật trạng thái hóa đơn = Hủy ---
+            hoaDon.setTrangThai(5); // hủy
             hoaDonRepository.save(hoaDon);
+
+            // --- 4. Lưu lịch sử hóa đơn ---
+            LichSuHoaDon lichSu = new LichSuHoaDon();
+            lichSu.setHoaDon(hoaDon);
+            lichSu.setTrangThai(9); // trạng thái lịch sử hủy
+            lichSu.setNguoiTao(hoaDon.getNguoiTao());
+            lichSu.setNguoiSua(hoaDon.getNguoiSua());
+            lichSu.setGhiChu("Hủy đơn do thanh toán thất bại hoặc bị hủy.");
+            lichSu.setNgayTao(LocalDateTime.now());
+            lichSuHoaDonRepository.save(lichSu);
+
             model.addAttribute("message", "Thanh toán thất bại hoặc bị hủy.");
         }
 
-        return "/khachhang/thanhcong";
+        return "/client/pages/payment/success";
     }
 }

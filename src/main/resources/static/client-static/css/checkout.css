@@ -1,0 +1,368 @@
+/* ===== CHECKOUT PAGE STYLES ===== */
+
+/* CSS Variables for warm golden theme */
+:root {
+    --primary: #DEAD6F;
+    --primary-light: #EDB867;
+    --primary-dark: #C19A5F;
+    --primary-bg: #fbedd9;
+    --primary-bg-light: #F9F3EC;
+    --accent: #f2cd95;
+    --text-dark: #41403E;
+    --text-muted: #6c757d;
+    --border-light: #e9ecef;
+    --success: #198754;
+    --danger: #dc3545;
+}
+
+/* Body background with margin */
+body.checkout-page {
+    margin: 3%;
+    background-color: var(--primary-bg-light);
+}
+
+/* Main Layout */
+.checkout-step {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-light);
+}
+
+.checkout-step.active {
+    border-color: var(--primary);
+    box-shadow: 0 4px 20px rgba(222, 173, 111, 0.15);
+}
+
+/* Product Cards */
+.hover-effect {
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-light);
+}
+
+.hover-effect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+.product-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.product-image-wrapper img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.hover-effect:hover .product-image-wrapper img {
+    transform: scale(1.05);
+}
+
+.product-title {
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.4;
+}
+
+.product-meta .badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+}
+
+.price-info small {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.total-price strong {
+    font-size: 1.1rem;
+    color: var(--danger);
+}
+
+/* Form Styles */
+.form-floating {
+    position: relative;
+}
+
+.form-floating .form-control,
+.form-floating .form-select {
+    border: 2px solid var(--border-light);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.form-floating .form-control:focus,
+.form-floating .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(222, 173, 111, 0.25);
+    outline: none;
+}
+
+.form-floating label {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.form-floating .text-danger {
+    color: var(--danger) !important;
+}
+
+/* Validation States */
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-control.is-invalid:focus,
+.form-select.is-invalid:focus {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: var(--success);
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.form-control.is-valid:focus,
+.form-select.is-valid:focus {
+    border-color: var(--success);
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.invalid-feedback {
+    display: none;
+    color: var(--danger);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.invalid-feedback.show {
+    display: block;
+}
+
+/* Payment Options */
+.payment-options {
+    margin-top: 1rem;
+}
+
+.payment-card {
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.payment-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(222, 173, 111, 0.15);
+}
+
+.payment-card.selected {
+    border-color: var(--primary);
+    background-color: var(--primary-bg);
+    box-shadow: 0 4px 20px rgba(222, 173, 111, 0.2);
+}
+
+.payment-card .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Order Summary */
+.order-summary {
+    position: sticky;
+    top: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-light);
+}
+
+.summary-item {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.summary-item .amount {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.summary-divider {
+    border-color: var(--border-light);
+    margin: 1.5rem 0;
+}
+
+.summary-total {
+    font-size: 1.1rem;
+}
+
+.total-amount {
+    font-size: 1.3rem;
+    color: var(--primary);
+}
+
+#savingsText {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Discount Code */
+#phieuGiamGia {
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(222, 173, 111, 0.3);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .checkout-step {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .product-image-wrapper img {
+        height: 100px;
+    }
+    
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+    
+    .order-summary {
+        position: static;
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .checkout-step {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .product-image-wrapper img {
+        height: 80px;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation Effects */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.checkout-step {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Loading States */
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #f8f9fa;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Focus States */
+.form-floating .form-control:focus + label,
+.form-floating .form-select:focus + label {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Custom Scrollbar for Select */
+.form-select {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) #f8f9fa;
+}
+
+.form-select::-webkit-scrollbar {
+    width: 6px;
+}
+
+.form-select::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 3px;
+}
+
+.form-select::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+.form-select::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}

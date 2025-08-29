@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{client/layout}">
+
+<head>
+    <title>Chi tiết Hóa đơn</title>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <link rel="stylesheet" th:href="@{/bootstrap-5.3.7-dist/css/bootstrap.min.css}"/>
+    <script th:src="@{/bootstrap-5.3.7-dist/js/bootstrap.bundle.min.js}"></script>
+
+    <style>
+        /* === NỀN VÀ CHUNG === */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        h2, h3, strong {
+            color: #343a40;
+        }
+
+        table th {
+            background-color: #dee2e6;
+        }
+
+        table td, table th {
+            vertical-align: middle !important;
+        }
+
+        /* === TIMELINE CONTAINER === */
+        .timeline-container {
+            position: relative;
+            overflow-x: auto;
+            padding: 20px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #ccc transparent;
+        }
+
+        .timeline-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .timeline-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .timeline-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+        .timeline-container::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        /* === TIMELINE DÒNG CHẠY === */
+        .timeline {
+            display: flex;
+            min-width: max-content;
+            padding: 20px 0;
+            gap: 1rem;
+        }
+
+        /* === CÁC BƯỚC TRONG TIMELINE === */
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 200px;
+            padding: 0 15px;
+            position: relative;
+        }
+
+        .timeline-step:not(:last-child)::after {
+            content: '➤';
+            position: absolute;
+            top: 22px;
+            right: -25px;
+            font-size: 20px;
+            color: #dee2e6;
+            z-index: 1;
+        }
+
+        /* === ICON TRẠNG THÁI CHUNG === */
+        .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #6c757d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .timeline-step:hover .icon {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* === MÀU THEO TRẠNG THÁI === */
+        .step-success .icon {
+            background: #28a745;
+        }
+
+        .step-warning .icon {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .step-cancelled .icon {
+            background: #dc3545;
+        }
+
+        /* === ROLLBACK ICON (↶) === */
+        .rollback-icon {
+            font-size: 20px;
+            color: #0d6efd;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* === LABEL + NGÀY === */
+        .label {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .date-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* === MŨI TÊN ➤ === */
+        .timeline-arrow {
+            font-size: 20px;
+            color: #ffc107;
+            margin-top: 5px;
+        }
+
+        /* === GỢI Ý CUỘN === */
+        .scroll-hint {
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .timeline-step {
+                min-width: 150px;
+                padding: 0 10px;
+            }
+
+            .icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .label {
+                font-size: 12px;
+            }
+
+            .date-label {
+                font-size: 10px;
+            }
+        }
+
+        /* === TOAST THÔNG BÁO === */
+        .custom-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            border-radius: 6px;
+            color: white;
+            z-index: 9999;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            min-width: 250px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .custom-toast.success {
+            background-color: #28a745;
+        }
+
+        .custom-toast.error {
+            background-color: #dc3545;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /*CSS Table so luong*/
+        .input-group-sm .form-control,
+        .input-group-sm .btn {
+            margin: 0; /* Xóa khoảng cách dư */
+        }
+
+        .input-group-sm {
+            gap: 0; /* Xóa khoảng cách giữa các phần tử nếu có */
+        }
+
+        .so-luong-input {
+            max-width: 100px; /* Giảm kích thước ô input nếu cần */
+            padding: 0.25rem 0.5rem; /* Tinh chỉnh padding nếu muốn nhỏ hơn */
+        }
+
+        /*Tat tang giam mac dinh cua input number*/
+        /* Chrome, Safari, Edge, Opera */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        button.disabled-custom {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+            pointer-events: auto; /* Cho phép hover nhưng không click vì có 'disabled' */
+        }
+
+        a.disabled-custom {
+            opacity: 0.5;
+            cursor: not-allowed !important;
+            pointer-events: none; /* Không cho click */
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div class="container py-5">
+        <!-- Thông báo -->
+        <div id="customSuccess" class="custom-toast success" style="display:none;">
+            <i class="bi bi-check-circle-fill me-2"></i> <span id="successMsg"></span>
+        </div>
+        <div id="customError" class="custom-toast error" style="display:none;">
+            <i class="bi bi-x-circle-fill me-2"></i> <span id="errorMsg"></span>
+        </div>
+
+        <a th:href="@{/san-pham/danh-sach}" class="inline-block mt-6 text-sm text-gray-600 hover:underline">
+            ← Mua tiếp
+        </a>
+
+        <!-- Tiêu đề -->
+        <div class="container mt-4 text-center">
+            <h2 class="mb-4">
+                <a th:href="@{/khach-hang/don-hang/{id}(id = ${ idKhachHang })}" class="text-decoration-none">Lịch sử
+                    mua
+                    hàng</a>
+                <span class="mx-2 text-muted">/</span>
+                <span th:text="'Hóa đơn ' + ${maHoaDon}"></span>
+            </h2>
+        </div>
+
+        <div class="container mt-5">
+            <div class="timeline-container position-relative border rounded shadow-sm p-3 bg-white"
+                 id="timelineContainer">
+                <div class="timeline d-flex overflow-auto gap-4 px-2" id="timeline">
+                    <div th:each="ls, iterStat : ${lichSuList}" class="timeline-step text-center"
+                         th:classappend="${ls.trangThai == 3 ? 'step-warning' : (ls.trangThai == 9 ? 'step-cancelled' : (ls.trangThai == 5 ? 'step-info' : (ls.ngayTao != null ? 'step-success' : '')))}">
+
+                        <!--                    &lt;!&ndash; Nếu rollback, hiển thị icon rollback TRƯỚC bước này &ndash;&gt;-->
+                        <!--                    <div th:if="${ls.isRollBack}" class="timeline-arrow rollback-icon">-->
+                        <!--                        &#x21B6;-->
+                        <!--                    </div>-->
+
+                        <!-- Icon trạng thái -->
+                        <div class="icon mb-2">
+                            <i th:class="${ls.iconTrangThai}" style="font-size: 24px;"></i>
+                        </div>
+
+                        <!-- Label trạng thái -->
+                        <div class="label fw-bold small text-truncate" th:text="${ls.trangThaiMoTa}"></div>
+
+                        <!-- Ngày tạo -->
+                        <div class="date-label text-muted" style="font-size: 12px;">
+                            <span th:text="${ls.ngayTao != null ? @utils_date.format(ls.ngayTao) : '--/--/----'}"></span>
+                        </div>
+
+                        <!--                    &lt;!&ndash; Mũi tên ➤ chỉ hiển thị nếu không phải rollback và không phải cuối &ndash;&gt;-->
+                        <!--                    <div th:if="${!ls.isRollBack and !iterStat.last}" class="timeline-arrow">-->
+                        <!--                        ➤-->
+                        <!--                    </div>-->
+                    </div>
+                </div>
+            </div>
+
+            <div class="scroll-hint text-center mt-2 text-muted small" th:if="${#lists.size(lichSuList) > 6}">
+                ← Vuốt hoặc kéo để xem thêm →
+            </div>
+
+            <div class="row mt-4 g-2">
+                <div
+                        class="col-auto">
+                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                            data-bs-target="#modalCapNhatTrangThai"
+                            th:classappend="${@hoa_don_utils.choPhepHuyDonKhachHang(hoaDon.trangThaiLichSuHoaDon) ? '' : 'disabled-custom'}"
+                            th:disabled="${!@hoa_don_utils.choPhepHuyDonKhachHang(hoaDon.trangThaiLichSuHoaDon)}"
+                            th:title="${!@hoa_don_utils.choPhepHuyDonKhachHang(hoaDon.trangThaiLichSuHoaDon) ? 'Không thể hủy đơn' : ''}"
+                    >
+                        Hủy đơn
+                    </button>
+                    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal"
+                            data-bs-target="#modalCapNhatTrangThai"
+                            th:classappend="${@hoa_don_utils.choPhepHoanHangKhachHang(hoaDon.trangThaiLichSuHoaDon) ? '' : 'disabled-custom'}"
+                            th:disabled="${!@hoa_don_utils.choPhepHoanHangKhachHang(hoaDon.trangThaiLichSuHoaDon)}"
+                            th:title="${!@hoa_don_utils.choPhepHoanHangKhachHang(hoaDon.trangThaiLichSuHoaDon) ? 'Chưa thể yêu cầu hoàn' : ''}"
+                    >
+                        Yêu cầu hoàn hàng
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                            data-bs-target="#modalLichSuTrangThai">
+                        Lịch sử trạng thái
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <a th:href="@{'/khach-hang/don-hang/'+ ${idKhachHang} + '/' + ${hoaDon.ma} + '/pdf'}"
+                       class="btn btn-outline-danger"
+                       th:classappend="${@hoa_don_utils.choPhepInHoaDon(hoaDon.trangThaiLichSuHoaDon, hoaDon.trangThaiHoaDonInteger) ? '' : 'disabled-custom'}"
+                       th:attr="title=${!@hoa_don_utils.choPhepInHoaDon(hoaDon.trangThaiLichSuHoaDon, hoaDon.trangThaiHoaDonInteger) ? 'Không thể in ở trạng thái hiện tại' : null}"
+                       th:if="${@hoa_don_utils.choPhepInHoaDon(hoaDon.trangThaiLichSuHoaDon, hoaDon.trangThaiHoaDonInteger)}">
+                        <i class="fa-solid fa-print"></i> In hóa đơn
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Modal Lịch Sử Trạng Thái -->
+        <div class="modal fade" id="modalLichSuTrangThai" tabindex="-1" aria-labelledby="modalLichSuLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalLichSuLabel">Lịch sử trạng thái hóa đơn</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-hover table-bordered align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="ls : ${lichSuHoaDonList}">
+                                <td th:text="${@utils_date.format(ls.ngayTao)}"></td>
+                                <td th:text="${ls.trangThaiMoTa}"></td>
+                                <td th:text="${ls.ghiChu != null ? ls.ghiChu : '-'}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade" id="modalCapNhatTrangThai" tabindex="-1" aria-labelledby="modalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <form th:action="@{'/khach-hang/don-hang/' + ${id} + '/' + ${hoaDon.ma} + '/cap-nhat-trang-thai'}"
+                      method="post">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalLabel">Xác nhận cập nhật trạng thái</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="maHoaDon" th:value="${hoaDon.ma}"/>
+                            <input type="hidden" id="trangThaiMoi" name="trangThaiMoi"/>
+                            <label for="ghiChu">Ghi chú <span style="color: red;">*</span> : </label>
+                            <textarea id="ghiChu" name="ghiChu" class="form-control" required></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Xác nhận</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Thông tin chung -->
+        <div class="container mt-4">
+            <h3>Thông tin chung</h3>
+            <hr>
+            <div class="row mb-2">
+                <div class="col-md-6">
+                    <p><strong>Mã hóa đơn:</strong> <span th:text="${hoaDon.ma}"></span></p>
+                    <p><strong>Tên người nhận:</strong> <span th:text="${hoaDon.tenNguoiNhan}"></span></p>
+                    <p><strong>Email:</strong> <span th:text="${hoaDon.email}"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Mã KH:</strong> <span th:text="${hoaDon.maKH}"></span></p>
+                    <p><strong>SĐT:</strong> <span th:text="${hoaDon.soDienThoai}"></span></p>
+                    <p><strong>Địa chỉ:</strong> <span th:text="${hoaDon.diaChi}"></span></p>
+                </div>
+            </div>
+            <!--    <p><strong>Nhân viên:</strong> <span th:text="${hoaDon.tenNhanVien}"></span></p>-->
+            <!--        <p><strong>Cập nhật lần cuối bởi:</strong> <span th:text="${lichSuMoiNhat.tenNguoiTao}"></span></p>-->
+            <p><strong>Trạng thái:</strong> <span th:text="${hoaDon.getTrangThaiLichSuHoaDonMoTa()}"></span></p>
+            <p>
+                <strong>Ghi chú:</strong>
+                <span th:utext="${!#strings.isEmpty(hoaDon.ghiChu) ? hoaDon.ghiChu.replaceAll('\n','<br/>') : 'Không có ghi chú'}">
+            </span>
+            </p>
+        </div>
+        <!-- Danh sách sản phẩm -->
+        <div class="container mt-4">
+            <h3>Danh sách sản phẩm</h3>
+            <hr>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="text-center">
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã sản phẩm</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Giá bán</th>
+                        <th>Số lượng</th>
+                        <th>Tổng tiền</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="hdct, index : ${hdctList}">
+                        <td th:text="${index.count}" class="text-center"></td>
+                        <td th:text="${hdct.maSp}" class="text-center"></td>
+                        <td th:text="${hdct.tenCTSP}" class="text-center"></td>
+                        <td th:text="${@utils.formatCurrency(hdct.giaSauGiam)}" class="text-end"></td>
+                        <!--                    <td th:text="${hdct.soLuong}" class="text-center"></td>-->
+                        <td class="text-center">
+                            <!--                        <div class="input-group input-group-sm justify-content-center"-->
+                            <!--                             th:if="${hoaDon.trangThaiLichSuHoaDon.name() == 'CHO_XAC_NHAN'}">-->
+                            <!--                            <button class="btn btn-outline-secondary btn-sm" onclick="thayDoiSoLuong(this, -1)">-</button>-->
+                            <!--                            <input type="number" class="form-control text-center so-luong-input" th:value="${hdct.soLuong}"-->
+                            <!--                                   min="1" th:data-id="${hdct.idHoaDonChiTiet}" onchange="capNhatSoLuong(this)">-->
+                            <!--                            <button class="btn btn-outline-secondary btn-sm" onclick="thayDoiSoLuong(this, 1)">+</button>-->
+                            <!--                        </div>-->
+
+                            <!-- Nếu không được thay đổi -->
+                            <span th:text="${hdct.soLuong}"></span>
+                        </td>
+                        <td class="text-end tong-tien" th:text="${@utils.formatCurrency(hdct.tongTien)}"></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-secondary"
+                                    th:data-id="${hdct.idCTSP}"
+                                    th:attr="disabled=${!@hoa_don_utils.choPhepDanhGiaDonHang(hoaDon.trangThaiLichSuHoaDon, hdct.idCTSP, idKhachHang)},
+                                    title=${@hoa_don_utils.choPhepDanhGiaDonHang(hoaDon.trangThaiLichSuHoaDon, hdct.idCTSP, idKhachHang) ? null : 'Không thể đánh giá ở trạng thái hiện tại'}"
+                                    th:classappend="${@hoa_don_utils.choPhepDanhGiaDonHang(hoaDon.trangThaiLichSuHoaDon, hdct.idCTSP, idKhachHang) ? '' : ' disabled-custom'}"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalDanhGiaSanPham"
+                                    onclick="chonSanPhamDanhGia(this)">
+                                Đánh giá
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!--Modal Danh Gia San Pham-->
+            <div class="modal fade" id="modalDanhGiaSanPham" tabindex="-1" aria-labelledby="modalDanhGiaSanPhamLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <form th:action="@{'/khach-hang/don-hang/' + ${id} + '/' + ${hoaDon.ma} + '/danh-gia'}"
+                          method="post" enctype="multipart/form-data">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Đánh giá sản phẩm</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" name="sanPhamId" id="sanPhamId"/>
+
+                                <div class="mb-3">
+                                    <label for="soSao">Chọn số sao:</label>
+                                    <select class="form-select" name="soSao" id="soSao" required>
+                                        <option value="5">★★★★★ - Rất tốt</option>
+                                        <option value="4">★★★★☆ - Tốt</option>
+                                        <option value="3">★★★☆☆ - Bình thường</option>
+                                        <option value="2">★★☆☆☆ - Kém</option>
+                                        <option value="1">★☆☆☆☆ - Rất tệ</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="noiDung">Nội dung:</label>
+                                    <textarea name="noiDung" id="noiDung" class="form-control" rows="3"
+                                              required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="hinhAnh">Ảnh minh họa (tùy chọn):</label>
+                                    <input type="file" class="form-control" name="hinhAnh" id="hinhAnh"
+                                           accept="image/*">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Tổng kết thanh toán -->
+        <div class="container mt-4">
+            <h3>Tổng kết</h3>
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <p>
+                        <strong>Phiếu giảm giá:</strong>
+                        <span th:text="${hoaDon.maGiamGia != null ? hoaDon.maGiamGia + ' - ' + hoaDon.giamGia : 'Không'}"></span>
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <!--                <p><strong>Giảm giá:</strong> <span th:text="${hoaDon.giamGia}"></span></p>-->
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Giá gốc:</strong> <span th:text="${@utils.formatCurrency(hoaDon.giaGoc)}"
+                                                       style="color: green"></span></p>
+                    <p><strong>Giá giảm:</strong> <span th:text="'- ' + ${@utils.formatCurrency(hoaDon.giaGiamGia)}"
+                                                        style="color: darkred"></span></p>
+                    <p><strong>Phí vận chuyển:</strong> <span
+                            th:text="${@utils.formatCurrency(hoaDon.phiVanChuyen)}" style="color: green"></span></p>
+                    <p><strong>Thành tiền:</strong> <span th:text="${@utils.formatCurrency(hoaDon.thanhTien)}"
+                                                          style="color: red"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Ngày tạo:</strong> <span th:text="${hoaDon.ngayTao}"></span></p>
+                    <p><strong>Thanh toán:</strong> <span th:text="${hoaDon.trangThaiHoaDonString}"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function chonSanPhamDanhGia(btn) {
+                const sanPhamId = btn.getAttribute("data-id");
+                document.getElementById("sanPhamId").value = sanPhamId;
+            }
+        </script>
+
+        <!-- JavaScript -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const container = document.getElementById('timelineContainer');
+
+                // Smooth scroll với mouse wheel
+                if (container) {
+                    container.addEventListener('wheel', function (e) {
+                        if (e.deltaY !== 0) {
+                            e.preventDefault();
+                            this.scrollLeft += e.deltaY > 0 ? 50 : -50;
+                        }
+                    });
+                }
+            });
+
+            window.addEventListener("load", function () {
+                const timeline = document.getElementById("timeline");
+                if (timeline) {
+                    timeline.scrollLeft = timeline.scrollWidth;
+                }
+            });
+        </script>
+
+
+        <!--  Thong bao-->
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const successMsg = [[${success} == null ? 'null' : '' + ${success} + '']];
+            const errorMsg = [[${error} == null ? 'null' : '' + ${error} + '']];
+
+            /*]]>*/
+
+            function showCustomToast(type, message) {
+                const toastEl = document.getElementById(type === 'success' ? 'customSuccess' : 'customError');
+                const msgEl = document.getElementById(type === 'success' ? 'successMsg' : 'errorMsg');
+                msgEl.textContent = message;
+                toastEl.style.display = 'block';
+
+                setTimeout(() => {
+                    toastEl.style.display = 'none';
+                }, 4000);
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                if (successMsg !== null && successMsg !== "null") {
+                    showCustomToast('success', successMsg);
+                }
+                if (errorMsg !== null && errorMsg !== "null") {
+                    showCustomToast('error', errorMsg);
+                }
+            });
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
+
+            thayDoiSoLuong = function (btn, delta) {
+                const input = btn.parentElement.querySelector('.so-luong-input');
+                let current = parseInt(input.value);
+                current += delta;
+                if (current < 1) current = 1;
+                input.value = current;
+                capNhatSoLuong(input);
+            };
+
+            capNhatSoLuong = function (input) {
+                const id = input.getAttribute("data-id");
+                const soLuong = parseInt(input.value);
+
+                fetch('/admin/hoa-don/detail1/api/cap-nhat-so-luong', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({id: id, soLuong: soLuong})
+                })
+                    .then(response => {
+                        console.log(response);
+                        if (!response.ok) throw new Error("Cập nhật thất bại!");
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(data);
+                        const tongTienTd = input.closest('tr').querySelector('.tong-tien');
+                        tongTienTd.textContent = data.tongTienFormatted;
+                    })
+                    .catch(err => alert(err.message));
+            };
+        </script>
+        <!--  Thong bao-->
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const huyDonBtn = document.querySelector("button.btn-outline-danger");
+                const hoanHangBtn = document.querySelector("button.btn-outline-warning");
+                const trangThaiMoiInput = document.getElementById("trangThaiMoi");
+
+                if (huyDonBtn) {
+                    huyDonBtn.addEventListener("click", function () {
+                        trangThaiMoiInput.value = 9; // HUY
+                    });
+                }
+
+                if (hoanHangBtn) {
+                    hoanHangBtn.addEventListener("click", function () {
+                        trangThaiMoiInput.value = 6; // YEU_CAU_HOAN_HANG
+                    });
+                }
+            });
+        </script>
+    </div>
+</div>
+
+
+</body>
+</html>

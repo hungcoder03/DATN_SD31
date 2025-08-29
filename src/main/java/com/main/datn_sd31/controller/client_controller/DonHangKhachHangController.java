@@ -3,6 +3,14 @@ package com.main.datn_sd31.controller.client_controller;
 import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
 import com.main.datn_sd31.dto.Pagination;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonDTO;
+import com.main.datn_sd31.entity.ChiTietSanPham;
+import com.main.datn_sd31.entity.DanhGia;
+import com.main.datn_sd31.entity.KhachHang;
+import com.main.datn_sd31.entity.SanPham;
+import com.main.datn_sd31.repository.Chitietsanphamrepository;
+import com.main.datn_sd31.repository.DanhGiaRepository;
+import com.main.datn_sd31.repository.KhachHangRepository;
+import com.main.datn_sd31.repository.SanPhamRepository;
 import com.main.datn_sd31.service.HoaDonChiTietService;
 import com.main.datn_sd31.service.HoaDonService;
 import com.main.datn_sd31.service.LichSuHoaDonService;
@@ -13,11 +21,17 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/khach-hang/don-hang/{id}")
@@ -33,6 +47,10 @@ public class DonHangKhachHangController {
     private final LichSuHoaDonService lichSuHoaDonService;
 
     private final GetKhachHang getKhachHang;
+    private final KhachHangRepository khachHangRepository;
+    private final SanPhamRepository sanPhamRepository;
+    private final DanhGiaRepository danhGiaRepository;
+    private final Chitietsanphamrepository chitietsanphamrepository;
 
 
     @GetMapping("")
@@ -66,15 +84,17 @@ public class DonHangKhachHangController {
         model.addAttribute("pageInfo", hoaDonList);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
-        model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
+        model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonService.getAllHoaDonKhachHang(getKhachHang.getCurrentKhachHang())));
+
+//        System.out.println(hoaDonService.getAllHoaDonKhachHang(getKhachHang.getCurrentKhachHang()).toString() + "\n");
 
         Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
         for (HoaDonDTO hd : hoaDonList.getContent()) {
-            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
+            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLeKhachHang(hd.getTrangThaiLichSuHoaDon(), hd));
         }
         model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
 
-        return "khachhang/lich-su-mua-hang";
+        return "client/pages/order/history";
     }
 
     @GetMapping("/search")
@@ -102,7 +122,47 @@ public class DonHangKhachHangController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
 
-        return "khachhang/lich-su-mua-hang";
+        return "client/pages/order/history";
+    }
+
+    @PostMapping("/{maHoaDon}/danh-gia")
+    public String danhGiaSanPham(
+            @PathVariable("id") Integer idKhachHang,
+            @PathVariable("maHoaDon") String maHoaDon,
+            @RequestParam("sanPhamId") Integer sanPhamId,
+            @RequestParam("soSao") Integer soSao,
+            @RequestParam("noiDung") String noiDung,
+            @RequestParam("hinhAnh") MultipartFile hinhAnhFile,
+            RedirectAttributes redirectAttributes) throws IOException {
+
+        Optional<KhachHang> khachHang = khachHangRepository.findById(idKhachHang);
+//        System.out.println("Spid: " +sanPhamId);
+//        System.out.println("SanPham:" + chitietsanphamrepository.findById(sanPhamId));
+        SanPham sp = sanPhamRepository.findSanPhamByChiTietSanPham(chitietsanphamrepository.findById(sanPhamId).orElseThrow());
+
+        DanhGia dg = new DanhGia();
+        dg.setSanPham(sp);
+        dg.setKhachHang(khachHang.get());
+        dg.setSoSao(soSao);
+        dg.setNoiDung(noiDung);
+        dg.setThoiGian(Instant.now());
+
+        if (hinhAnhFile != null && !hinhAnhFile.isEmpty()) {
+            String tenFile = UUID.randomUUID().toString() + "_" +
+                    hinhAnhFile.getOriginalFilename().replaceAll("[^a-zA-Z0-9.\\-]", "_");
+            Path uploadPath = Paths.get("src/main/resources/static/uploads/danh-gia/");
+            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+
+            Path path = uploadPath.resolve(tenFile);
+            Files.copy(hinhAnhFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+            dg.setHinhAnh("/uploads/danh-gia/" + tenFile); // lưu path thay vì Base64
+        }
+
+        danhGiaRepository.save(dg);
+
+        redirectAttributes.addFlashAttribute("success", "Đánh giá sản phẩm thành công!");
+        return "redirect:/khach-hang/don-hang/" + idKhachHang + "/" + maHoaDon;
     }
 
 //    @GetMapping("/detail")

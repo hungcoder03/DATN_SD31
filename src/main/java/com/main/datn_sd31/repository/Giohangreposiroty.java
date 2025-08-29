@@ -2,9 +2,11 @@ package com.main.datn_sd31.repository;
 
 import com.main.datn_sd31.entity.GioHangChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,4 +32,11 @@ public interface Giohangreposiroty extends JpaRepository<GioHangChiTiet,Integer>
     @Query("SELECT ghct FROM GioHangChiTiet ghct WHERE ghct.khachHang.id = :khachHangId")
     List<GioHangChiTiet> findByKhachHangId(@Param("khachHangId") Integer khachHangId);
 
+    GioHangChiTiet findByKhachHangIdAndChiTietSpId(Integer khachHangId, Integer chiTietSpId);
+
+    // ✅ Thêm method để xóa giỏ hàng theo khách hàng
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM GioHangChiTiet g WHERE g.khachHang.id = :khachHangId")
+    void deleteByKhachHangId(@Param("khachHangId") Integer khachHangId);
 }

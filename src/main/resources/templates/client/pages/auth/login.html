@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{client/layout}">
+
+<head>
+    <title>Đăng nhập - Waggy Pet Shop</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-4">Đăng Nhập</h2>
+
+                            <form th:action="@{/khach-hang/dang-nhap}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label">Email:</label>
+                                    <input type="email" name="username" class="form-control" required />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Mật khẩu:</label>
+                                    <input type="password" name="password" class="form-control" required />
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
+                                
+                                <div class="text-center">
+                                    <span class="text-muted">Chưa có tài khoản? </span>
+                                    <a href="/khach-hang/dang-ky" class="text-primary text-decoration-none">Đăng ký ngay</a>
+                                </div>
+                            </form>
+
+                            <div th:if="${param.error}" class="alert alert-danger mt-3">
+                                <p class="mb-0">❌ Sai email hoặc mật khẩu!</p>
+                            </div>
+                            <div th:if="${param.logout}" class="alert alert-success mt-3">
+                                <p class="mb-0">✅ Đã đăng xuất thành công.</p>
+                            </div>
+                            
+                            <!-- Thông báo thành công từ đăng ký -->
+                            <div th:if="${success}" class="alert alert-success mt-3">
+                                <p class="mb-0">✅ <span th:text="${success}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/layout}">
+<head>
+    <title>Áp dụng sản phẩm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            prefix: 'tw-',
+            theme: {
+                extend: {
+                    colors: {
+                        'project-primary': '#dead6f',
+                        'project-primary-dark': '#c19b5b',
+                        'project-primary-light': '#f0d4a0',
+                        'project-gray': '#f8f9fa',
+                        'project-dark': '#2c3e50'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" th:href="@{/css/admin/sanpham/add.css}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body class="tw-bg-gray-50">
+<section layout:fragment="content">
+    <div class="tw-min-h-screen tw-bg-gradient-to-br tw-from-gray-50 tw-to-gray-100 tw-py-8 tw-px-4">
+        <div class="tw-max-w-4xl tw-mx-auto tw-space-y-6">
+        <div class="tw-flex tw-items-center tw-justify-between">
+            <div>
+                <h1 class="tw-text-3xl tw-font-semibold tw-text-project-dark">Áp dụng sản phẩm</h1>
+                <p class="tw-text-gray-600">Chọn biến thể để áp dụng/huỷ áp dụng cho đợt: <span class="tw-font-medium" th:text="${dotGiamGia.ten}"></span></p>
+            </div>
+            <div class="tw-flex tw-gap-2">
+                <a th:href="@{|/admin/dot-giam-gia/edit/${dotGiamGia.id}|}" class="btn-secondary-custom">Chỉnh sửa thông tin</a>
+                <a th:href="@{/admin/dot-giam-gia}" class="btn-secondary-custom">Quay lại</a>
+            </div>
+        </div>
+
+        <div class="tw-bg-white tw-rounded-2xl tw-shadow-xl tw-border tw-border-gray-100 tw-p-6">
+            <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
+                <h2 class="tw-text-lg tw-font-semibold tw-text-project-dark">Thông tin đợt</h2>
+                <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium"
+                      th:classappend="${dotGiamGia.trangThai == 0} ? ' tw-bg-yellow-100 tw-text-yellow-800' : (${dotGiamGia.trangThai == 1} ? ' tw-bg-green-100 tw-text-green-800' : ' tw-bg-red-100 tw-text-red-800')"
+                      th:text="${dotGiamGia.trangThai == 0} ? 'Chuẩn bị' : (${dotGiamGia.trangThai == 1} ? 'Đang hoạt động' : 'Ngừng')"></span>
+            </div>
+            <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                <div>
+                    <div class="tw-text-xs tw-text-gray-500">Mã</div>
+                    <div class="tw-text-sm tw-font-medium" th:text="${dotGiamGia.ma}"></div>
+                </div>
+                <div>
+                    <div class="tw-text-xs tw-text-gray-500">Tên</div>
+                    <div class="tw-text-sm tw-font-medium" th:text="${dotGiamGia.ten}"></div>
+                </div>
+                <div>
+                    <div class="tw-text-xs tw-text-gray-500">Loại</div>
+                    <div class="tw-text-sm tw-font-medium" th:text="${dotGiamGia.loai == 'phan_tram' ? 'Phần trăm' : 'Tiền mặt'}"></div>
+                </div>
+                <div>
+                    <div class="tw-text-xs tw-text-gray-500">Giá trị</div>
+                    <div class="tw-text-sm tw-font-medium" th:text="${dotGiamGia.loai == 'phan_tram' ? dotGiamGia.giaTriDotGiamGia + '%' : #numbers.formatDecimal(dotGiamGia.giaTriDotGiamGia, 0, 'COMMA', 0, 'POINT') + ' VND'}"></div>
+                </div>
+                <div>
+                    <div class="tw-text-xs tw-text-gray-500">Bắt đầu</div>
+                    <div class="tw-text-sm tw-font-medium" th:text="${#temporals.format(dotGiamGia.ngayBatDau, 'dd/MM/yyyy HH:mm')}"></div>
+                </div>
+                <div>
+                    <div class="tw-text-xs tw-text-gray-500">Kết thúc</div>
+                    <div class="tw-text-sm tw-font-medium" th:text="${#temporals.format(dotGiamGia.ngayKetThuc, 'dd/MM/yyyy HH:mm')}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tw-bg-white tw-rounded-2xl tw-shadow-xl tw-border tw-border-gray-100 tw-p-6">
+            <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
+                <div class="tw-flex tw-gap-2">
+                    <input id="prodKeyword" type="text" class="tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm" placeholder="Tìm theo tên/ mã...">
+                    <select id="prodApplied" class="tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm">
+                        <option value="ALL">Tất cả</option>
+                        <option value="APPLIED">Đã áp dụng</option>
+                        <option value="APPLIED_OTHER">Đã áp dụng bởi đợt khác</option>
+                        <option value="NOT_APPLIED">Chưa áp dụng</option>
+                    </select>
+                    <button id="btnReload" type="button" class="tw-px-3 tw-py-2 tw-text-sm tw-rounded-lg tw-border tw-border-gray-300 hover:tw-bg-gray-50">Tải lại</button>
+                </div>
+                <div id="selectedCount" class="tw-text-sm tw-text-gray-600">Đã chọn: 0</div>
+            </div>
+
+            <div class="tw-overflow-x-auto tw-border tw-border-gray-100 tw-rounded-lg">
+                <table class="tw-min-w-full tw-divide-y tw-divide-gray-200">
+                    <thead class="tw-bg-gray-50">
+                    <tr>
+                        <th class="tw-w-10 tw-px-4">#</th>
+                        <th class="tw-px-4 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Biến thể</th>
+                        <th class="tw-px-4 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Giá gốc</th>
+                        <th class="tw-px-4 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Giá giảm dự kiến</th>
+                        <th class="tw-px-4 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Trạng thái áp dụng</th>
+                    </tr>
+                    </thead>
+                    <tbody id="applyTableBody" class="tw-bg-white tw-divide-y tw-divide-gray-200">
+                        <tr><td class="tw-px-4 tw-py-3" colspan="5">Đang tải...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tw-flex tw-items-center tw-justify-between tw-mt-4">
+                <div class="tw-flex tw-items-center tw-gap-2">
+                    <button id="btnPrev" type="button" class="tw-px-3 tw-py-2 tw-text-sm tw-rounded-lg tw-border tw-border-gray-300 hover:tw-bg-gray-50">Trang trước</button>
+                    <span id="pageInfo" class="tw-text-sm tw-text-gray-600">Trang 1/1</span>
+                    <button id="btnNext" type="button" class="tw-px-3 tw-py-2 tw-text-sm tw-rounded-lg tw-border tw-border-gray-300 hover:tw-bg-gray-50">Trang sau</button>
+                </div>
+                <div class="tw-flex tw-items-center tw-gap-2">
+                    <span class="tw-text-sm tw-text-gray-600">Hiển thị</span>
+                    <select id="pageSize" class="tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="tw-flex tw-justify-end tw-items-center tw-mt-4 tw-gap-2">
+                <button id="btnApply" type="button" class="tw-bg-project-primary tw-text-white tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm hover:tw-bg-project-primary-dark">Áp dụng</button>
+                <button id="btnUnapply" type="button" class="tw-bg-gray-100 tw-text-gray-700 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm hover:tw-bg-gray-200">Bỏ áp dụng</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const dotId = /*[[${dotGiamGia.id}]]*/ null;
+            const tbody = document.getElementById('applyTableBody');
+            const keywordEl = document.getElementById('prodKeyword');
+            const appliedEl = document.getElementById('prodApplied');
+            const btnReload = document.getElementById('btnReload');
+            const btnApply = document.getElementById('btnApply');
+            const btnUnapply = document.getElementById('btnUnapply');
+            const selectedCount = document.getElementById('selectedCount');
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            const pageInfo = document.getElementById('pageInfo');
+            const pageSizeEl = document.getElementById('pageSize');
+
+            if (!dotId || !tbody) return;
+
+            let selected = new Set();
+            let currentPage = 0;
+            let pageSize = parseInt(pageSizeEl ? pageSizeEl.value : '20', 10);
+            let totalPages = 1;
+            function renderSelectedCount() { selectedCount.textContent = 'Đã chọn: ' + selected.size; }
+            function currency(v) { return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v); }
+            function updatePager() {
+                if (pageInfo) pageInfo.textContent = 'Trang ' + (currentPage + 1) + '/' + Math.max(totalPages, 1);
+                if (btnPrev) btnPrev.disabled = currentPage <= 0;
+                if (btnNext) btnNext.disabled = currentPage >= (totalPages - 1);
+            }
+
+            async function loadProducts() {
+                tbody.innerHTML = '<tr><td class="tw-px-4 tw-py-3" colspan="5">Đang tải...</td></tr>';
+                const params = new URLSearchParams({ dotId, page: currentPage, size: pageSize, keyword: keywordEl.value || '', applied: appliedEl.value });
+                const res = await fetch('/admin/dot-giam-gia/api/products?' + params.toString());
+                const data = await res.json();
+                if (!data.success) { tbody.innerHTML = '<tr><td class="tw-px-4 tw-py-3" colspan="5">' + (data.message || 'Lỗi tải dữ liệu') + '</td></tr>'; updatePager(); return; }
+                selected.clear(); renderSelectedCount();
+                totalPages = data.totalPages || 1;
+                tbody.innerHTML = '';
+                data.content.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const applied = item.applied; // Bỏ Number() vì backend đã trả về int
+                    tr.innerHTML = `
+                        <td class="tw-px-4 tw-py-3"><input type="checkbox" data-id="${item.id}"></td>
+                        <td class="tw-px-4 tw-py-3">${item.tenCt} <span class="tw-text-xs tw-text-gray-500">(${item.sanPham})</span></td>
+                        <td class="tw-px-4 tw-py-3">${currency(item.giaGoc || 0)}</td>
+                        <td class="tw-px-4 tw-py-3 tw-font-semibold">${currency(item.discountedPrice || 0)}</td>
+                        <td class="tw-px-4 tw-py-3">
+                            ${
+                        applied === 1
+                            ? '<span class="tw-text-green-700 tw-text-xs">Đã áp dụng</span>'
+                            : applied === 2
+                                ? '<span class="tw-text-orange-600 tw-text-xs">Đã áp dụng bởi đợt khác</span>'
+                                : '<span class="tw-text-gray-400 tw-text-xs">Chưa áp dụng</span>'
+                    }
+                        </td>
+                    `;
+                    const cb = tr.querySelector('input[type="checkbox"]');
+                    cb.addEventListener('change', (e) => {
+                        if (e.target.checked) selected.add(item.id); else selected.delete(item.id); renderSelectedCount();
+                    });
+                    tbody.appendChild(tr);
+                });
+                updatePager();
+            }
+
+            async function postJSON(url, body) {
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', [header]: token },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) {
+                    const text = await res.text();
+                    throw new Error('HTTP ' + res.status + ': ' + text);
+                }
+                return await res.json();
+            }
+
+            btnReload && btnReload.addEventListener('click', () => { currentPage = 0; loadProducts(); });
+            keywordEl && keywordEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') { currentPage = 0; loadProducts(); } });
+            appliedEl && appliedEl.addEventListener('change', () => { currentPage = 0; loadProducts(); });
+            pageSizeEl && pageSizeEl.addEventListener('change', () => { pageSize = parseInt(pageSizeEl.value, 10) || 20; currentPage = 0; loadProducts(); });
+            btnPrev && btnPrev.addEventListener('click', () => { if (currentPage > 0) { currentPage--; loadProducts(); } });
+            btnNext && btnNext.addEventListener('click', () => { if (currentPage < totalPages - 1) { currentPage++; loadProducts(); } });
+
+            btnApply && btnApply.addEventListener('click', async () => {
+                if (selected.size === 0) { alert('Vui lòng chọn ít nhất một biến thể.'); return; }
+                try {
+                    const data = await postJSON(`/admin/dot-giam-gia/${dotId}/apply-products`, { ids: Array.from(selected) });
+                    alert(data.message || 'Áp dụng thành công');
+                    await loadProducts();
+                } catch (e) {
+                    alert('Lỗi áp dụng: ' + e.message);
+                }
+            });
+
+            btnUnapply && btnUnapply.addEventListener('click', async () => {
+                if (selected.size === 0) { alert('Vui lòng chọn ít nhất một biến thể.'); return; }
+                try {
+                    const data = await postJSON(`/admin/dot-giam-gia/${dotId}/unapply-products`, { ids: Array.from(selected) });
+                    alert(data.message || 'Bỏ áp dụng thành công');
+                    await loadProducts();
+                } catch (e) {
+                    alert('Lỗi bỏ áp dụng: ' + e.message);
+                }
+            });
+
+            loadProducts();
+        });
+        /*]]>*/
+    </script>
+</section>
+</body>
+</html> 

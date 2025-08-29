@@ -47,7 +47,7 @@ public class HoaDon {
     private Integer trangThai;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "khach_hang_id", nullable = false)
+    @JoinColumn(name = "khach_hang_id")
     private KhachHang khachHang;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

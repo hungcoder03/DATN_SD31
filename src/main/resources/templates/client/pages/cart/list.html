@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{client/layout}">
+
+<head>
+    <title>Giỏ hàng - D&C Fashions</title>
+    
+    <!-- Page-specific CSS -->
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/client/css/cart.css}">
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+<!-- Success Toast -->
+<div id="customSuccess" class="custom-toast success" style="display:none;">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    <span id="successMsg"></span>
+    <button class="close-btn" onclick="closeToast('customSuccess')">&times;</button>
+    <div class="progress-bar"></div>
+</div>
+
+<!-- Error Toast -->
+<div id="customError" class="custom-toast error" style="display:none;">
+    <i class="bi bi-x-circle-fill me-2"></i>
+    <span id="errorMsg"></span>
+    <button class="close-btn" onclick="closeToast('customError')">&times;</button>
+    <div class="progress-bar"></div>
+</div>
+
+<!-- Giỏ hàng -->
+        <div class="lg:no-scrollbar mt-px h-[calc(100dvh-114px)] overflow-y-auto lg:mx-auto lg:mt-0 lg:flex lg:h-[calc(100vh-132px)] lg:max-w-[1248px] lg:gap-6 lg:overflow-y-auto lg:py-12">
+            <!-- Cột trái: Danh sách sản phẩm -->
+            <div class="space-y-4 bg-white pt-5 pb-[130px] lg:w-full rounded-lg border border-border-primary p-6 shadow-lg lg:h-fit lg:space-y-6">
+                <div class="flex flex-col gap-4 bg-white px-3 lg:h-fit lg:gap-6 lg:p-0">
+    <!-- Chọn tất cả -->
+                    <div class="inline-flex items-center space-x-2">
+                        <button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" 
+                                class="group h-4 w-4 rounded-xs shrink-0 border border-border-primary outline-none hover:border-border-secondary hover:data-[state=checked]:bg-brand-surface-hover disabled:cursor-not-allowed data-[state=checked]:bg-brand-surface data-[state=checked]:border-transparent data-[state=indeterminate]:bg-brand-surface data-[state=indeterminate]:border-transparent data-[state=checked]:text-primary-foreground" 
+                                id="chonTatCa">
+                            <span data-state="unchecked" class="flex items-center justify-center text-current" style="pointer-events: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon" class="size-4 hidden text-white group-data-[state=indeterminate]:inline-block">
+                                    <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd"></path>
+                                </svg>
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-3 scale-125 text-white group-data-[state=checked]:inline-block">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12.0303 5.21967C12.3232 5.51256 12.3232 5.98744 12.0303 6.28033L7.53033 10.7803C7.23744 11.0732 6.76256 11.0732 6.46967 10.7803L4.21967 8.53033C3.92678 8.23744 3.92678 7.76256 4.21967 7.46967C4.51256 7.17678 4.98744 7.17678 5.28033 7.46967L7 9.18934L10.9697 5.21967C11.2626 4.92678 11.7374 4.92678 12.0303 5.21967Z" fill="#ffffff"></path>
+                                </svg>
+                            </span>
+                        </button>
+                        <label for="chonTatCa" class="text-label-md group-disabled:cursor-not-allowed">
+                            <p class="text-theme-text text-label-md cursor-pointer">Chọn tất cả</p>
+        </label>
+    </div>
+
+                    <!-- Danh sách sản phẩm -->
+                    <div th:if="${list != null and !list.isEmpty()}" class="space-y-2">
+                        <div th:each="item, iterStat : ${list}" 
+                th:data-price="${item.chiTietSp.giaBan}"
+                             th:data-item-id="${item.id}"
+                             class="flex max-h-[116px] items-center gap-2 lg:max-h-[176px] rounded-lg border border-border-primary p-3 shadow-sm">
+                            
+                            <!-- Checkbox sản phẩm -->
+                            <div class="inline-flex items-center space-x-2">
+                                <button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" 
+                                        class="group h-4 w-4 rounded-xs shrink-0 border border-border-primary outline-none hover:border-border-secondary hover:data-[state=checked]:bg-brand-surface-hover disabled:cursor-not-allowed data-[state=checked]:bg-brand-surface data-[state=checked]:border-transparent data-[state=indeterminate]:bg-brand-surface data-[state=indeterminate]:border-transparent data-[state=checked]:text-primary-foreground item-checkbox" 
+                                        th:id="'item-' + ${item.id}">
+                                    <span data-state="unchecked" class="flex items-center justify-center text-current" style="pointer-events: none;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon" class="size-4 hidden text-white group-data-[state=indeterminate]:inline-block">
+                                            <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="size-3 scale-125 text-white group-data-[state=checked]:inline-block">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12.0303 5.21967C12.3232 5.51256 12.3232 5.98744 12.0303 6.28033L7.53033 10.7803C7.23744 11.0732 6.76256 11.0732 6.46967 10.7803L4.21967 8.53033C3.92678 8.23744 3.92678 7.76256 4.21967 7.46967C4.51256 7.17678 4.98744 7.17678 5.28033 7.46967L7 9.18934L10.9697 5.21967C11.2626 4.92678 11.7374 4.92678 12.0303 5.21967Z" fill="#ffffff"></path>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <!-- Nội dung sản phẩm -->
+                            <div class="flex flex-1 gap-3">
+                                <!-- Ảnh sản phẩm -->
+                                <div class="relative" style="width:88px; min-width:88px; height:88px; min-height:88px; overflow:hidden;">
+                                    <img th:each="img : ${item.chiTietSp.sanPham.hinhAnhs}"
+                                         th:if="${img.loaiAnh == 0}"
+                                         th:src="@{${img.url}}"
+                                         th:alt="${item.chiTietSp.sanPham.ten}"
+                                         loading="lazy"
+                                         th:width="88" th:height="88"
+                                         class="size-full rounded-lg object-cover" />
+                                    <img th:if="${item.chiTietSp.sanPham.hinhAnhs == null or item.chiTietSp.sanPham.hinhAnhs.isEmpty()}"
+                                         th:src="@{'/client-static/images/item1.jpg'}"
+                                         th:alt="${item.chiTietSp.sanPham.ten}"
+                                         loading="lazy"
+                                         th:width="88" th:height="88"
+                                         class="size-full rounded-lg object-cover" />
+                                </div>
+
+                                <!-- Thông tin sản phẩm -->
+                                <div class="flex w-full flex-col gap-2">
+                                    <!-- Tên sản phẩm và nút xóa -->
+                                    <div class="flex justify-between gap-2">
+                                        <a th:href="@{/san-pham/chi-tiet/{id}(id=${item.chiTietSp.sanPham.id})}" 
+                                           target="_blank" 
+                                           rel="noreferrer" 
+                                           aria-label="go to product" 
+                                           class="flex-1">
+                                            <p class="text-theme-text text-body-sm line-clamp-2 lg:text-body-lg" 
+                                               th:text="${item.chiTietSp.sanPham.ten}">Tên sản phẩm</p>
+                                        </a>
+                                        <svg xmlns="http://www.w3.org/2000/svg" 
+                                             fill="none" 
+                                             viewBox="0 0 24 24" 
+                                             stroke-width="1.5" 
+                                             stroke="currentColor" 
+                                             aria-hidden="true" 
+                                             data-slot="icon" 
+                                             class="size-4 min-w-4 cursor-pointer text-theme-text-secondary lg:mt-0.5 lg:size-5 lg:min-w-5"
+                                             th:onclick="'removeItem(' + ${item.id} + ')'">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
+                                        </svg>
+                    </div>
+
+                                    <!-- Variant selector -->
+                                    <button class="focus-visible:ring-ring inline-flex items-center whitespace-nowrap rounded-rounded font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 border border-border-primary bg-theme-bg text-theme-text hover:bg-theme-surface-hover [&_svg]:text-theme-text h-6 gap-1 px-3 py-1 text-label-sm [&_svg]:size-3 justify-between w-fit" 
+                                            aria-label="select variant">
+                                        <span th:text="${item.chiTietSp.mauSac.ten + ', ' + item.chiTietSp.size.ten}">Màu, Size</span>
+                                        <span class="focus-visible:ring-ring inline-flex items-center gap-2 whitespace-nowrap rounded-rounded font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 size-3 min-w-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon" class="text-theme-text">
+                                                <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </span>
+                                    </button>
+
+                                    <!-- Số lượng và giá -->
+                                    <div class="mt-auto flex items-center gap-3">
+                                        <!-- Quantity controls -->
+                                        <div class="text-field-wrapper space-y-1 w-[112px] min-w-[112px] lg:min-w-[140px] [&_input]:text-center">
+                                            <div class="flex items-center border border-border-primary rounded-full bg-theme-bg has-[:hover]:border-border-secondary has-[:focus]:border-border-brand focus-within:!border-border-brand has-[:disabled]:border-border-secondary has-[:disabled]:bg-theme-surface has-[:disabled]:text-theme-text-secondary data-[error=true]:border-border-negative [&_input]:text-placeholder-md h-[34px] gap-2 px-3 py-2" 
+                                                 data-error="false">
+                                                <span class="size-4 min-w-4 cursor-pointer select-none text-theme-text-secondary"
+                                                      th:onclick="'updateQuantity(' + ${item.id} + ', -1)'"
+                                                      th:style="${item.soLuong <= 1} ? 'opacity: 0.4; cursor: not-allowed;' : ''">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"></path>
+                                                    </svg>
+                                                </span>
+                                                <input type="number" class="size-full border-none bg-transparent outline-none quantity-input-field" 
+                                                       data-error="false" 
+                                                       th:id="'quantity-' + ${item.id}"
+                                                       inputmode="numeric" 
+                                                       th:value="${item.soLuong}"
+                                                       th:data-item-id="${item.id}"
+                                                       th:data-original-value="${item.soLuong}"
+                                                       min="1" 
+                                                       th:max="${item.chiTietSp.soLuong}"
+                                                       style="color:var(--theme-text); min-width:28px;">
+                                                <span class="size-4 min-w-4 cursor-pointer select-none"
+                                                      th:onclick="'updateQuantity(' + ${item.id} + ', 1)'"
+                                                      th:style="${item.soLuong >= item.chiTietSp.soLuong} ? 'opacity: 0.4; cursor: not-allowed;' : ''">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
+                                                    </svg>
+            </span>
+                                            </div>
+    </div>
+
+                                        <!-- Giá sản phẩm -->
+                                        <div class="ml-auto flex flex-col items-end gap-[2px]">
+                                            <p class="text-theme-text text-price-md lg:text-price-lg !font-extrabold" 
+                                               th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT') + '₫'}">89.000₫</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        </div>
+
+                    <!-- Giỏ hàng trống -->
+                    <div th:if="${list == null or list.isEmpty()}" class="empty-cart">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h2 class="empty-cart-title">Giỏ hàng trống</h2>
+                        <p class="empty-cart-message">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
+                        <a th:href="@{/san-pham/danh-sach}" class="checkout-btn">
+                            Tiếp tục mua sắm
+                        </a>
+        </div>
+    </div>
+</div>
+
+            <!-- Cột phải: Tổng tiền đơn hàng -->
+            <div class="sticky top-0 h-fit min-w-[436px] space-y-3 rounded-lg border border-border-primary p-6 bg-white shadow-lg">
+                <p class="text-theme-text text-heading-md">Chi tiết đơn hàng</p>
+                
+                <!-- Tổng tiền -->
+                <div class="flex justify-between">
+                    <p class="text-theme-text text-body-md">Tổng tiền</p>
+                    <p class="text-theme-text text-price-md" id="totalTien">0₫</p>
+                </div>
+                
+                <!-- Giảm giá -->
+                <div class="flex justify-between">
+                    <p class="text-theme-text text-body-md">Giảm giá</p>
+                    <p class="text-theme-text text-price-md">0₫</p>
+                </div>
+                
+                <!-- Đường kẻ -->
+                <div class="border border-dashed border-border-primary"></div>
+                
+                <!-- Thành tiền -->
+                <div class="flex w-full justify-between">
+                    <p class="text-theme-text text-body-md">Thành tiền</p>
+                    <div class="flex flex-col items-end justify-end gap-[2px]">
+                        <p class="text-theme-text text-price-xl" id="finalTotal">0₫</p>
+                        <div class="flex items-center gap-[2px]">
+                            <p class="text-theme-text text-label-sm">Mua nhiều giảm nhiều</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Thông tin vận chuyển -->
+                <div class="mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="size-5 text-theme-text-secondary">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"></path>
+                    </svg>
+                    <p class="text-theme-text text-body-md">Đặt hàng ngay vận chuyển nhanh!</p>
+                </div>
+                
+                <!-- Nút đặt hàng -->
+                <button class="focus-visible:ring-ring inline-flex items-center gap-2 whitespace-nowrap rounded-rounded font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-brand-surface text-theme-text hover:bg-brand-surface-hover [&_svg]:text-theme-text h-11 px-4 py-3 text-label-md [&_svg]:size-5 w-full justify-center" 
+                        aria-label="order"
+                        id="submitThanhToan"
+                        disabled>
+                    Đặt hàng
+                    <span class="focus-visible:ring-ring inline-flex items-center gap-2 whitespace-nowrap rounded-rounded font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 size-5 min-w-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon" class="size-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"></path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <!-- Pass server messages to JavaScript -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+            window.successMessage = /*[[${success}]]*/ null;
+            window.errorMessage = /*[[${error}]]*/ null;
+    /*]]>*/
+</script>
+
+        <!-- Page-specific JavaScript -->
+        <script th:src="@{/client/js/cart.js}"></script>
+    </th:block>
+</body>
+</html>

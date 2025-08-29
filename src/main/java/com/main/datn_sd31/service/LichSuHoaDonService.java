@@ -21,17 +21,19 @@ public interface LichSuHoaDonService {
 
     List<TrangThaiLichSuHoaDon> getTrangThaiTiepTheoHopLe(TrangThaiLichSuHoaDon hienTai, HoaDonDTO hoaDonDTO);
 
+    List<TrangThaiLichSuHoaDon> getTrangThaiTiepTheoHopLeKhachHang(TrangThaiLichSuHoaDon hienTai, HoaDonDTO hoaDonDTO);
+
     List<LichSuHoaDonDTO> getLichSuHoaDonDTOByHoaDon(String maHoaDon);
 
     List<LichSuHoaDonDTO> getLichSuHoaDonDTODescByMaHoaDon(String maHoaDon);
 
-    void capNhatTrangThai(String maHoaDon, Integer trangThaiMoi, String ghiChu, NhanVien nhanVien, Integer lyDoGiaoKhongThanhCong);
+    void capNhatTrangThai(String maHoaDon, Integer trangThaiMoi, String ghiChu, NhanVien nhanVien);
 
 
     KetQuaCapNhatTrangThai xuLyCapNhatTrangThai(
             String maHoaDon,
             Integer trangThaiMoi,
-            Integer lyDoGiaoKhongThanhCong,
+//            Integer lyDoGiaoKhongThanhCong,
             String ghiChu,
             NhanVien nhanVien
     );

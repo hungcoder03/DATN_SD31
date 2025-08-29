@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{client/layout}">
+
+<head>
+    <title>Đăng ký - Waggy Pet Shop</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-body p-5">
+                            <h2 class="text-center mb-4">Đăng Ký Tài Khoản</h2>
+
+                            <form th:action="@{/khach-hang/dang-ky}" method="post" id="registerForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Họ và tên: <span class="text-danger">*</span></label>
+                                            <input type="text" name="ten" class="form-control" required 
+                                                   th:value="${khachHang != null ? khachHang.ten : ''}" />
+                                            <div class="invalid-feedback" id="tenError"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Email: <span class="text-danger">*</span></label>
+                                            <input type="email" name="email" class="form-control" required 
+                                                   th:value="${khachHang != null ? khachHang.email : ''}" />
+                                            <div class="invalid-feedback" id="emailError"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Mật khẩu: <span class="text-danger">*</span></label>
+                                            <input type="password" name="matKhau" id="matKhau" class="form-control" required />
+                                            <div class="invalid-feedback" id="matKhauError"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Xác nhận mật khẩu: <span class="text-danger">*</span></label>
+                                            <input type="password" name="xacNhanMatKhau" id="xacNhanMatKhau" class="form-control" required />
+                                            <div class="invalid-feedback" id="xacNhanMatKhauError"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Số điện thoại: <span class="text-danger">*</span></label>
+                                            <input type="tel" name="soDienThoai" class="form-control" required 
+                                                   th:value="${khachHang != null ? khachHang.soDienThoai : ''}" />
+                                            <div class="invalid-feedback" id="soDienThoaiError"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Ngày sinh:</label>
+                                            <input type="date" name="ngaySinh" class="form-control" 
+                                                   th:value="${khachHang != null ? khachHang.ngaySinh : ''}" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Địa chỉ:</label>
+                                    <textarea name="diaChi" class="form-control" rows="3" 
+                                              th:text="${khachHang != null ? khachHang.diaChi : ''}"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="dongYDieuKhoan" required>
+                                        <label class="form-check-label" for="dongYDieuKhoan">
+                                            Tôi đồng ý với <a href="#" class="text-primary">điều khoản sử dụng</a> và <a href="#" class="text-primary">chính sách bảo mật</a>
+                                        </label>
+                                        <div class="invalid-feedback">
+                                            Bạn phải đồng ý với điều khoản sử dụng
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100 mb-3">Đăng ký</button>
+                                
+                                <div class="text-center">
+                                    <span class="text-muted">Đã có tài khoản? </span>
+                                    <a href="/khach-hang/dang-nhap" class="text-primary text-decoration-none">Đăng nhập ngay</a>
+                                </div>
+                            </form>
+
+                            <!-- Thông báo lỗi -->
+                            <div th:if="${error}" class="alert alert-danger mt-3">
+                                <p class="mb-0">❌ <span th:text="${error}"></span></p>
+                            </div>
+
+                            <!-- Thông báo thành công -->
+                            <div th:if="${success}" class="alert alert-success mt-3">
+                                <p class="mb-0">✅ <span th:text="${success}"></span></p>
+                            </div>
+
+                            <!-- Thông báo từ URL params -->
+                            <div th:if="${param.error}" class="alert alert-danger mt-3">
+                                <p class="mb-0">❌ <span th:text="${param.error}"></span></p>
+                            </div>
+                            <div th:if="${param.success}" class="alert alert-success mt-3">
+                                <p class="mb-0">✅ <span th:text="${param.success}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form validation
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Reset validation
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+            
+            // Validate họ tên
+            const ten = document.querySelector('input[name="ten"]');
+            if (!ten.value.trim()) {
+                ten.classList.add('is-invalid');
+                document.getElementById('tenError').textContent = 'Vui lòng nhập họ và tên';
+                isValid = false;
+            }
+            
+            // Validate email
+            const email = document.querySelector('input[name="email"]');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value.trim() || !emailRegex.test(email.value)) {
+                email.classList.add('is-invalid');
+                document.getElementById('emailError').textContent = 'Vui lòng nhập email hợp lệ';
+                isValid = false;
+            }
+            
+            // Validate mật khẩu
+            const matKhau = document.getElementById('matKhau');
+            if (matKhau.value.length < 6) {
+                matKhau.classList.add('is-invalid');
+                document.getElementById('matKhauError').textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
+                isValid = false;
+            }
+            
+            // Validate xác nhận mật khẩu
+            const xacNhanMatKhau = document.getElementById('xacNhanMatKhau');
+            if (matKhau.value !== xacNhanMatKhau.value) {
+                xacNhanMatKhau.classList.add('is-invalid');
+                document.getElementById('xacNhanMatKhauError').textContent = 'Mật khẩu xác nhận không khớp';
+                isValid = false;
+            }
+            
+            // Validate số điện thoại
+            const soDienThoai = document.querySelector('input[name="soDienThoai"]');
+            const phoneRegex = /^[0-9]{10,11}$/;
+            if (!soDienThoai.value.trim() || !phoneRegex.test(soDienThoai.value)) {
+                soDienThoai.classList.add('is-invalid');
+                document.getElementById('soDienThoaiError').textContent = 'Vui lòng nhập số điện thoại hợp lệ';
+                isValid = false;
+            }
+            
+            // Validate điều khoản
+            const dongYDieuKhoan = document.getElementById('dongYDieuKhoan');
+            if (!dongYDieuKhoan.checked) {
+                dongYDieuKhoan.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+
+</html> 

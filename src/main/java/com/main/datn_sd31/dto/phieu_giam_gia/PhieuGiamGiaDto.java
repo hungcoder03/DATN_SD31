@@ -22,5 +22,6 @@ public class PhieuGiamGiaDto {
     private BigDecimal mucDo;
     private BigDecimal giamToiDa;
     private BigDecimal dieuKien;
+    private Boolean trangThai;
     private Integer soLuongTon;
 }

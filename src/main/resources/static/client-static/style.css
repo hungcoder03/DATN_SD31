@@ -117,9 +117,9 @@ CSS STRUCTURE:
 
 /* Fonts */
 :root {
-  --body-font: 'Chilanka', cursive;
-  --heading-font: 'Chilanka', cursive;
-  --secondary-font: 'Montserrat', sans-serif;
+  --body-font: 'Chivo Mono', monospace, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --heading-font: 'Chivo Mono', monospace, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --secondary-font: 'Chivo Mono', monospace, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 }
 
 
@@ -135,11 +135,11 @@ body {
 
   --bs-light-rgb: 248, 248, 248;
 
-  --bs-font-sans-serif: 'Chilanka', cursive;
+  --bs-font-sans-serif: 'Chivo Mono', monospace, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   --bs-body-font-family: var(--bs-font-sans-serif);
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 400;
-  --bs-body-line-height: 2;
+  --bs-body-line-height: 1.5;
   --bs-body-color: #41403E;
 
   --bs-primary: #DEAD6F;
@@ -418,10 +418,12 @@ a.btn-cart {
   border: 1px solid rgba(65, 64, 62, 0.20);
 }
 
-a.btn-wishlist {
-
+.btn-wishlist,
+a.btn-wishlist,
+button.btn-wishlist {
   border-radius: 0.25rem;
   border: 1px solid rgba(65, 64, 62, 0.20);
+  background: transparent;
 }
 
 
@@ -673,4 +675,404 @@ Single Product section style start
 .nav-pills .show>.nav-link {
   color: var(--light-color);
   background-color: var(--accent-color);
+}
+
+/*--------------------------------------------------------------
+Header - Đảm bảo luôn hiển thị trên navbar sticky
+--------------------------------------------------------------*/
+header {
+  position: relative;
+  z-index: 1020; /* Thấp hơn navbar sticky nhưng cao hơn các element khác */
+}
+
+/*--------------------------------------------------------------
+Sticky Navbar with Liquid Glass Effect
+--------------------------------------------------------------*/
+.navbar-sticky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+/* Header Cart Count - Đảm bảo luôn hiển thị trên navbar sticky */
+#headerCartCount,
+#mobileHeaderCartCount {
+  z-index: 1040 !important; /* Cao hơn navbar sticky (1030) */
+  position: absolute !important;
+}
+
+/* Đảm bảo cart icon trong header luôn hiển thị trên navbar sticky */
+header .nav-link[data-bs-target="#offcanvasCart"],
+header .nav-link[data-bs-target="#offcanvasCart"] iconify-icon {
+  position: relative;
+  z-index: 1050 !important; /* Cao hơn navbar sticky (1030) và header (1020) */
+  pointer-events: auto !important;
+}
+
+/* Đảm bảo tất cả cart-related elements trong header luôn hiển thị trên navbar sticky */
+header .d-flex .nav-link[data-bs-target="#offcanvasCart"],
+header .d-flex .nav-link[data-bs-target="#offcanvasCart"] iconify-icon,
+header .d-flex .badge {
+  position: relative;
+  z-index: 1050 !important; /* Cao hơn navbar sticky (1030) và header (1020) */
+  pointer-events: auto !important;
+}
+
+/* Đảm bảo cart count badge luôn hiển thị trên cùng */
+.badge.cart-count-badge {
+  z-index: 1050 !important; /* Cao hơn navbar sticky (1030) và header (1020) */
+  position: absolute !important;
+  pointer-events: auto !important;
+}
+
+/* Đảm bảo cart icon container luôn hiển thị trên navbar sticky */
+.nav-link[data-bs-target="#offcanvasCart"] {
+  position: relative !important;
+  z-index: 1050 !important; /* Cao hơn navbar sticky (1030) và header (1020) */
+  pointer-events: auto !important;
+}
+
+.navbar-sticky.show {
+  transform: translateY(0);
+  opacity: 1;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Nav Items Styling */
+.nav-link {
+  position: relative;
+  padding: 12px 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--dark-color);
+  font-weight: 500;
+}
+
+/* Text glow effect for all nav links */
+.nav-link:hover {
+  color: var(--accent-color);
+  text-shadow: 0 0 10px rgba(222, 173, 111, 0.6), 
+               0 0 20px rgba(222, 173, 111, 0.4), 
+               0 0 30px rgba(222, 173, 111, 0.2);
+}
+
+/* Sticky navbar specific styling */
+.navbar-sticky .nav-link {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Đảm bảo cart count trong sticky navbar luôn hiển thị */
+.navbar-sticky .badge.cart-count-badge {
+  z-index: 1050 !important; /* Cao hơn navbar sticky (1030) và header (1020) */
+  position: absolute !important;
+  pointer-events: auto !important;
+}
+
+.navbar-sticky .nav-link[data-bs-target="#offcanvasCart"] {
+  position: relative !important;
+  z-index: 1050 !important; /* Cao hơn navbar sticky (1030) và header (1020) */
+  pointer-events: auto !important;
+}
+
+
+
+.navbar-sticky .nav-link.active {
+  background: rgba(222, 173, 111, 0.2);
+  color: var(--accent-color);
+  box-shadow: 0 4px 15px rgba(222, 173, 111, 0.3);
+}
+
+/* Dropdown Animation */
+.dropdown-menu {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-top: 8px;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  display: block !important;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Navbar sticky dropdown styles */
+.navbar-sticky .dropdown-menu {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.dropdown-item {
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin: 4px 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--dark-color);
+}
+
+.dropdown-item:hover {
+  background: transparent;
+  color: var(--accent-color);
+  text-shadow: 0 0 10px rgba(222, 173, 111, 0.6), 
+               0 0 20px rgba(222, 173, 111, 0.4), 
+               0 0 30px rgba(222, 173, 111, 0.2);
+}
+
+/* Icon Animations */
+.navbar-sticky iconify-icon {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar-sticky .nav-link:hover iconify-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.navbar-sticky .badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Cart Icon Special Animation */
+.navbar-sticky [icon="mdi:cart"]:hover {
+  animation: cartBounce 0.6s ease;
+}
+
+@keyframes cartBounce {
+  0%, 20%, 60%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+  80% { transform: translateY(-4px); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 991px) {
+  .navbar-sticky {
+    padding: 8px 0;
+  }
+  
+  .navbar-sticky .nav-link {
+    padding: 8px 16px;
+  }
+  
+  /* Đảm bảo mobile cart count luôn hiển thị trên navbar sticky */
+  .d-flex.d-lg-none .nav-link[data-bs-target="#offcanvasCart"],
+  .d-flex.d-lg-none .nav-link[data-bs-target="#offcanvasCart"] iconify-icon,
+  .d-flex.d-lg-none .badge {
+    position: relative;
+    z-index: 1050 !important; /* Cao hơn navbar sticky (1030) và header (1020) */
+    pointer-events: auto !important;
+  }
+}
+
+/*--------------------------------------------------------------
+Category Icons Animations
+--------------------------------------------------------------*/
+.category-icon {
+  font-size: 3rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+}
+
+.categories-item {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  padding: 20px;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.categories-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(222, 173, 111, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.categories-item:hover::before {
+  left: 100%;
+}
+
+.categories-item:hover {
+  background: rgba(222, 173, 111, 0.05);
+}
+
+.categories-item:hover .category-icon {
+  color: var(--accent-color);
+}
+
+/* Glasses Animation - Tilt and Shine */
+.animate-glasses {
+  animation: glassesFloat 3s ease-in-out infinite;
+}
+
+.categories-item:hover .animate-glasses {
+  animation: glassesTilt 0.6s ease-in-out;
+}
+
+@keyframes glassesFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+}
+
+@keyframes glassesTilt {
+  0%, 100% { transform: scale(1.1) rotate(0deg); }
+  25% { transform: scale(1.15) rotate(-5deg); }
+  75% { transform: scale(1.15) rotate(5deg); }
+}
+
+/* Chain Animation - Swing */
+.animate-chain {
+  animation: chainSway 2.5s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.categories-item:hover .animate-chain {
+  animation: chainSwing 0.8s ease-in-out;
+}
+
+@keyframes chainSway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(3deg); }
+  75% { transform: rotate(-3deg); }
+}
+
+@keyframes chainSwing {
+  0%, 100% { transform: scale(1.1) rotate(0deg); }
+  20% { transform: scale(1.15) rotate(10deg); }
+  40% { transform: scale(1.15) rotate(-8deg); }
+  60% { transform: scale(1.15) rotate(6deg); }
+  80% { transform: scale(1.15) rotate(-4deg); }
+}
+
+/* T-Shirt Animation - Bounce */
+.animate-shirt {
+  animation: shirtBreathe 2.8s ease-in-out infinite;
+}
+
+.categories-item:hover .animate-shirt {
+  animation: shirtBounce 0.7s ease-in-out;
+}
+
+@keyframes shirtBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shirtBounce {
+  0%, 100% { transform: scale(1.1); }
+  25% { transform: scale(1.2) translateY(-3px); }
+  50% { transform: scale(1.15) translateY(-6px); }
+  75% { transform: scale(1.18) translateY(-2px); }
+}
+
+/* Tuxedo/Vest Animation - Elegant Spin */
+.animate-vest {
+  animation: vestElegant 3.2s ease-in-out infinite;
+}
+
+.categories-item:hover .animate-vest {
+  animation: vestSpin 0.8s ease-in-out;
+}
+
+@keyframes vestElegant {
+  0%, 100% { transform: rotateY(0deg) scale(1); }
+  50% { transform: rotateY(5deg) scale(1.02); }
+}
+
+@keyframes vestSpin {
+  0% { transform: scale(1.1) rotateY(0deg); }
+  50% { transform: scale(1.15) rotateY(180deg); }
+  100% { transform: scale(1.1) rotateY(360deg); }
+}
+
+/* Palette Animation - Color Wave */
+.animate-pattern {
+  animation: patternPulse 2.2s ease-in-out infinite;
+}
+
+.categories-item:hover .animate-pattern {
+  animation: patternWave 1s ease-in-out;
+}
+
+@keyframes patternPulse {
+  0%, 100% { 
+    transform: scale(1);
+    filter: hue-rotate(0deg);
+  }
+  50% { 
+    transform: scale(1.03);
+    filter: hue-rotate(20deg);
+  }
+}
+
+@keyframes patternWave {
+  0% { 
+    transform: scale(1.1);
+    filter: hue-rotate(0deg);
+  }
+  25% { 
+    transform: scale(1.2) rotate(5deg);
+    filter: hue-rotate(90deg);
+  }
+  50% { 
+    transform: scale(1.15) rotate(-3deg);
+    filter: hue-rotate(180deg);
+  }
+  75% { 
+    transform: scale(1.18) rotate(2deg);
+    filter: hue-rotate(270deg);
+  }
+  100% { 
+    transform: scale(1.1);
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Enhanced hover effects for category items */
+.categories-item h5 {
+  margin-top: 15px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.categories-item:hover h5 {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .category-icon {
+    font-size: 2.5rem;
+  }
+  
+  .categories-item {
+    padding: 15px;
+  }
 }

@@ -1,0 +1,3 @@
+:root, body { font-family: 'Bai Jamjuree', 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; }
+/* Ensure headings also use the same font */
+h1, h2, h3, h4, h5, h6 { font-family: 'Bai Jamjuree', 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; } 

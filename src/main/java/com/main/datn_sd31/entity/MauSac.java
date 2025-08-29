@@ -36,6 +36,10 @@ public class MauSac {
     @Column(name = "ten", nullable = false, length = 100)
     private String ten;
 
+    @Size(max = 7)
+    @Column(name = "ma_mau", length = 7)
+    private String maMau; // Hex color code như #FF0000 cho đỏ
+
     @Column(name = "nguoi_tao")
     private Integer nguoiTao;
 

@@ -4,433 +4,431 @@
       layout:decorate="~{admin/layout}">
 
 <head>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>Quản lý đợt giảm giá</title>
-    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"-->
-    <!--          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">-->
-
-    <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">-->
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f5f7fa;
-            margin: 0;
-            padding: 40px;
-            color: #2d3436;
-        }
-
-        h1, h2 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            color: #0984e3;
-            font-size: 32px;
-            font-weight: 800;
-        }
-
-        h2 {
-            color: #2c3e50;
-            font-size: 26px;
-            font-weight: 700;
-        }
-
-        form {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            max-width: 1200px;
-            margin: 0 auto 40px auto;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #34495e;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="datetime-local"],
-        select {
-            padding: 12px 14px;
-            border: 1px solid #dcdde1;
-            border-radius: 8px;
-            font-size: 15px;
-            background-color: #f9f9f9;
-            transition: 0.2s ease;
-        }
-
-        input:focus,
-        select:focus {
-            border-color: #0984e3;
-            background-color: #ffffff;
-            outline: none;
-        }
-
-        input[readonly] {
-            background-color: #f1f2f6;
-            color: #636e72;
-        }
-
-        p {
-            color: #d63031;
-            font-size: 13px;
-            margin-top: 4px;
-        }
-
-        button {
-            margin-top: 30px;
-            padding: 14px 30px;
-            font-size: 16px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(145deg, #6c5ce7, #0984e3);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s ease;
-            width: fit-content;
-            align-self: center;
-        }
-
-        button:hover {
-            opacity: 0.95;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #ffffff;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-            margin: auto;
-        }
-
-        th, td {
-            padding: 14px 16px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background-color: #2d3436;
-            color: #fff;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-
-        tr:hover {
-            background-color: #f1f2f6;
-        }
-
-        .status-0, .status-1, .status-2 {
-            padding: 6px 12px;
-            border-radius: 10px;
-            color: white;
-            font-size: 13px;
-            font-weight: bold;
-            display: inline-block;
-        }
-
-        .status-0 {
-            background-color: #fdcb6e;
-        }
-
-        .status-1 {
-            background-color: #00b894;
-        }
-
-        .status-2 {
-            background-color: #d63031;
-        }
-
-        a {
-            color: #0984e3;
-            text-decoration: none;
-            font-weight: 500;
-            margin-right: 10px;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        @media screen and (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            prefix: 'tw-',
+            theme: {
+                extend: {
+                    colors: {
+                        'project-primary': '#dead6f',
+                        'project-primary-dark': '#c19b5b',
+                        'project-primary-light': '#f0d4a0',
+                        'project-gray': '#f8f9fa',
+                        'project-dark': '#2c3e50'
+                    }
+                }
             }
         }
-
-        .active-page a {
-            font-weight: bold;
-            color: red;
-            text-decoration: underline;
-        }
-
-        .card-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .card {
-            background: #fff;
-            padding: 10px;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            flex: 1 1 48%;
-            min-width: 350px;
-        }
-
-        .card h3 {
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 20px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-
-        .btn-action {
-            padding: 6px 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            color: #fff;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .btn-edit {
-            background-color: #3498db;
-        }
-
-        .btn-delete {
-            background-color: #e74c3c;
-        }
-
-        .btn-disabled {
-            background-color: #b2bec3;
-            cursor: not-allowed;
-        }
-
-        .btn-view {
-            background-color: #6c5ce7;
-        }
-
-        .btn-action:hover:not(.btn-disabled) {
-            opacity: 0.85;
-        }
-    </style>
-
+    </script>
 </head>
 <body>
-
 <section layout:fragment="content">
-    <!-- THÔNG BÁO THÀNH CÔNG -->
-    <div th:if="${success}" style="background-color: #dff9fb; color: #0984e3; padding: 14px 20px;
-     border-left: 6px solid #00cec9; border-radius: 8px; margin-bottom: 20px;
-     font-weight: 600; box-shadow: 0 4px 8px rgba(0,0,0,0.03);">
-        <span th:text="${success}"></span>
-    </div>
-
-    <!-- THÔNG BÁO LỖI (nếu có dùng) -->
-    <div th:if="${error}" style="background-color: #ffe6e6; color: #c0392b; padding: 14px 20px;
-     border-left: 6px solid #e74c3c; border-radius: 8px; margin-bottom: 20px;
-     font-weight: 600; box-shadow: 0 4px 8px rgba(0,0,0,0.03);">
-        <span th:text="${error}"></span>
-    </div>
-    <div class="card-wrapper">
-        <!-- Form Lọc -->
-        <div class="card filter-card">
-            <h3>Bộ lọc</h3>
-            <form method="get" th:action="@{/admin/dot-giam-gia/tim-kiem}">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Tên:</label>
-                        <input type="text" name="ten" th:value="${param.ten}" placeholder="Nhập tên đợt">
-                    </div>
-                    <div class="form-group">
-                        <label>Trạng thái:</label>
-                        <select name="trangThai">
-                            <option value="">--Chọn--</option>
-                            <option value="0" th:selected="${param.trangThai == '0'}">Chuẩn bị</option>
-                            <option value="1" th:selected="${param.trangThai == '1'}">Đang hoạt động</option>
-                            <option value="2" th:selected="${param.trangThai == '2'}">Ngừng</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Loại:</label>
-                        <select name="loai">
-                            <option value="">--Chọn--</option>
-                            <option value="phan_tram" th:selected="${param.loai == 'phan_tram'}">Phần trăm</option>
-                            <option value="tien_mat" th:selected="${param.loai == 'tien_mat'}">Tiền mặt</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit">Lọc</button>
-            </form>
+    <div class="tw-p-6 tw-space-y-6">
+        <!-- Header -->
+        <div class="tw-flex tw-items-center tw-justify-between">
+            <div>
+                <h1 class="tw-text-2xl tw-font-bold tw-text-gray-900">Quản lý đợt giảm giá</h1>
+                <p class="tw-text-sm tw-text-gray-600">Tạo, lên lịch và quản lý các đợt giảm giá áp dụng cho sản phẩm</p>
+            </div>
+            <a th:href="@{/admin/dot-giam-gia/them}" class="tw-bg-project-primary tw-text-white tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm hover:tw-bg-project-primary-dark">+ Thêm đợt giảm giá</a>
         </div>
 
-        <!-- Form Thêm / Sửa -->
-        <div class="card add-card">
-            <h3 th:text="${dotGiamGia.id == null} ? 'Thêm mới' : 'Cập nhật'"></h3>
-            <form th:action="@{/admin/dot-giam-gia/save}" th:object="${dotGiamGia}" method="post">
-                <input type="hidden" th:field="*{id}">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Mã:</label>
-                        <input type="text" th:field="*{ma}" placeholder="Mã đợt giảm giá">
-                        <p th:if="${#fields.hasErrors('ma')}" th:errors="*{ma}"></p>
-                    </div>
-                    <div class="form-group">
-                        <label>Tên:</label>
-                        <input type="text" th:field="*{ten}" placeholder="Tên chương trình giảm giá">
-                        <p th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}"></p>
-                    </div>
-                    <div class="form-group">
-                        <label>Giá trị giảm:</label>
-                        <input type="number" step="0.01" th:field="*{giaTriDotGiamGia}"
-                               placeholder="VD: 0.1 hoặc 10000">
-                        <p th:if="${#fields.hasErrors('giaTriDotGiamGia')}" th:errors="*{giaTriDotGiamGia}"></p>
-                    </div>
-                    <div class="form-group">
-                        <label>Loại giảm giá:</label>
-                        <select th:field="*{loai}">
-                            <option value="phan_tram">Phần trăm</option>
-                            <option value="tien_mat">Tiền mặt</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Ngày bắt đầu:</label>
-                        <input type="datetime-local" th:field="*{ngayBatDau}">
-                        <p th:if="${#fields.hasErrors('ngayBatDau')}" th:errors="*{ngayBatDau}"></p>
-                    </div>
-                    <div class="form-group">
-                        <label>Ngày kết thúc:</label>
-                        <input type="datetime-local" th:field="*{ngayKetThuc}">
-                        <p th:if="${#fields.hasErrors('ngayKetThuc')}" th:errors="*{ngayKetThuc}"></p>
-                    </div>
-                </div>
+        <!-- Alerts -->
+        <div th:if="${success}" class="tw-bg-green-50 tw-border tw-border-green-200 tw-rounded-lg tw-p-4">
+            <div class="tw-flex tw-items-center tw-text-green-700 tw-text-sm" th:text="${success}"></div>
+        </div>
+        <div th:if="${error}" class="tw-bg-red-50 tw-border tw-border-red-200 tw-rounded-lg tw-p-4">
+            <div class="tw-flex tw-items-center tw-text-red-700 tw-text-sm" th:text="${error}"></div>
+        </div>
 
-                <div class="form-group">
-                    <label>Ngày tạo:</label>
-                    <input type="text" th:value="${#temporals.format(dotGiamGia.ngayTao, 'dd/MM/yyyy HH:mm')}"
-                           readonly/>
+        <!-- Cards: Filter + Add/Update -->
+        <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-12 tw-gap-6">
+            <!-- Card áp dụng sản phẩm (đặt bên phải khi đã có id) -->
+            <div th:if="${dotGiamGia.id != null}" class="tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-p-6 lg:tw-col-span-5">
+                <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
+                    <div>
+                        <h3 class="tw-font-semibold tw-text-gray-900">Hiển thị sản phẩm để thêm giảm giá</h3>
+                        <p class="tw-text-xs tw-text-gray-500">Chọn biến thể và áp dụng/huỷ áp dụng đợt.</p>
+                    </div>
+                    <div class="tw-flex tw-gap-2">
+                        <a th:href="@{|/admin/dot-giam-gia/edit/${dotGiamGia.id}|}"
+                           class="tw-px-3 tw-py-2 tw-text-sm tw-rounded-lg tw-border tw-border-gray-300 hover:tw-bg-gray-50">Chỉnh sửa thông tin</a>
+                        <a th:href="@{|/admin/dot-giam-gia/${dotGiamGia.id}/apply|}"
+                           class="tw-bg-project-primary tw-text-white tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm hover:tw-bg-project-primary-dark">Đi tới trang áp dụng</a>
+                    </div>
                 </div>
+                <div class="tw-text-sm tw-text-gray-600">Chức năng áp dụng sản phẩm đã được chuyển sang trang riêng để đồng bộ UI.</div>
+            </div>
 
-                <div class="form-group">
-                    <label>Ngày sửa:</label>
-                    <input type="text" th:value="${#temporals.format(dotGiamGia.ngaySua, 'dd/MM/yyyy HH:mm')}"
-                           readonly/>
+            <!-- Thông tin đợt giảm giá (đặt bên trái) - chỉ hiển thị khi đang sửa đợt (có id) -->
+            <div th:if="${dotGiamGia.id != null}" class="tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-p-6 lg:tw-col-span-7">
+                <h3 class="tw-font-semibold tw-text-gray-900 tw-mb-4" th:text="${dotGiamGia.id == null} ? 'Thêm mới' : 'Cập nhật'"></h3>
+                <form th:action="@{/admin/dot-giam-gia/save}" th:object="${dotGiamGia}" method="post" class="tw-space-y-4">
+                    <input type="hidden" th:field="*{id}">
+                    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Mã</label>
+                            <div class="tw-flex tw-gap-2">
+                                <input type="text" th:field="*{ma}"
+                                       class="tw-flex-1 tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm focus:tw-ring-1 focus:tw-ring-blue-500 focus:tw-border-blue-500"
+                                       placeholder="Để trống để tự sinh mã (GG******)">
+                                <button type="button" id="btnGenMa"
+                                        class="tw-px-3 tw-py-2 tw-text-sm tw-rounded-lg tw-border tw-border-gray-300 hover:tw-bg-gray-50">Sinh mã</button>
+                            </div>
+                            <p class="tw-text-xs tw-text-red-600 tw-mt-1" th:if="${#fields.hasErrors('ma')}" th:errors="*{ma}"></p>
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Tên</label>
+                            <input type="text" th:field="*{ten}"
+                                   class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm focus:tw-ring-1 focus:tw-ring-blue-500 focus:tw-border-blue-500"
+                                   placeholder="Tên chương trình giảm giá">
+                            <p class="tw-text-xs tw-text-red-600 tw-mt-1" th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}"></p>
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Giá trị giảm</label>
+                            <input type="number" id="giaTriInput" step="1" min="1" max="100" th:field="*{giaTriDotGiamGia}"
+                                   class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm focus:tw-ring-1 focus:tw-ring-blue-500 focus:tw-border-blue-500"
+                                   placeholder="Nhập % (1–100)">
+                            <p class="tw-text-xs tw-text-gray-500 tw-mt-1">Chọn "Phần trăm": nhập 1–100 (%). Chọn "Tiền mặt": nhập số VND ≥ 0.</p>
+                            <p class="tw-text-xs tw-text-red-600 tw-mt-1" th:if="${#fields.hasErrors('giaTriDotGiamGia')}" th:errors="*{giaTriDotGiamGia}"></p>
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Loại giảm giá</label>
+                            <select id="loaiSelect" th:field="*{loai}"
+                                    class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm bg-white focus:tw-ring-1 focus:tw-ring-blue-500 focus:tw-border-blue-500">
+                                <option value="phan_tram">Phần trăm</option>
+                                <option value="tien_mat">Tiền mặt</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Ngày bắt đầu</label>
+                            <input type="datetime-local" th:field="*{ngayBatDau}"
+                                   class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm focus:tw-ring-1 focus:tw-ring-blue-500 focus:tw-border-blue-500">
+                            <p class="tw-text-xs tw-text-red-600 tw-mt-1" th:if="${#fields.hasErrors('ngayBatDau')}" th:errors="*{ngayBatDau}"></p>
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Ngày kết thúc</label>
+                            <input type="datetime-local" th:field="*{ngayKetThuc}"
+                                   class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-text-sm focus:tw-ring-1 focus:tw-ring-blue-500 focus:tw-border-blue-500">
+                            <p class="tw-text-xs tw-text-red-600 tw-mt-1" th:if="${#fields.hasErrors('ngayKetThuc')}" th:errors="*{ngayKetThuc}"></p>
+                        </div>
+                    </div>
+
+                    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Ngày tạo</label>
+                            <input type="text" th:value="${#temporals.format(dotGiamGia.ngayTao, 'dd/MM/yyyy HH:mm')}"
+                                   class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-200 tw-rounded-lg tw-text-sm tw-bg-gray-50" readonly>
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Ngày sửa</label>
+                            <input type="text" th:value="${#temporals.format(dotGiamGia.ngaySua, 'dd/MM/yyyy HH:mm')}"
+                                   class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-200 tw-rounded-lg tw-text-sm tw-bg-gray-50" readonly>
+                        </div>
+                    </div>
+
+                    <div class="tw-flex tw-justify-end tw-pt-2">
+                        <button type="submit"
+                                class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-bg-blue-600 tw-text-white tw-rounded-lg tw-text-sm hover:tw-bg-blue-700 tw-transition"
+                                th:text="${dotGiamGia.id == null} ? 'Thêm mới' : 'Cập nhật'"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Table: danh sách đợt -->
+        <div class="tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-overflow-hidden">
+            <div class="tw-px-6 tw-py-4 tw-border-b tw-border-gray-200">
+                <h2 class="tw-font-semibold tw-text-gray-900">Danh sách Đợt Giảm Giá</h2>
+            </div>
+            <div class="tw-overflow-x-auto">
+                <form method="get" th:action="@{/admin/dot-giam-gia}">
+                    <div class="tw-flex tw-flex-wrap tw-gap-3 tw-items-end tw-px-6 tw-py-4">
+                        <div>
+                            <label class="tw-block tw-text-xs tw-text-gray-600">Từ khóa</label>
+                            <input class="tw-px-3 tw-py-2 tw-border tw-rounded-lg tw-text-sm" name="keyword" th:value="${f_keyword}">
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-xs tw-text-gray-600">Trạng thái</label>
+                            <select class="tw-px-3 tw-py-2 tw-border tw-rounded-lg tw-text-sm" name="trangThai">
+                                <option value="" th:selected="${f_trangThai == null}">Tất cả</option>
+                                <option th:value="0" th:selected="${f_trangThai == 0}">Chuẩn bị</option>
+                                <option th:value="1" th:selected="${f_trangThai == 1}">Đang hoạt động</option>
+                                <option th:value="2" th:selected="${f_trangThai == 2}">Ngừng</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-xs tw-text-gray-600">Loại</label>
+                            <select class="tw-px-3 tw-py-2 tw-border tw-rounded-lg tw-text-sm" name="loai">
+                                <option value="" th:selected="${f_loai == null}">Tất cả</option>
+                                <option value="phan_tram" th:selected="${f_loai == 'phan_tram'}">Phần trăm</option>
+                                <option value="tien_mat" th:selected="${f_loai == 'tien_mat'}">Tiền mặt</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="tw-block tw-text-xs tw-text-gray-600">Sắp xếp</label>
+                            <div class="tw-flex tw-gap-2">
+                                <select class="tw-px-3 tw-py-2 tw-border tw-rounded-lg tw-text-sm" name="sortBy">
+                                    <option value="ngayTao" th:selected="${f_sortBy == 'ngayTao'}">Ngày tạo</option>
+                                    <option value="ten" th:selected="${f_sortBy == 'ten'}">Tên</option>
+                                    <option value="ngayBatDau" th:selected="${f_sortBy == 'ngayBatDau'}">Ngày bắt đầu</option>
+                                    <option value="ngayKetThuc" th:selected="${f_sortBy == 'ngayKetThuc'}">Ngày kết thúc</option>
+                                    <option value="giaTriDotGiamGia" th:selected="${f_sortBy == 'giaTriDotGiamGia'}">Giá trị</option>
+                                </select>
+                                <select class="tw-px-3 tw-py-2 tw-border tw-rounded-lg tw-text-sm" name="sortOrder">
+                                    <option value="asc" th:selected="${f_sortOrder == 'asc'}">Tăng dần</option>
+                                    <option value="desc" th:selected="${f_sortOrder == 'desc'}">Giảm dần</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="tw-ml-auto">
+                            <button type="submit" class="tw-bg-project-primary tw-text-white tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm hover:tw-bg-project-primary-dark">Lọc</button>
+                        </div>
+                    </div>
+                </form>
+                <table class="tw-min-w-full tw-divide-y tw-divide-gray-200">
+                    <thead class="tw-bg-gray-50">
+                    <tr>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">ID</th>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Mã</th>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Tên</th>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Giá trị</th>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Loại</th>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Ngày bắt đầu</th>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Ngày kết thúc</th>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Trạng thái</th>
+                        <th class="tw-px-6 tw-py-3 tw-text-left tw-text-[11px] tw-font-semibold tw-text-gray-500 tw-uppercase">Hành động</th>
+                    </tr>
+                    </thead>
+                    <tbody class="tw-bg-white tw-divide-y tw-divide-gray-200">
+                    <tr th:each="item : ${dotGiamGias}" class="hover:tw-bg-gray-50 tw-transition-colors tw-duration-150">
+                        <td class="tw-px-6 tw-py-4" th:text="${item.id}"></td>
+                        <td class="tw-px-6 tw-py-4" th:text="${item.ma}"></td>
+                        <td class="tw-px-6 tw-py-4" th:text="${item.ten}"></td>
+                        <td class="tw-px-6 tw-py-4 price" th:attr="data-value=${item.giaTriDotGiamGia}, data-loai=${item.loai}"></td>
+                        <td class="tw-px-6 tw-py-4" th:text="${item.loai == 'phan_tram'|| item.loai == 'PHAN_TRAM' ? 'Phần trăm' : 'Tiền mặt'}"></td>
+                        <td class="tw-px-6 tw-py-4" th:text="${#temporals.format(item.ngayBatDau, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td class="tw-px-6 tw-py-4" th:text="${#temporals.format(item.ngayKetThuc, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td class="tw-px-6 tw-py-4">
+                            <span class="tw-inline-flex tw-items-center tw-px-2.5 tw-py-0.5 tw-rounded-full tw-text-xs tw-font-medium"
+                                  th:classappend="${item.trangThai == 0} ? ' tw-bg-yellow-100 tw-text-yellow-800' : (${item.trangThai == 1} ? ' tw-bg-green-100 tw-text-green-800' : ' tw-bg-red-100 tw-text-red-800')"
+                                  th:text="${item.trangThai == 0} ? 'Chuẩn bị hoạt động' : (${item.trangThai == 1} ? 'Đang hoạt động' : 'Ngừng hoạt động')"></span>
+                        </td>
+                        <td class="tw-px-6 tw-py-4">
+                            <div class="tw-flex tw-items-center tw-gap-2">
+                                <a th:href="@{'/admin/dot-giam-gia/edit/' + ${item.id}}"
+                                   class="tw-text-gray-400 hover:tw-text-gray-700 tw-p-2" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a th:if="${item.trangThai == 2}" th:href="@{'/admin/dot-giam-gia/delete/' + ${item.id}}"
+                                   onclick="return confirm('Bạn chắc chắn xoá?')"
+                                   class="tw-text-gray-400 hover:tw-text-red-600 tw-p-2" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                <span th:if="${item.trangThai != 2}" class="tw-text-gray-300 tw-p-2" title="Chỉ xóa khi đợt đã ngừng và không còn sản phẩm áp dụng">
+                                    <i class="fas fa-trash"></i>
+                                </span>
+                                <a th:href="@{|/admin/dot-giam-gia/${item.id}/apply|}"
+                                   class="tw-text-gray-400 hover:tw-text-gray-700 tw-p-2" title="Sản phẩm áp dụng">
+                                    <i class="fas fa-layer-group"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <!-- Phân trang -->
+                <div class="tw-flex tw-items-center tw-justify-between tw-px-6 tw-py-4">
+                    <div class="tw-text-sm tw-text-gray-700">
+                        Trang <span th:text="${currentPage + 1}"></span>/<span th:text="${totalPages}"></span> - Tổng <span th:text="${totalElements}"></span> đợt
+                    </div>
+                    <div class="tw-flex tw-gap-2">
+                        <a th:if="${currentPage > 0}"
+                           th:href="@{/admin/dot-giam-gia(page=${currentPage-1},size=${pageSize},keyword=${f_keyword},trangThai=${f_trangThai},loai=${f_loai},sortBy=${f_sortBy},sortOrder=${f_sortOrder})}"
+                           class="tw-px-3 tw-py-2 tw-text-sm tw-border tw-rounded-lg tw-text-gray-600 hover:tw-bg-gray-50">Trước</a>
+                        <a th:if="${currentPage < totalPages-1}"
+                           th:href="@{/admin/dot-giam-gia(page=${currentPage+1},size=${pageSize},keyword=${f_keyword},trangThai=${f_trangThai},loai=${f_loai},sortBy=${f_sortBy},sortOrder=${f_sortOrder})}"
+                           class="tw-px-3 tw-py-2 tw-text-sm tw-border tw-rounded-lg tw-text-gray-600 hover:tw-bg-gray-50">Sau</a>
+                    </div>
                 </div>
-                <button type="submit" th:text="${dotGiamGia.id == null} ? 'Thêm mới' : 'Cập nhật'"></button>
-            </form>
+            </div>
         </div>
     </div>
-    <h2>Danh sách Đợt Giảm Giá</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Mã</th>
-            <th>Tên</th>
-            <th>Giá trị</th>
-            <th>Loại</th>
-            <th>Ngày bắt đầu</th>
-            <th>Ngày kết thúc</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="item : ${dotGiamGias}">
-            <td th:text="${item.id}"></td>
-            <td th:text="${item.ma}"></td>
-            <td th:text="${item.ten}"></td>
-            <td class="price"
-                th:attr="data-value=${item.giaTriDotGiamGia}, data-loai=${item.loai}">
-            </td> <!-- giá sẽ được cập nhật bằng JS -->
-            <td th:text="${item.loai == 'phan_tram' ? 'Phần trăm' : 'Tiền mặt'}"></td>
-            <td th:text="${#temporals.format(item.ngayBatDau, 'dd/MM/yyyy HH:mm')}"></td>
-            <td th:text="${#temporals.format(item.ngayKetThuc, 'dd/MM/yyyy HH:mm')}"></td>
-            <td>
-                    <span th:switch="${item.trangThai}">
-                        <span th:case="0" class="status-0">Chuẩn bị hoạt động</span>
-                        <span th:case="1" class="status-1">Đang hoạt động</span>
-                        <span th:case="2" class="status-2">Ngừng hoạt động</span>
-                        <span th:case="*">?</span>
-                    </span>
-            <td>
-                <div class="action-buttons">
-                    <a th:href="@{'/admin/dot-giam-gia/edit/' + ${item.id}}" class="btn-action btn-edit">Sửa</a>
-                    <span th:if="${item.trangThai == 2}">
-                        <a th:href="@{'/admin/dot-giam-gia/delete/' + ${item.id}}"
-                           class="btn-action btn-delete"
-                           onclick="return confirm('Bạn chắc chắn xoá?')">Xoá</a>
-                    </span>
-                    <span th:if="${item.trangThai != 2}">
-                        <span class="btn-action btn-disabled" title="Không thể xóa khi đang hoạt động">Xoá</span>
-                    </span>
-                    <a th:href="@{|/admin/dot-giam-gia/${item.id}/san-pham|}" class="btn-action btn-view">Xem SP áp
-                        dụng</a>
-                </div>
-            </td>
-        </tr>
-        <!-- Dòng này để hiển thị kết quả AJAX -->
-        <tr class="product-row" style="display: none;">
-            <td colspan="9">
-                <div class="san-pham-container"></div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</section>
 
-</body>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const prices = document.querySelectorAll('.price');
-        prices.forEach(function (el) {
-            const value = parseFloat(el.dataset.value);
-            const loai = el.dataset.loai;
-            if (loai === 'phan_tram') {
-                el.textContent = Math.round(value * 100) + '%';
-            } else {
-                el.textContent = new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'}).format(value);
+    <!-- Định dạng giá trị giảm theo loại -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const prices = document.querySelectorAll('.price');
+            prices.forEach(function (el) {
+                const value = parseFloat(el.dataset.value);
+                const loai = el.dataset.loai;
+                if (isNaN(value)) { el.textContent = ''; return; }
+                if (loai === 'phan_tram') {
+                    const pct = value <= 1 ? Math.round(value * 100) : Math.round(value);
+                    el.textContent = pct + '%';
+                } else {
+                    el.textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                }
+            });
+        });
+    </script>
+
+    <!-- JS nhỏ: sinh mã GG và ràng buộc động giá trị theo loại, kiểm tra ngày -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnGen = document.getElementById('btnGenMa');
+            const maInput = document.querySelector('input[name="ma"]');
+            const loaiSelect = document.getElementById('loaiSelect');
+            const giaTriInput = document.getElementById('giaTriInput');
+            const batDauInput = document.querySelector('input[name="ngayBatDau"]');
+            const ketThucInput = document.querySelector('input[name="ngayKetThuc"]');
+
+            // Sinh mã GG****** (client) - chỉ hỗ trợ nhanh; server vẫn sinh lại nếu trống
+            if (btnGen) {
+                btnGen.addEventListener('click', () => {
+                    const rand = Math.floor(Math.random() * 1_000_000);
+                    maInput.value = 'GG' + String(rand).padStart(6, '0');
+                });
+            }
+
+            // Ràng buộc giá trị theo loại
+            function applyConstraints() {
+                if (!loaiSelect || !giaTriInput) return;
+                if (loaiSelect.value === 'phan_tram') {
+                    giaTriInput.min = 1; giaTriInput.max = 100; giaTriInput.step = 1;
+                    giaTriInput.placeholder = 'Nhập % (1–100)';
+                } else {
+                    giaTriInput.min = 0; giaTriInput.removeAttribute('max');
+                    giaTriInput.step = 1000; // gợi ý bước theo VND
+                    giaTriInput.placeholder = 'Nhập số tiền VND (≥ 0)';
+                }
+            }
+            if (loaiSelect) {
+                loaiSelect.addEventListener('change', applyConstraints);
+                applyConstraints();
+            }
+
+            // Kiểm tra ngày bắt đầu < ngày kết thúc (client hint)
+            function validateDates() {
+                if (!batDauInput || !ketThucInput) return true;
+                if (!batDauInput.value || !ketThucInput.value) return true;
+                const start = new Date(batDauInput.value);
+                const end = new Date(ketThucInput.value);
+                if (start && end && start >= end) {
+                    ketThucInput.setCustomValidity('Ngày kết thúc phải sau ngày bắt đầu');
+                    return false;
+                }
+                ketThucInput.setCustomValidity('');
+                return true;
+            }
+            if (batDauInput && ketThucInput) {
+                batDauInput.addEventListener('change', validateDates);
+                ketThucInput.addEventListener('change', validateDates);
             }
         });
-    });
+    </script>
 
-</script>
+    <!-- JS: tải và áp dụng sản phẩm cho đợt -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function () {
+            const dotId = /*[[${dotGiamGia.id}]]*/ null;
+            const tbody = document.getElementById('applyTableBody');
+            const keywordEl = document.getElementById('prodKeyword');
+            const appliedEl = document.getElementById('prodApplied');
+            const btnReload = document.getElementById('btnReload');
+            const btnApply = document.getElementById('btnApply');
+            const btnUnapply = document.getElementById('btnUnapply');
+            const selectedCount = document.getElementById('selectedCount');
+
+            if (!dotId || !tbody) return; // Chỉ chạy khi đã có đợt
+
+            let selected = new Set();
+            function renderSelectedCount() { selectedCount.textContent = 'Đã chọn: ' + selected.size; }
+
+            function currency(v) { return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v); }
+
+            async function loadProducts() {
+                tbody.innerHTML = '<tr><td class="tw-px-4 tw-py-3" colspan="5">Đang tải...</td></tr>';
+                const params = new URLSearchParams({ dotId, page: 0, size: 20, keyword: keywordEl.value || '', applied: 'ALL' });
+                const res = await fetch('/admin/dot-giam-gia/api/products?' + params.toString());
+                const data = await res.json();
+                if (!data.success) { tbody.innerHTML = '<tr><td class="tw-px-4 tw-py-3" colspan="5">' + (data.message || 'Lỗi tải dữ liệu') + '</td></tr>'; return; }
+                selected.clear(); renderSelectedCount();
+                tbody.innerHTML = '';
+                data.content.forEach(item => {
+                    const tr = document.createElement('tr');
+                    const applied = item.applied; // Bỏ Number() vì backend đã trả về int
+                    tr.innerHTML = `
+                        <td class="tw-px-4 tw-py-3"><input type="checkbox" data-id="${item.id}"></td>
+                        <td class="tw-px-4 tw-py-3">${item.tenCt} <span class="tw-text-xs tw-text-gray-500">(${item.sanPham})</span></td>
+                        <td class="tw-px-4 tw-py-3">${currency(item.giaGoc || 0)}</td>
+                        <td class="tw-px-4 tw-py-3 tw-font-semibold">${currency(item.discountedPrice || 0)}</td>
+                        <td class="tw-px-4 tw-py-3">
+                            ${
+                                        applied === 1
+                                            ? '<span class="tw-text-green-700 tw-text-xs">Đã áp dụng</span>'
+                                            : applied === 2
+                                                ? '<span class="tw-text-orange-600 tw-text-xs">Đã áp dụng bởi đợt khác</span>'
+                                                : '<span class="tw-text-gray-400 tw-text-xs">Chưa áp dụng</span>'
+                                    }
+                        </td>
+                    `;
+                    const cb = tr.querySelector('input[type="checkbox"]');
+                    cb.addEventListener('change', (e) => {
+                        if (e.target.checked) selected.add(item.id); else selected.delete(item.id); renderSelectedCount();
+                    });
+                    tbody.appendChild(tr);
+                });
+            }
+
+            async function postJSON(url, body) {
+                const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                return await res.json();
+            }
+
+            btnReload && btnReload.addEventListener('click', loadProducts);
+            keywordEl && keywordEl.addEventListener('keyup', (e) => { if (e.key === 'Enter') loadProducts(); });
+            appliedEl && appliedEl.addEventListener('change', loadProducts);
+
+            btnApply && btnApply.addEventListener('click', async () => {
+                if (selected.size === 0) return;
+                const data = await postJSON(`/admin/dot-giam-gia/${dotId}/apply-products`, { ids: Array.from(selected) });
+                alert(data.message || '');
+                await loadProducts();
+            });
+
+            btnUnapply && btnUnapply.addEventListener('click', async () => {
+                if (selected.size === 0) return;
+                const data = await postJSON(`/admin/dot-giam-gia/${dotId}/unapply-products`, { ids: Array.from(selected) });
+                alert(data.message || '');
+                await loadProducts();
+            });
+
+            loadProducts();
+        });
+        /*]]>*/
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.price').forEach(function (el) {
+                const value = parseFloat(el.dataset.value);
+                const loai = el.dataset.loai;
+                if (isNaN(value)) return;
+
+                if (loai && loai.toLowerCase() === 'phan_tram') {
+                    el.textContent = Math.round(value) + '%';
+                    el.classList.add("tw-text-green-600","tw-font-medium");
+                } else {
+                    el.textContent = new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+                    el.classList.add("tw-text-green-600","tw-font-medium");
+                }
+            });
+        });
+
+    </script>
+
+</section>
+</body>
 </html>

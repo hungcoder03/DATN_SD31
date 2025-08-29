@@ -98,4 +98,8 @@ public class SanPham {
     @OneToMany(mappedBy = "sanPham")
     private Set<SpYeuThich> spYeuThiches = new LinkedHashSet<>();
 
+    // Transient field để lưu thông tin giảm giá
+    @Transient
+    private DotGiamGia dotGiamGia;
+
 }

@@ -160,6 +160,9 @@
                                     #
                                 </th>
                                 <th>
+                                    Mã Sản phẩm
+                                </th>
+                                <th>
                                     Sản phẩm
                                 </th>
                                 <th>
@@ -177,6 +180,7 @@
                             <tr th:each="sp,index : ${sanPhamThongKeList}"
                                 th:classappend="${sp.soLuongTon == 0} ? 'bg-danger-subtle' : ''">
                                 <td th:text="${index.count}"></td>
+                                <td th:text="${sp.maSp}"></td>
                                 <td th:text="${sp.tenCt}"></td>
                                 <td th:text="${sp.soLuongDaBan}"></td>
                                 <td th:text="${sp.soLuongTon}"></td>

@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{client/layout}">
+
+<head>
+    <title th:text="${sanPham.ten} + ' - Waggy Pet Shop'">Chi tiết sản phẩm</title>
+    <meta name="description" th:content="${sanPham.moTa}">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <th:block layout:fragment="css">
+        <!-- Custom CSS for product detail -->
+        <link rel="stylesheet" th:href="@{/client-static/css/product-detail.css}">
+        
+        <!-- Lightbox CSS for image gallery -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css">
+    </th:block>
+    <!-- 3. KIỂM TRA CSS HIỂN THỊ SAO -->
+    <!-- Đảm bảo CSS cho sao được định nghĩa đúng -->
+    <style>
+        .product-rating .stars .star {
+            color: #ddd; /* Sao rỗng - màu xám nhạt */
+            font-size: 1.2em;
+            margin-right: 2px;
+        }
+
+        .product-rating .stars .star.filled {
+            color: #ffc107; /* Sao đầy - màu vàng */
+        }
+
+        .product-rating .stars .star.half {
+            color: #ffc107; /* Nửa sao - màu vàng */
+            position: relative;
+        }
+
+        /* CSS cho nửa sao nếu cần hiệu ứng đặc biệt */
+        .product-rating .stars .star.half::before {
+            content: "★";
+            position: absolute;
+            left: 0;
+            color: #ffc107;
+            width: 50%;
+            overflow: hidden;
+        }
+    </style>
+
+    <!-- CSS cho wishlist button -->
+    <style>
+        .wishlist-btn {
+            background: none !important;
+            border: none !important;
+            cursor: pointer;
+        }
+
+        .wishlist-btn:hover {
+            transform: scale(1.1);
+            transition: all 0.2s ease;
+        }
+
+        .text-red-500 {
+            color: #ef4444 !important;
+        }
+
+        .text-gray-400 {
+            color: #9ca3af !important;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb Navigation -->
+        <nav class="breadcrumb-nav" aria-label="breadcrumb">
+            <div class="container">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/home}">Trang chủ</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/san-pham/danh-sach}">Sản phẩm</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page" th:text="${sanPham.ten}">
+                        Tên sản phẩm
+                    </li>
+                </ol>
+            </div>
+        </nav>
+
+        <!-- Product Detail Section -->
+        <section class="product-detail-section">
+            <div class="container">
+                <div class="row">
+                    <!-- Product Images -->
+                    <div class="col-lg-6">
+                        <div class="product-gallery">
+                            <!-- Main Image -->
+                            <div class="main-image-container">
+                                <a th:href="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}" 
+                                   data-lightbox="product-gallery" 
+                                   class="main-image-link">
+                                    <img th:src="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}" 
+                                         th:alt="${sanPham.ten}" 
+                                         class="main-image" 
+                                         id="mainImage"
+                                         onerror="this.src='/client-static/images/item1.jpg'">
+                                </a>
+                            </div>
+                            
+                            <!-- Thumbnail Images -->
+                            <div class="thumbnail-container" th:if="${!hinhanhs.isEmpty()}">
+                                <div th:each="img, iterStat : ${hinhanhs}" 
+                                     class="thumbnail-item" 
+                                     th:classappend="${iterStat.first} ? 'active' : ''"
+                                     th:data-image="@{${img.url}}"
+                                     th:data-lightbox-url="@{${img.url}}">
+                                    <img th:src="@{${img.url}}" th:alt="${sanPham.ten}" 
+                                         onerror="this.src='/client-static/images/item1.jpg'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="col-lg-6">
+                        <div class="product-info">
+                            <!-- Flash Messages -->
+                            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                <iconify-icon icon="mdi:check-circle" class="me-2"></iconify-icon>
+                                <span th:text="${success}">Thành công</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            
+                            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <iconify-icon icon="mdi:alert-circle" class="me-2"></iconify-icon>
+                                <span th:text="${error}">Lỗi</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+
+                            <!-- Product Title và Wishlist Button -->
+                            <div class="product-header d-flex justify-content-between align-items-center">
+                                <h1 class="product-title" th:text="${sanPham.ten}">Tên sản phẩm</h1>
+                                <button id="wishlistBtn"
+                                        th:data-id="${sanPham.id}"
+                                        th:classappend="${#lists.contains(yeuThichList, sanPham.id)} ? ' text-red-500' : ' text-gray-400'"
+                                        class="btn btn-link p-0 border-0 wishlist-btn">
+                                    <i id="wishlistIcon"
+                                       class="fas fa-heart fs-4"
+                                       th:classappend="${#lists.contains(yeuThichList, sanPham.id)} ? ' text-red-500' : ' text-gray-400'"></i>
+                                </button>
+                            </div>
+
+
+
+                            <!-- 2. SỬA LOGIC HIỂN THỊ SAO TRONG PRODUCT RATING -->
+                            <div class="product-rating">
+                                <div class="stars">
+                                    <!-- Hiển thị sao đầy -->
+                                    <th:block th:if="${fullStars > 0}">
+                                        <span th:each="i : ${#numbers.sequence(1, fullStars)}" class="star filled">★</span>
+                                    </th:block>
+
+                                    <!-- Hiển thị nửa sao -->
+                                    <span th:if="${halfStar}" class="star half">★</span>
+
+                                    <!-- Hiển thị sao rỗng -->
+                                    <th:block th:if="${emptyStars > 0}">
+                                        <span th:each="i : ${#numbers.sequence(1, emptyStars)}" class="star">★</span>
+                                    </th:block>
+
+                                    <!-- Fallback nếu không có sao nào (trường hợp lỗi logic) -->
+<!--                                    <th:block th:if="${fullStars == 0 && !halfStar && emptyStars == 5}">-->
+<!--                                        <span class="star">★</span>-->
+<!--                                        <span class="star">★</span>-->
+<!--                                        <span class="star">★</span>-->
+<!--                                        <span class="star">★</span>-->
+<!--                                        <span class="star">★</span>-->
+<!--                                    </th:block>-->
+                                </div>
+
+                                <span class="rating-text">
+                                    <!-- Hiển thị khác nhau tùy vào có đánh giá hay không -->
+                                    <span th:if="${totalCount > 0}">
+                                        <span th:text="${avgRatingStr}">0.0</span>/5
+                                        (<span th:text="${totalCount}">0</span> đánh giá)
+                                    </span>
+                                    <span th:unless="${totalCount > 0}">
+                                        Chưa có đánh giá
+                                    </span>
+                                </span>
+                            </div>
+
+                            <!-- Product Price -->
+                            <div class="product-price">
+                                <div class="price-container">
+                                    <!-- Original Price (strikethrough) -->
+                                    <div class="original-price" th:if="${giaGocMin > 0 && giaGocMin > giaBanMin}">
+                                        <span class="price-amount original" id="originalPrice" th:text="${#numbers.formatDecimal(giaGocMin, 0, 'COMMA', 0, 'POINT') + '₫'}">
+                                            0₫
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Current Price (prominent) -->
+                                    <div class="current-price">
+                                        <span class="price-amount" id="currentPrice" th:text="${#numbers.formatDecimal(giaBanMin, 0, 'COMMA', 0, 'POINT') + '₫'}">
+                                            0₫
+                                        </span>
+                                        
+                                        <!-- Discount Badge -->
+                                        <div class="discount-badge" th:if="${giaGocMin > 0 && giaGocMin > giaBanMin}">
+                                            <span class="discount-text" id="discountPercent">
+                                                -<span th:text="${#numbers.formatDecimal((giaGocMin - giaBanMin) / giaGocMin * 100, 0, 'COMMA', 0, 'POINT')}">0</span>%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- Alternative: Money Discount Badge (uncomment if needed) -->
+                                    <!-- <div class="discount-badge money-discount" th:if="${giaGocMin > 0 && giaGocMin > giaBanMin}">
+                                        <span class="discount-text" id="discountMoney">
+                                            -<span th:text="${#numbers.formatDecimal(giaGocMin - giaBanMin, 0, 'COMMA', 0, 'POINT')}">0</span>₫
+                                        </span>
+                                    </div> -->
+                                </div>
+                            </div>
+
+                            <!-- Product Description -->
+                            <div class="product-description" th:if="${sanPham.moTa != null}">
+                                <h4>Mô tả</h4>
+                                <p th:text="${sanPham.moTa}">Mô tả sản phẩm</p>
+                            </div>
+
+                            <!-- Product Variants Selection -->
+                            <div class="product-variants">
+                                <!-- Size Selection -->
+                                <div class="variant-group" th:if="${sizeCount > 0}">
+                                    <label class="variant-label">Kích thước:</label>
+                                    <div class="variant-options">
+                                        <div th:each="size : ${dsSize}" class="variant-option" data-variant-type="size">
+                                            <input type="radio" 
+                                                   th:id="'size-' + ${size.id}" 
+                                                   th:name="selectedSize" 
+                                                   th:value="${size.id}" 
+                                                   th:data-size="${size.ten}"
+                                                   class="variant-radio"
+                                                   required>
+                                            <label th:for="'size-' + ${size.id}" class="variant-label-radio">
+                                                <span th:text="${size.ten}">Size</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Color Selection -->
+                                <div class="variant-group" th:if="${mauSacCount > 0}">
+                                    <div class="color-selection-header">
+                                        <label class="variant-label">Màu sắc:</label>
+                                        <span class="selected-color-name" id="selectedColorName">Chọn màu</span>
+                                    </div>
+                                    <div class="variant-options">
+                                        <div th:each="mauSac : ${dsMauSac}" class="variant-option" data-variant-type="color">
+                                            <input type="radio" 
+                                                   th:id="'color-' + ${mauSac.id}" 
+                                                   th:name="selectedColor" 
+                                                   th:value="${mauSac.id}" 
+                                                   th:data-color="${mauSac.ten}"
+                                                   class="variant-radio"
+                                                   required>
+                                            <div class="color-option-container" th:style="'--color-value: ' + (${mauSac.maMau != null ? mauSac.maMau : '#ccc'}) + ';'">
+                                                <label th:for="'color-' + ${mauSac.id}" class="variant-label-radio color-square">
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    <div class="stock-info">
+                                        <span class="stock-text">Còn lại: </span>
+                                        <span class="stock-amount" id="stockAmount">--</span>
+                                    </div>
+                                    
+                                    <div class="validation-message" id="validationMessage"></div>
+                                </div>
+
+
+
+                            <!-- Product Attributes -->
+                            <div class="product-attributes">
+                                <div class="attribute-item" th:if="${sanPham.chatLieu != null}">
+                                    <span class="attribute-label">Chất liệu:</span>
+                                    <span class="attribute-value" th:text="${sanPham.chatLieu.ten}">Chất liệu</span>
+                                </div>
+                                <div class="attribute-item" th:if="${sanPham.xuatXu != null}">
+                                    <span class="attribute-label">Xuất xứ:</span>
+                                    <span class="attribute-value" th:text="${sanPham.xuatXu.ten}">Xuất xứ</span>
+                                </div>
+                                <div class="attribute-item" th:if="${sanPham.thuongHieu != null}">
+                                    <span class="attribute-label">Thương hiệu:</span>
+                                    <span class="attribute-value" th:text="${sanPham.thuongHieu.ten}">Thương hiệu</span>
+                                </div>
+                                <div class="attribute-item" th:if="${sanPham.kieuDang != null}">
+                                    <span class="attribute-label">Kiểu dáng:</span>
+                                    <span class="attribute-value" th:text="${sanPham.kieuDang.ten}">Kiểu dáng</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Service Policy Section -->
+                            <div class="service-policy-section">
+                                <div class="policy-grid">
+                                    <!-- Hotline - Ưu tiên cao nhất -->
+                                    <div class="policy-item">
+                                        <div class="policy-icon">
+                                            <iconify-icon icon="material-symbols:call" class="icon"></iconify-icon>
+                                        </div>
+                                        <div class="policy-content">
+                                            <div class="policy-title">Hotline 1900.27.27.37</div>
+                                            <div class="policy-desc">hỗ trợ từ 8h30 - 22h</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Thời gian đổi trả -->
+                                    <div class="policy-item">
+                                        <div class="policy-icon">
+                                            <iconify-icon icon="material-symbols:schedule" class="icon"></iconify-icon>
+                                        </div>
+                                        <div class="policy-content">
+                                            <div class="policy-title">03 ngày đổi trả</div>
+                                            <div class="policy-desc">sản phẩm chưa qua sử dụng và còn nguyên nhãn mác</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Đổi trả dễ dàng -->
+                                    <div class="policy-item">
+                                        <div class="policy-icon">
+                                            <iconify-icon icon="material-symbols:swap-horiz" class="icon"></iconify-icon>
+                                        </div>
+                                        <div class="policy-content">
+                                            <div class="policy-title">Đổi trả cực dễ</div>
+                                            <div class="policy-desc">chỉ cần số điện thoại</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Dịch vụ tại nhà -->
+                                    <div class="policy-item">
+                                        <div class="policy-icon">
+                                            <iconify-icon icon="material-symbols:location-on" class="icon"></iconify-icon>
+                                        </div>
+                                        <div class="policy-content">
+                                            <div class="policy-title">Đến tận nơi nhận hàng trả</div>
+                                            <div class="policy-desc">hoàn tiền trong 24h</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Reviews Section -->
+        <section class="product-reviews-section" th:if="${totalCount > 0}">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="section-title">Đánh giá sản phẩm</h3>
+
+                        <!-- Rating Summary -->
+                        <div class="rating-summary">
+                            <div class="rating-overview">
+                                <div class="average-rating">
+                                    <div class="rating-number" th:text="${avgRatingStr}">0.0</div>
+                                    <div class="rating-stars">
+                                        <!-- Hiển thị sao đầy -->
+                                        <th:block th:if="${fullStars > 0}">
+                                            <span th:each="i : ${#numbers.sequence(1, fullStars)}" class="star filled">★</span>
+                                        </th:block>
+
+                                        <!-- Hiển thị nửa sao -->
+                                        <span th:if="${halfStar}" class="star half">★</span>
+
+                                        <!-- Hiển thị sao rỗng -->
+                                        <th:block th:if="${emptyStars > 0}">
+                                            <span th:each="i : ${#numbers.sequence(1, emptyStars)}" class="star">★</span>
+                                        </th:block>
+                                    </div>
+                                    <div class="total-reviews" th:text="${totalCount + ' đánh giá'}">0 đánh giá</div>
+                                </div>
+                            </div>
+
+                            <!-- Rating Breakdown -->
+                            <div class="rating-breakdown">
+                                <div th:each="star : ${#numbers.sequence(5, 1)}" class="rating-bar">
+                                    <span class="star-label" th:text="${star} + ' sao'">5 sao</span>
+                                    <div class="rating-progress">
+                                        <div class="progress-bar"
+                                             th:style="'width: ' + ${countByStar.get(star) != null ? (countByStar.get(star) * 100 / totalCount) : 0} + '%'">
+                                        </div>
+                                    </div>
+                                    <span class="rating-count" th:text="${countByStar.get(star) != null ? countByStar.get(star) : 0}">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reviews List -->
+                        <div class="reviews-list">
+                            <div th:each="review : ${reviews}" class="review-item">
+                                <div class="review-header">
+                                    <div class="reviewer-info">
+                                        <div class="reviewer-avatar">
+                                            <iconify-icon icon="healthicons:person" class="avatar-icon"></iconify-icon>
+                                        </div>
+                                        <div class="reviewer-details">
+                                            <div class="reviewer-name" th:text="${review.khachHang.ten != null ? review.khachHang.ten : 'Khách hàng'}">
+                                                Khách hàng
+                                            </div>
+                                            <div class="review-date" th:text="${#temporals.format(review.thoiGian, 'dd/MM/yyyy')}">
+                                                01/01/2024
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="review-rating">
+                                        <!-- Cách đơn giản: duyệt từ 1 đến 5 -->
+                                        <span th:each="starNum : ${#numbers.sequence(1, 5)}"
+                                              class="star"
+                                              th:classappend="${starNum <= review.soSao} ? ' filled' : ''">★</span>
+                                    </div>
+                                </div>
+                                <div class="review-content" th:if="${review.noiDung != null}">
+                                    <p th:text="${review.noiDung}">Nội dung đánh giá</p>
+                                </div>
+                                <div class="review-content" th:if="${review.hinhAnh != null}">
+                                    <img th:src="${review.hinhAnh}" alt="img-danh-gia" width="400px" height="400px"></img>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination for Reviews -->
+                        <div class="reviews-pagination" th:if="${totalPages > 1}">
+                            <nav aria-label="Reviews pagination">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${currentPage - 1})}">Trước</a>
+                                    </li>
+                                    <li th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" 
+                                        class="page-item" 
+                                        th:classappend="${pageNum == currentPage} ? 'active'">
+                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${pageNum})}" 
+                                           th:text="${pageNum + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${currentPage + 1})}">Sau</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fallback khi không có đánh giá -->
+        <section class="product-reviews-section" th:if="${totalCount == 0}">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="section-title">Đánh giá sản phẩm</h3>
+                        <div class="no-reviews-message">
+                            <p>Sản phẩm này chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Fixed Bottom Bar for Mobile/Tablet -->
+        <div class="fixed-bottom-cart-bar" id="fixedCartBar">
+            <div class="container">
+                <div class="fixed-cart-content">
+                    <!-- Product Info -->
+                    <div class="fixed-product-info">
+                        <div class="fixed-product-image">
+                            <img th:src="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}" 
+                                 th:alt="${sanPham.ten}" 
+                                 onerror="this.src='/client-static/images/item1.jpg'">
+                        </div>
+                        <div class="fixed-product-details">
+                            <div class="fixed-product-name" th:text="${sanPham.ten}">Tên sản phẩm</div>
+                            <div class="fixed-product-category" th:text="${sanPham.danhMuc != null ? sanPham.danhMuc.ten : 'Sản phẩm'}">Danh mục</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quantity and Add to Cart -->
+                    <div class="fixed-cart-controls">
+                        <div class="fixed-quantity-group">
+                            <label class="fixed-qty-label">Qty:</label>
+                            <div class="fixed-quantity-controls">
+                                <button type="button" class="fixed-qty-btn" id="fixedDecreaseBtn">-</button>
+                                <input type="number" id="fixedQuantity" value="1" min="1" max="99" class="fixed-qty-input" style="width: 100px;">
+                                <button type="button" class="fixed-qty-btn" id="fixedIncreaseBtn">+</button>
+                            </div>
+                        </div>
+                        
+                        <form th:action="@{/gio-hang/them}" method="post" id="fixedAddToCartForm" class="fixed-add-to-cart-form">
+                            <input type="hidden" id="fixedSelectedChiTietId" name="chiTietId">
+                            <input type="hidden" id="fixedSelectedQuantity" name="soLuong" value="1">
+                            
+                            <button type="submit" class="fixed-add-to-card-btn" id="fixedAddToCartBtn" disabled>
+                                ADD TO CARD
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!--        <script>-->
+<!--            document.getElementById("wishlistBtn").addEventListener("click", function () {-->
+<!--                const productId = this.getAttribute("data-id");-->
+
+<!--                // lấy token từ meta-->
+<!--                const token = document.querySelector('meta[name="_csrf"]').getAttribute("content");-->
+<!--                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");-->
+
+<!--                fetch("/wishlist/toggle", {-->
+<!--                    method: "POST",-->
+<!--                    headers: {-->
+<!--                        "Content-Type": "application/x-www-form-urlencoded",-->
+<!--                        [header]: token   // ✅ thêm CSRF header-->
+<!--                    },-->
+<!--                    body: "productId=" + productId-->
+<!--                })-->
+<!--                    .then(res => {-->
+<!--                        if (!res.ok) {-->
+<!--                            throw new Error("HTTP error " + res.status);-->
+<!--                        }-->
+<!--                        return res.json();-->
+<!--                    })-->
+<!--                    .then(data => {-->
+<!--                        if (data.success) {-->
+<!--                            const icon = document.getElementById("wishlistBtn");-->
+<!--                            if (data.status === "added") {-->
+<!--                                icon.classList.remove("text-gray-400");-->
+<!--                                icon.classList.add("text-red-500");-->
+<!--                            } else if (data.status === "removed") {-->
+<!--                                icon.classList.remove("text-red-500");-->
+<!--                                icon.classList.add("text-gray-400");-->
+<!--                            }-->
+<!--                        }-->
+<!--                    })-->
+<!--                    .catch(err => console.error("Wishlist toggle error:", err));-->
+<!--            });-->
+<!--        </script>-->
+
+        <!-- JavaScript sửa lỗi -->
+        <script>
+            // SỬA LẠI WISHLIST EVENT LISTENER
+            document.addEventListener("DOMContentLoaded", function() {
+                const wishlistBtn = document.getElementById("wishlistBtn");
+                if (wishlistBtn) {
+                    wishlistBtn.addEventListener("click", function () {
+                        const productId = this.getAttribute("data-id");
+
+                        // Lấy token từ meta
+                        const token = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
+                        const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
+
+                        if (!token || !header) {
+                            showNotification("Lỗi bảo mật: Không tìm thấy CSRF token", "error");
+                            return;
+                        }
+
+                        fetch("/wishlist/toggle", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                                [header]: token
+                            },
+                            body: "productId=" + productId
+                        })
+                            .then(res => {
+                                if (!res.ok) {
+                                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                                }
+                                return res.json();
+                            })
+                            .then(data => {
+                                console.log("Wishlist response:", data);
+
+                                if (data.success) {
+                                    const icon = document.getElementById("wishlistIcon");
+                                    const btn = document.getElementById("wishlistBtn");
+
+                                    if (data.status === "added") {
+                                        // Thêm vào wishlist
+                                        if (icon) {
+                                            icon.classList.remove("text-gray-400");
+                                            icon.classList.add("text-red-500");
+                                        }
+                                        if (btn) {
+                                            btn.classList.remove("text-gray-400");
+                                            btn.classList.add("text-red-500");
+                                        }
+
+                                        showNotification(data.message || "Đã thêm vào danh sách yêu thích!", "success");
+
+                                    } else if (data.status === "removed") {
+                                        // Xóa khỏi wishlist
+                                        if (icon) {
+                                            icon.classList.remove("text-red-500");
+                                            icon.classList.add("text-gray-400");
+                                        }
+                                        if (btn) {
+                                            btn.classList.remove("text-red-500");
+                                            btn.classList.add("text-gray-400");
+                                        }
+
+                                        showNotification(data.message || "Đã xóa khỏi danh sách yêu thích!", "success");
+                                    }
+                                } else {
+                                    showNotification(data.error || "Có lỗi xảy ra", "error");
+                                }
+                            })
+                            .catch(err => {
+                                console.error("Wishlist toggle error:", err);
+                                showNotification("Không thể cập nhật danh sách yêu thích. Vui lòng thử lại.", "error");
+                            });
+                    });
+                }
+            });
+
+            // Hàm hiển thị notification
+            function showNotification(message, type) {
+                // Tạo notification element
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.zIndex = '9999';
+                notification.innerHTML = `
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+
+                document.body.appendChild(notification);
+
+                // Tự động ẩn sau 3 giây
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
+            }
+        </script>
+
+
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <!-- Lightbox JS for image gallery -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"></script>
+
+        <!-- Custom JS for product detail -->
+        <script th:src="@{/client-static/js/product-detail.js}"></script>
+
+        <!-- Product data for JavaScript -->
+        <script th:inline="javascript">
+            console.log('=== THYMELEAF SCRIPT LOADED ===');
+
+            // Pass product data to JavaScript
+            window.productData = {
+                id: /*[[${sanPham.id}]]*/ 0,
+                name: /*[[${sanPham.ten}]]*/ '',
+                variants: /*[[${dsChiTietSanPham}]]*/ [],
+                originalPrice: /*[[${giaGocMin}]]*/ 0,
+                currentPrice: /*[[${giaBanMin}]]*/ 0
+            };
+            
+            // Debug logging
+            console.log('=== DEBUG PRODUCT DETAIL ===');
+            console.log('Product ID:', window.productData.id);
+            console.log('Product Name:', window.productData.name);
+            console.log('Variants:', window.productData.variants);
+            console.log('Original Price:', window.productData.originalPrice);
+            console.log('Current Price:', window.productData.currentPrice);
+            console.log('=== END DEBUG ===');
+        </script>
+    </th:block>
+
+
+    
+
+</body>
+
+</html> 

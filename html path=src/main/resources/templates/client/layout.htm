@@ -1,0 +1,9 @@
+<ul class="dropdown-menu" aria-labelledby="pages">
+  <li th:each="danhMuc : ${danhMucs}">
+    <a th:href="@{/san-pham/danh-sach(danhMucId=${danhMuc.id})}" 
+       th:text="${danhMuc.ten}" 
+       class="dropdown-item"></a>
+  </li>
+  <li><hr class="dropdown-divider"></li>
+  <li><a th:href="@{/san-pham/danh-sach}" class="dropdown-item">Tất cả sản phẩm</a></li>
+</ul> 

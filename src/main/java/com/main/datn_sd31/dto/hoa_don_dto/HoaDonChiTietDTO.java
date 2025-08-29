@@ -16,6 +16,7 @@ public class HoaDonChiTietDTO {
     private String maHD;
     private Integer idCTSP;
     private String tenCTSP;
+    private String maSp;
     private BigDecimal giaGoc;
     private Integer soLuong;
     private BigDecimal giaSauGiam;

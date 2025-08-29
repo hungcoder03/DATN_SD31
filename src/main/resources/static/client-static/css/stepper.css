@@ -1,0 +1,132 @@
+:root {
+    --primary: #DEAD6F;
+    --primary-foreground: #ffffff;
+    --secondary: #f5f5f5;
+    --secondary-foreground: #111111;
+    --accent: #EDB867;
+    --accent-foreground: #ffffff;
+    --background: #ffffff;
+    --foreground: #111111;
+    --card: #ffffff;
+    --card-foreground: #111111;
+    --border: #e5e5e5;
+    --input: #ffffff;
+    --ring: #DEAD6F;
+    --radius: 0.5rem;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+body {
+    background-color: var(--background);
+    color: var(--foreground);
+}
+
+.stepper-wrapper {
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.stepper-items {
+    display: flex;
+    justify-content: space-between;
+    margin-top: -14px;
+}
+
+.stepper-item {
+    position: relative;
+    text-align: center;
+    flex: 1;
+}
+
+.step-counter {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.stepper-item.active .step-counter {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.stepper-item.completed .step-counter {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+}
+
+.step-name {
+    font-size: 0.875rem;
+    color: var(--foreground);
+}
+
+.step-pane {
+    display: none;
+}
+
+.step-pane.active {
+    display: block;
+}
+
+.card {
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border-color: var(--border);
+}
+
+.form-control, .form-select {
+    border-color: var(--border);
+    border-radius: var(--radius);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 2px rgba(0,112,243,0.1);
+}
+
+.btn {
+    border-radius: var(--radius);
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.payment-options {
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+}
+
+@media (max-width: 768px) {
+    .stepper-items {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-left: 20px;
+    }
+    
+    .stepper-item {
+        margin-bottom: 20px;
+    }
+    
+    .step-counter {
+        margin: 0 10px 0 0;
+        display: inline-flex;
+    }
+    
+    .step-name {
+        display: inline-block;
+        margin-left: 10px;
+    }
+}

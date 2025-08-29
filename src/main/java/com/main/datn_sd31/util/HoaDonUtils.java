@@ -1,10 +1,24 @@
 package com.main.datn_sd31.util;
 
 import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
+import com.main.datn_sd31.dto.hoa_don_dto.HoaDonDTO;
+import com.main.datn_sd31.entity.KhachHang;
+import com.main.datn_sd31.service.HoaDonService;
+import com.main.datn_sd31.service.LichSuHoaDonService;
+import com.main.datn_sd31.service.impl.DanhGiaService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("hoa_don_utils")
+@RequiredArgsConstructor
 public class HoaDonUtils {
+
+    private final DanhGiaService danhGiaService;
+
+    private final LichSuHoaDonService lichSuHoaDonService;
+
+    private final HoaDonService hoaDonService;
 
     public static boolean choPhepSuaGhiChuHoaDon(TrangThaiLichSuHoaDon trangThai) {
         return switch (trangThai) {
@@ -20,13 +34,18 @@ public class HoaDonUtils {
 
     public static boolean khongChoPhepCapNhatTrangThai(TrangThaiLichSuHoaDon trangThai) {
         return switch (trangThai) {
-            case HOAN_THANH, DA_HOAN, HUY, DA_GIAO -> false;
+            case HOAN_THANH, DA_HOAN, HUY, GIAO_KHONG_THANH_CONG -> false;
             default -> true;
         };
     }
 
     public static boolean choPhepHuyDonKhachHang(TrangThaiLichSuHoaDon trangThai) {
         return trangThai == TrangThaiLichSuHoaDon.CHO_XAC_NHAN || trangThai == TrangThaiLichSuHoaDon.XAC_NHAN;
+    }
+
+    public boolean khongChoPhepXacNhanDonHang(TrangThaiLichSuHoaDon trangThai, String maHd) {
+        HoaDonDTO hd = hoaDonService.getHoaDonByMa(maHd);
+        return hd.getTrangThaiHoaDonInteger() == 1;
     }
 
     public static boolean choPhepHoanHangKhachHang(TrangThaiLichSuHoaDon trangThai) {
@@ -45,5 +64,17 @@ public class HoaDonUtils {
             };
         }
         return false;
+    }
+
+    public boolean choPhepDanhGiaDonHang(TrangThaiLichSuHoaDon trangThai, Integer idCtsp, Integer idKhachHang) {
+//        System.out.println("Khong Cho phep: " + danhGiaService.checkDanhGiaExist(idCtsp, idKhachHang));
+        if (danhGiaService.checkDanhGiaExist(idCtsp, idKhachHang)) {
+            return false;
+        }
+
+        return switch (trangThai) {
+            case HOAN_THANH, DA_GIAO -> true;
+            default -> false;
+        };
     }
 }

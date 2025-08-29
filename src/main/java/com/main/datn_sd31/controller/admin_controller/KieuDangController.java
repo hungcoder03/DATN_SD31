@@ -1,6 +1,7 @@
 package com.main.datn_sd31.controller.admin_controller;
 
 import com.main.datn_sd31.entity.KieuDang;
+import com.main.datn_sd31.entity.ThuongHieu;
 import com.main.datn_sd31.repository.Kieudangrepository;
 
 import lombok.RequiredArgsConstructor;
@@ -39,11 +40,26 @@ public class KieuDangController {
         if (kieuDang.getId() == null) {
             // THÊM MỚI
             kieuDang.setNgayTao(LocalDateTime.now());
+            KieuDang last = kieuDangRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
+            if (last != null && last.getMa() != null && last.getMa().startsWith("KD")) {
+                try {
+                    // Cắt phần số sau "TH"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            // Format mã theo dạng TH001, TH002...
+            kieuDang.setMa(String.format("KD%03d", nextNumber));
+
         } else {
             // SỬA: Lấy bản gốc để giữ nguyên ngày tạo
             KieuDang existing = kieuDangRepository.findById(kieuDang.getId()).orElse(null);
             if (existing != null) {
                 kieuDang.setNgayTao(existing.getNgayTao());
+                kieuDang.setMa(existing.getMa()); // Giữ nguyên mã khi sửa
+
             }
         }
 

@@ -1,0 +1,255 @@
+/* Product Add Form Styles */
+/* Fix navigation layout - ensure elements stay on one line */
+.navbar .nav-link.dropdown-toggle {
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+}
+
+.navbar .nav-link.dropdown-toggle .profile-text {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 200px !important;
+}
+
+.navbar .nav-link.dropdown-toggle img {
+    flex-shrink: 0 !important;
+    margin-left: 8px !important;
+}
+
+/* Ensure dropdown arrow stays aligned */
+.navbar .nav-link.dropdown-toggle::after {
+    margin-left: 8px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar .nav-link.dropdown-toggle .profile-text {
+        max-width: 150px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar .nav-link.dropdown-toggle .profile-text {
+        max-width: 120px !important;
+    }
+}
+
+/* Custom form styling to fix text field visibility */
+.form-input-custom {
+    background-color: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    color: #2c3e50 !important;
+    transition: all 0.2s ease !important;
+}
+
+.form-input-custom:focus {
+    outline: none !important;
+    border-color: #dead6f !important;
+    box-shadow: 0 0 0 3px rgba(222, 173, 111, 0.1) !important;
+    background-color: #ffffff !important;
+}
+
+.form-input-custom::placeholder {
+    color: #9ca3af !important;
+}
+
+.form-select-custom {
+    background-color: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    color: #2c3e50 !important;
+    transition: all 0.2s ease !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 12px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    padding-right: 40px !important;
+}
+
+.form-select-custom:focus {
+    outline: none !important;
+    border-color: #dead6f !important;
+    box-shadow: 0 0 0 3px rgba(222, 173, 111, 0.1) !important;
+    background-color: #ffffff !important;
+}
+
+.form-textarea-custom {
+    background-color: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    color: #2c3e50 !important;
+    transition: all 0.2s ease !important;
+    resize: vertical !important;
+    min-height: 100px !important;
+}
+
+.form-textarea-custom:focus {
+    outline: none !important;
+    border-color: #dead6f !important;
+    box-shadow: 0 0 0 3px rgba(222, 173, 111, 0.1) !important;
+    background-color: #ffffff !important;
+}
+
+.btn-primary-custom {
+    background-color: #dead6f !important;
+    border: 2px solid #dead6f !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 12px 24px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-primary-custom:hover {
+    background-color: #c19b5b !important;
+    border-color: #c19b5b !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(222, 173, 111, 0.3) !important;
+}
+
+.btn-secondary-custom {
+    background-color: #f8f9fa !important;
+    border: 2px solid #e2e8f0 !important;
+    color: #6b7280 !important;
+    border-radius: 8px !important;
+    padding: 12px 24px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-secondary-custom:hover {
+    background-color: #e5e7eb !important;
+    border-color: #d1d5db !important;
+    color: #374151 !important;
+}
+
+.section-icon {
+    color: #dead6f !important;
+}
+
+.upload-area {
+    border: 2px dashed #d1d5db !important;
+    background-color: #f9fafb !important;
+    transition: all 0.2s ease !important;
+}
+
+.upload-area:hover {
+    border-color: #dead6f !important;
+    background-color: rgba(222, 173, 111, 0.05) !important;
+}
+
+/* Validation styles */
+.error-message {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.error-message.show {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.form-input-custom.error,
+.form-select-custom.error,
+.form-textarea-custom.error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+.form-input-custom.valid,
+.form-select-custom.valid,
+.form-textarea-custom.valid {
+    border-color: #16a34a !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1) !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading spinner for generate code button */
+.btn-loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.btn-loading .spinner {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Success/Error message styles */
+.message-success {
+    color: #16a34a;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.message-error {
+    color: #dc2626;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* File preview styles */
+.file-preview {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 8px;
+}
+
+.file-preview .file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.file-preview .file-item:last-child {
+    border-bottom: none;
+}
+
+.file-preview .file-name {
+    flex: 1;
+    margin-right: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-preview .file-remove {
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.file-preview .file-remove:hover {
+    color: #dc2626;
+    background-color: #fef2f2;
+} 

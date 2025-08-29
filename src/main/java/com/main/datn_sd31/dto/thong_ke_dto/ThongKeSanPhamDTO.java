@@ -10,12 +10,14 @@ import lombok.*;
 public class ThongKeSanPhamDTO {
 
     private Integer id;
+    private String maSp;
     private String tenCt;
     private Long soLuongDaBan;
     private Integer soLuongTon;
 
-    public ThongKeSanPhamDTO(Integer id, String tenCt, Long soLuongDaBan, Integer soLuongTon) {
+    public ThongKeSanPhamDTO(Integer id, String maSp, String tenCt, Long soLuongDaBan, Integer soLuongTon) {
         this.id = id;
+        this.maSp = maSp;
         this.tenCt = tenCt;
         this.soLuongDaBan = soLuongDaBan;
         this.soLuongTon = soLuongTon;

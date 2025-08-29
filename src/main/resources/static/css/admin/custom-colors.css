@@ -1,0 +1,153 @@
+/* Custom Color Scheme for Admin Interface */
+/* Primary Colors */
+.tw-bg-custom-light {
+    background-color: #F2EFE8 !important;
+}
+
+.tw-text-custom-dark {
+    color: #333333 !important;
+}
+
+.tw-text-custom-brown {
+    color: #997351 !important;
+}
+
+.tw-bg-custom-brown {
+    background-color: #997351 !important;
+}
+
+.tw-bg-custom-brown-dark {
+    background-color: #7a5d3f !important;
+}
+
+.tw-text-custom-brown-dark {
+    color: #7a5d3f !important;
+}
+
+.tw-bg-custom-brown-light {
+    background-color: #b08a6b !important;
+}
+
+/* Border Colors */
+.tw-border-custom-brown\/20 {
+    border-color: rgba(153, 115, 81, 0.2) !important;
+}
+
+.tw-border-custom-brown\/30 {
+    border-color: rgba(153, 115, 81, 0.3) !important;
+}
+
+/* Background Colors with Opacity */
+.tw-bg-custom-brown\/10 {
+    background-color: rgba(153, 115, 81, 0.1) !important;
+}
+
+.tw-bg-custom-light\/50 {
+    background-color: rgba(242, 239, 232, 0.5) !important;
+}
+
+/* Focus States */
+.focus\:tw-ring-custom-brown:focus {
+    --tw-ring-color: #997351 !important;
+}
+
+.focus\:tw-ring-custom-dark:focus {
+    --tw-ring-color: #333333 !important;
+}
+
+/* Hover Effects */
+.hover\:tw-bg-custom-light\/50:hover {
+    background-color: rgba(242, 239, 232, 0.5) !important;
+}
+
+.hover\:tw-bg-custom-brown-dark:hover {
+    background-color: #7a5d3f !important;
+}
+
+.hover\:tw-text-custom-brown-dark:hover {
+    color: #7a5d3f !important;
+}
+
+/* Form Elements */
+input:focus {
+    border-color: #997351 !important;
+    box-shadow: 0 0 0 2px rgba(153, 115, 81, 0.2) !important;
+}
+
+/* Button Styles */
+.btn-custom-primary {
+    background-color: #997351 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-custom-primary:hover {
+    background-color: #7a5d3f !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(153, 115, 81, 0.3) !important;
+}
+
+.btn-custom-secondary {
+    background-color: #333333 !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-custom-secondary:hover {
+    background-color: #555555 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(51, 51, 51, 0.3) !important;
+}
+
+/* Card Styles */
+.card-custom {
+    background-color: #F2EFE8 !important;
+    border: 1px solid rgba(153, 115, 81, 0.2) !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.card-custom:hover {
+    box-shadow: 0 8px 16px rgba(153, 115, 81, 0.1) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Table Styles */
+.table-custom thead {
+    background-color: rgba(153, 115, 81, 0.1) !important;
+}
+
+.table-custom tbody tr:hover {
+    background-color: rgba(242, 239, 232, 0.5) !important;
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+} 

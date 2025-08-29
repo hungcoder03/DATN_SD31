@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- Mini Cart Fragment -->
+<div th:fragment="mini-cart" class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasCart" aria-labelledby="My Cart">
+    <div class="offcanvas-header justify-content-center">
+        <div class="d-flex align-items-center">
+            <iconify-icon icon="mdi:cart" width="24" class="me-2"></iconify-icon>
+            <span class="fw-bold">Giỏ hàng</span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    
+    <!-- Summary Section -->
+    <div class="mini-cart-summary-section" th:if="${@cartService.getMiniCartData().totalItems > 0}">
+        <div class="mini-cart-summary-content">
+            <span class="mini-cart-summary-label">Tạm tính:</span>
+            <span class="mini-cart-summary-amount" th:text="${#numbers.formatDecimal(@cartService.getMiniCartData().totalAmount, 0, 'COMMA', 0, 'POINT') + '₫'}"></span>
+            <span class="mini-cart-summary-quantity" th:text="'(' + ${@cartService.getMiniCartData().totalItems} + ' sản phẩm)'"></span>
+        </div>
+    </div>
+    
+    <div class="offcanvas-body">
+        <div class="order-md-last">
+            <!-- Cart Items Container -->
+            <div id="cartItemsContainer" th:if="${@cartService.getMiniCartData().items.size() > 0}">
+                <!-- Cart Items -->
+                <div th:each="item : ${@cartService.getMiniCartData().items}" class="mini-cart-item" th:data-item-id="${item.id}">
+                    <div class="mini-cart-item-image-container">
+                        <img th:if="${item.imageUrl != null}" th:src="@{${item.imageUrl}}" th:alt="${item.tenSanPham}" class="mini-cart-item-image" onerror="this.src='/client-static/images/item1.jpg'">
+                        <img th:unless="${item.imageUrl != null}" th:src="@{/client-static/images/item1.jpg}" th:alt="${item.tenSanPham}" class="mini-cart-item-image">
+                    </div>
+                    
+                    <div class="mini-cart-item-details">
+                        <div class="mini-cart-item-name" th:text="${item.tenSanPham}"></div>
+                        <div class="mini-cart-item-variant" th:text="${item.tenSize + ' / ' + item.tenMauSac}"></div>
+                        <div class="mini-cart-item-price" th:text="${#numbers.formatDecimal(item.thanhTien, 0, 'COMMA', 0, 'POINT') + '₫'}"></div>
+                        <div class="mini-cart-item-quantity-display">
+                            Số lượng: <span th:text="${item.soLuong}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="mini-cart-total">
+                        <a class="btn-add-cart" th:href="@{/gio-hang/hien_thi}">Giỏ hàng của tôi</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Empty Cart -->
+            <div id="cartItemsContainer" th:if="${@cartService.getMiniCartData().items.size() == 0}" class="mini-cart-empty">
+                <div class="mini-cart-empty-icon">
+                    <iconify-icon icon="mdi:cart-outline" width="48"></iconify-icon>
+                </div>
+                <p>Giỏ hàng trống</p>
+                <p class="text-muted">Hãy thêm sản phẩm vào giỏ hàng</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cart Count Badge Fragment -->
+<div th:fragment="cart-count-badge" class="badge bg-primary rounded-circle pt-2 cart-count-badge" id="cartCount" th:text="${@cartService.getMiniCartData().totalItems}">0</div>
+
+<!-- Mobile Header Cart Count Fragment -->
+<div th:fragment="mobile-cart-count" class="position-absolute translate-middle badge rounded-circle bg-primary pt-2 cart-count-badge" id="mobileHeaderCartCount" th:text="${@cartService.getMiniCartData().totalItems}">0</div>
+
+<!-- Header Cart Count Fragment -->
+<div th:fragment="header-cart-count" class="position-absolute translate-middle badge rounded-circle bg-primary pt-2 cart-count-badge" id="headerCartCount" th:text="${@cartService.getMiniCartData().totalItems}">0</div>
+
+</html> 
+</html> 

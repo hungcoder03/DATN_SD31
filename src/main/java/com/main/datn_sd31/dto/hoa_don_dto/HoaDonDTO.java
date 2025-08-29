@@ -18,6 +18,8 @@ public class HoaDonDTO {
 
     private String tenKH;
 
+    private String tenNguoiNhan;
+
     private String diaChi;
 
     private String email;
@@ -57,6 +59,8 @@ public class HoaDonDTO {
     private String ghiChu;
 
     private Integer lyDoGiaoKhongThanhCongEnum;
+
+//    private String phuongThucThanhToan;
 
     public String getTrangThaiLichSuHoaDonMoTa() {
         return trangThaiLichSuHoaDon != null ? trangThaiLichSuHoaDon.getMoTa() : "Không rõ";

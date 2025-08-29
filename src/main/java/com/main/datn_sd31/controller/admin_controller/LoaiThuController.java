@@ -1,6 +1,7 @@
 package com.main.datn_sd31.controller.admin_controller;
 
 import com.main.datn_sd31.entity.LoaiThu;
+import com.main.datn_sd31.entity.ThuongHieu;
 import com.main.datn_sd31.repository.Loaithurepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -39,11 +40,27 @@ public class LoaiThuController {
         if (loaiThu.getId() == null) {
             // THÊM MỚI
             loaiThu.setNgayTao(LocalDateTime.now());
+            LoaiThu last = loaiThuRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
+
+            if (last != null && last.getMa() != null && last.getMa().startsWith("LT")) {
+                try {
+                    // Cắt phần số sau "TH"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            // Format mã theo dạng TH001, TH002...
+            loaiThu.setMa(String.format("LT%03d", nextNumber));
+
         } else {
             // SỬA: Lấy bản gốc để giữ nguyên ngày tạo
             LoaiThu existing = loaiThuRepository.findById(loaiThu.getId()).orElse(null);
             if (existing != null) {
                 loaiThu.setNgayTao(existing.getNgayTao());
+                loaiThu.setMa(existing.getMa()); // Giữ nguyên mã khi sửa
+
             }
         }
 

@@ -1,8 +1,10 @@
 package com.main.datn_sd31.controller.admin_controller;
 
 import com.main.datn_sd31.entity.PhieuGiamGia;
+import com.main.datn_sd31.repository.PhieuGiamGiaRepository;
 import com.main.datn_sd31.service.HoaDonService;
 import com.main.datn_sd31.service.PhieuGiamGiaService;
+import com.main.datn_sd31.util.GetNhanVien;
 import com.main.datn_sd31.util.ThongBaoUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,8 @@ public class PhieuGiamGiaController {
     private final HoaDonService hoaDonService;
 
     private final PhieuGiamGiaService phieuGiamGiaService;
+    private final GetNhanVien get_nhan_vien;
+    private final PhieuGiamGiaRepository phieuGiamGiaRepository;
 
     @GetMapping
     public String index(
@@ -57,12 +61,32 @@ public class PhieuGiamGiaController {
     }
 
     @PostMapping("/create")
-    public String create(@Valid @ModelAttribute("phieuGiamGia") PhieuGiamGia phieuGiamGia,
-                         BindingResult bindingResult,
-                         RedirectAttributes redirectAttributes,
-                         Model model) {
+    public String create(
+            @Valid @ModelAttribute("phieuGiamGia") PhieuGiamGia phieuGiamGia,
+             BindingResult bindingResult,
+             RedirectAttributes redirectAttributes,
+             Model model)
+    {
+//        if (!phieuGiamGia.isDieuKienHopLe()) {
+//            bindingResult.rejectValue("dieuKien", "error.dieuKien", "Điều kiện không được lớn hơn Giảm tối đa");
+//        }
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("error", "Thêm thất bại");
+            return "admin/pages/phieu-giam-gia/create";
+        }
+
+        // Tự sinh mã PGG nếu để trống
+        if (phieuGiamGia.getMa() == null || phieuGiamGia.getMa().trim().isEmpty()) {
+            String generated;
+            int attempts = 0;
+            do {
+                generated = "PGG" + String.format("%06d", (int) (Math.random() * 1_000_000));
+                attempts++;
+            } while (phieuGiamGiaRepository.existsByMa(generated) && attempts < 20);
+            phieuGiamGia.setMa(generated);
+        } else if (phieuGiamGia.getMa() != null && !phieuGiamGia.getMa().trim().isEmpty() && phieuGiamGiaRepository.existsByMa(phieuGiamGia.getMa())) {
+            model.addAttribute("error", "Mã trùng");
             return "admin/pages/phieu-giam-gia/create";
         }
 
@@ -72,7 +96,7 @@ public class PhieuGiamGiaController {
 
         phieuGiamGia.setNgayTao(LocalDate.now());
         phieuGiamGia.setNgaySua(LocalDate.now());
-        phieuGiamGiaService.save(phieuGiamGia);
+        phieuGiamGiaService.save(phieuGiamGia, get_nhan_vien.getCurrentNhanVien());
         ThongBaoUtils.addSuccess(redirectAttributes, "Thêm thành công");
         return "redirect:/admin/phieu-giam-gia";
     }
@@ -92,14 +116,17 @@ public class PhieuGiamGiaController {
         model.addAttribute("phieuGiamGia", entity);
         return "admin/pages/phieu-giam-gia/edit";
     }
-
     @PostMapping("/update")
     public String update(
             @Valid @ModelAttribute("phieuGiamGia") PhieuGiamGia pg,
-             BindingResult result,
-             Model model,
-             RedirectAttributes redirectAttributes
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
+//        if (!pg.isDieuKienHopLe()) {
+//            result.rejectValue("dieuKien", "error.dieuKien", "Điều kiện không được nhỏ hơn Giảm tối đa");
+//        }
+
         if (result.hasErrors()) {
             model.addAttribute("error", "Cập nhật thất bại");
             model.addAttribute("phieuGiamGia", pg);
@@ -107,7 +134,22 @@ public class PhieuGiamGiaController {
         }
 
         pg.setNgaySua(LocalDate.now());
-        phieuGiamGiaService.save(pg);
+        LocalDate today = LocalDate.now();
+
+        // ✅ Nếu đã hết hạn -> luôn false
+        if (pg.getNgayKetThuc() != null && today.isAfter(pg.getNgayKetThuc())) {
+            pg.setTrangThai(false);
+        }
+        // ✅ Nếu chưa tới ngày bắt đầu -> luôn false
+        else if (pg.getNgayBatDau() != null && today.isBefore(pg.getNgayBatDau())) {
+            pg.setTrangThai(false);
+        }
+        // ✅ Trong khoảng hợp lệ -> GIỮ THEO USER (radio button)
+        // Không cần gán lại, vì giá trị đã được bind từ form
+        // else { giữ nguyên pg.getTrangThai() }
+
+//        phieuGiamGiaRepository.save(pg);
+        phieuGiamGiaService.save(pg, get_nhan_vien.getCurrentNhanVien());
         ThongBaoUtils.addSuccess(redirectAttributes, "Cập nhật thành công");
         return "redirect:/admin/phieu-giam-gia";
     }

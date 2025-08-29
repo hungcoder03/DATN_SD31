@@ -11,14 +11,22 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
             crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" th:href="@{/vendors/iconfonts/mdi/css/materialdesignicons.min.css}">
     <!--    <link rel="stylesheet" th:href="@{/vendors/css/vendor.bundle.base.css}">-->
     <!--    <link rel="stylesheet" th:href="@{/vendors/css/vendor.bundle.addons.css}">-->
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/font-override.css}">
     <link rel="shortcut icon" th:href="@{/images/favicon.png}"/>
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- CSS Fix cho Profile Layout - Giải quyết xung đột Bootstrap vs Tailwind -->
+    <link rel="stylesheet" th:href="@{/css/admin/profile-fix.css}">
 
     <style>
         /* Icon Animation for Main Menu and Submenu */
@@ -46,6 +54,108 @@
 
         .sidebar .sub-menu .nav-item .nav-link:hover .menu-icon {
             transform: scale(1.3) rotate(15deg);
+        }
+
+        /* Navbar Depth and Shadow Effects */
+        .navbar.default-layout {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .navbar-brand-wrapper {
+            position: relative;
+            background: linear-gradient(135deg, #dead6f 0%, #c19b5b 100%);
+        }
+
+        .navbar-menu-wrapper {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .nav-link.dropdown-toggle {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 0 5px;
+        }
+
+        .nav-link.dropdown-toggle:hover {
+            background: rgba(222, 173, 111, 0.1);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(222, 173, 111, 0.2);
+        }
+
+        .dropdown-menu {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border: none;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .dropdown-item {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            margin: 2px 8px;
+        }
+        
+        /* CRITICAL FIX: Profile Layout - Đảm bảo luôn nằm trên 1 dòng */
+        .navbar .nav-link.dropdown-toggle {
+            display: flex !important;
+            align-items: center !important;
+            white-space: nowrap !important;
+            flex-wrap: nowrap !important;
+            gap: 8px !important;
+            flex-direction: row !important;
+        }
+        
+        .navbar .nav-link.dropdown-toggle .profile-text {
+            display: inline-block !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            max-width: 200px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.2 !important;
+            vertical-align: middle !important;
+        }
+        
+        .navbar .nav-link.dropdown-toggle img {
+            flex-shrink: 0 !important;
+            margin: 0 0 0 8px !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        
+        .navbar .nav-link.dropdown-toggle::after {
+            margin: 0 0 0 8px !important;
+            flex-shrink: 0 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        
+        /* Override Tailwind CSS nếu có xung đột */
+        .navbar .nav-link.dropdown-toggle[class*="tw-"] {
+            display: flex !important;
+            align-items: center !important;
+            white-space: nowrap !important;
+            flex-wrap: nowrap !important;
+        }
+        
+        /* Responsive fixes */
+        @media (max-width: 768px) {
+            .navbar .nav-link.dropdown-toggle .profile-text {
+                max-width: 120px !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .navbar .nav-link.dropdown-toggle .profile-text {
+                max-width: 100px !important;
+            }
         }
 
         /*CSS Thong bao*/
@@ -116,6 +226,174 @@
         }
 
         /*CSS Thong bao*/
+
+        /* Force submenu display fix */
+        .sidebar .nav .nav-item .collapse.show {
+            display: block !important;
+        }
+
+        .sidebar .nav .nav-item.active > .nav-link {
+            color: #dead6f !important;
+        }
+
+        /* Sidebar Background Color Override */
+        .sidebar {
+            background: #2d3f51 !important;
+            position: fixed !important;
+            top: 70px !important; /* Chiều cao của navbar */
+            left: 0 !important;
+            height: calc(100vh - 70px) !important; /* Chiều cao viewport trừ navbar */
+            overflow-y: auto !important; /* Cho phép scroll nếu menu dài */
+            z-index: 1000 !important;
+            width: 260px !important; /* Chiều rộng cố định */
+            transition: transform 0.3s ease !important;
+        }
+
+        /* Đảm bảo main panel không bị che bởi sidebar */
+        .main-panel {
+            margin-left: 260px !important; /* Bằng chiều rộng sidebar */
+            transition: margin-left 0.3s ease !important;
+        }
+
+        /* Responsive cho mobile */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%) !important;
+            }
+
+            .sidebar.show {
+                transform: translateX(0) !important;
+            }
+
+            .main-panel {
+                margin-left: 0 !important;
+            }
+        }
+
+        /* Đảm bảo container-scroller và page-body-wrapper hoạt động đúng */
+        .container-scroller {
+            overflow-x: hidden !important;
+        }
+
+        .page-body-wrapper {
+            padding-top: 70px !important; /* Chiều cao navbar */
+        }
+
+        /* Custom scrollbar cho sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #34495e;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #dead6f;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #c19b5b;
+        }
+
+        .sidebar .nav .nav-item .collapse.show,
+        .sidebar .nav .nav-item .collapsing {
+            background: #34495e !important;
+        }
+
+        .sidebar .nav .nav-item .nav-link {
+            color: #ecf0f1 !important;
+        }
+
+        .sidebar .nav .nav-item .nav-link:hover {
+            color: #ffffff !important;
+            background: #34495e !important;
+        }
+
+        .sidebar .nav .nav-item .nav-link[aria-expanded="true"] {
+            background: #34495e !important;
+        }
+
+        .sidebar .nav .nav-item .nav-link .menu-icon {
+            color: #bdc3c7 !important;
+        }
+
+        .sidebar .nav .nav-item .nav-link:hover .menu-icon {
+            color: #ffffff !important;
+        }
+
+        .sidebar .nav.sub-menu .nav-item .nav-link {
+            color: #bdc3c7 !important;
+        }
+
+        .sidebar .nav.sub-menu .nav-item .nav-link:hover {
+            color: #ffffff !important;
+        }
+
+        .sidebar .nav.sub-menu .nav-item .nav-link.active {
+            color: #dead6f !important;
+        }
+
+        .sidebar .nav:not(.sub-menu) > .nav-item:hover:not(.nav-profile) > .nav-link {
+            background: #34495e !important;
+            color: #ffffff !important;
+        }
+
+        /* Nav Profile Height and Balance Adjustments */
+        .sidebar .nav .nav-item.nav-profile .nav-link {
+            padding: 1.5rem !important;
+            height: auto !important;
+            min-height: 80px !important;
+            background: #34495e !important;
+            border-bottom: 1px solid #4a5f7a !important;
+        }
+
+        .sidebar .nav .nav-item.nav-profile .nav-link .user-wrapper {
+            margin-bottom: 0 !important;
+            align-items: center !important;
+        }
+
+        .sidebar .nav .nav-item.nav-profile .nav-link .user-wrapper .profile-image {
+            width: 48px !important;
+            height: 48px !important;
+            flex-shrink: 0 !important;
+        }
+
+        .sidebar .nav .nav-item.nav-profile .nav-link .user-wrapper .profile-image img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        }
+
+        .sidebar .nav .nav-item.nav-profile .nav-link .user-wrapper .text-wrapper {
+            margin-left: 12px !important;
+            flex: 1 !important;
+        }
+
+        .sidebar .nav .nav-item.nav-profile .nav-link .user-wrapper .text-wrapper .profile-name {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            margin-bottom: 4px !important;
+            font-size: 14px !important;
+            line-height: 1.2 !important;
+        }
+
+        .sidebar .nav .nav-item.nav-profile .nav-link .user-wrapper .text-wrapper .designation {
+            color: #bdc3c7 !important;
+            font-size: 12px !important;
+            line-height: 1.2 !important;
+        }
+
+        .sidebar .nav .nav-item.nav-profile .nav-link .user-wrapper .text-wrapper .status-indicator {
+            display: inline-block !important;
+            width: 8px !important;
+            height: 8px !important;
+            border-radius: 50% !important;
+            background: #27ae60 !important;
+            margin-left: 8px !important;
+        }
     </style>
 </head>
 
@@ -174,7 +452,7 @@
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
-                        <a class="dropdown-item d-flex align-items-center gap-2 py-3 px-4" th:href="@{/admin/dang-xuat}" style="color: #e74c3c; font-weight: 500; border-radius: 8px; transition: background 0.2s;">
+                        <a class="dropdown-item d-flex align-items-center gap-2 py-3 px-4" th:href="@{/admin/logout}" style="color: #dead6f; font-weight: 500; border-radius: 8px; transition: background 0.2s;">
                             <i class="fas fa-sign-out-alt" style="font-size: 1.2rem;"></i>
                             <span>Sign Out</span>
                         </a>
@@ -199,10 +477,12 @@
                             <div class="profile-image">
                                 <img th:if="${@get_nhan_vien.getCurrentNhanVien() != null && @get_nhan_vien.getCurrentNhanVien().anh != null && !@get_nhan_vien.getCurrentNhanVien().anh.isEmpty()}"
                                      th:src="@{'/uploads/' + ${@get_nhan_vien.getCurrentNhanVien().anh}}"
-                                     alt="profile image">
+                                     alt="profile image"
+                                     style="width: 48px; height: 48px; object-fit: cover; border-radius: 50%;">
                                 <img th:if="${@get_nhan_vien.getCurrentNhanVien() == null || @get_nhan_vien.getCurrentNhanVien().anh == null || @get_nhan_vien.getCurrentNhanVien().anh.isEmpty()}"
                                      th:src="@{/images/faces-clipart/pic-1.png}"
-                                     alt="profile image">
+                                     alt="profile image"
+                                     style="width: 48px; height: 48px; object-fit: cover; border-radius: 50%;">
                             </div>
                             <div class="text-wrapper">
                                 <p class="profile-name"
@@ -245,9 +525,8 @@
                         <span class="menu-title">Đơn hàng</span>
                     </a>
                 </li>
-                <li class="nav-item">
-<!--                    <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">-->
-<!--                        <i class="menu-icon fas fa-box"></i>-->
+                <!-- Menu Sản phẩm - Chỉ hiển thị cho ADMIN -->
+                <li class="nav-item" th:if="${@securityUtils.hasRoleAdmin()}">
                     <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false"
                        aria-controls="ui-basic">
                         <i class="menu-icon mdi mdi-content-copy"></i>
@@ -260,12 +539,6 @@
                                 <a class="nav-link" th:href="@{/admin/san-pham/hien_thi}">
                                     <i class="menu-icon fas fa-tshirt"></i>
                                     Sản phẩm
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="">
-                                    <i class="menu-icon fas fa-images"></i>
-                                    Hình ảnh
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -319,25 +592,29 @@
                         </ul>
                     </div>
                 </li>
-                <li class="nav-item">
+                <!-- Menu Đợt giảm giá - Chỉ hiển thị cho ADMIN -->
+                <li class="nav-item" th:if="${@securityUtils.hasRoleAdmin()}">
                     <a class="nav-link" th:href="@{/admin/dot-giam-gia}">
                         <i class="menu-icon fas fa-percentage"></i>
                         <span class="menu-title">Đợt giảm giá</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- Menu Phiếu giảm giá - Chỉ hiển thị cho ADMIN -->
+                <li class="nav-item" th:if="${@securityUtils.hasRoleAdmin()}">
                     <a class="nav-link" th:href="@{/admin/phieu-giam-gia}">
                         <i class="menu-icon fas fa-ticket-alt"></i>
                         <span class="menu-title">Phiếu giảm giá</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- Menu Nhân viên - Chỉ hiển thị cho ADMIN -->
+                <li class="nav-item" th:if="${@securityUtils.hasRoleAdmin()}">
                     <a class="nav-link" th:href="@{/admin/quanlytaikhoan/nhanvien}">
                         <i class="menu-icon fas fa-users-cog"></i>
                         <span class="menu-title">Nhân viên</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <!-- Menu Khách hàng - Chỉ hiển thị cho ADMIN -->
+                <li class="nav-item" th:if="${@securityUtils.hasRoleAdmin()}">
                     <a class="nav-link" th:href="@{/admin/quanlytaikhoan/khachhang}">
                         <i class="menu-icon fas fa-users"></i>
                         <span class="menu-title">Khách hàng</span>
@@ -471,6 +748,59 @@
 </script>
 <!--  Thong bao-->
 
+<!-- Fix submenu display for product pages -->
+<script>
+$(document).ready(function() {
+    // Additional fix for submenu display
+    var currentPath = window.location.pathname;
+    console.log('Layout script - Current path:', currentPath);
+
+    // Force show product submenu if on product-related pages
+    if (currentPath.includes('/admin/san-pham') ||
+        currentPath.includes('/admin/thuong-hieu') ||
+        currentPath.includes('/admin/kieu-dang') ||
+        currentPath.includes('/admin/xuat-xu') ||
+        currentPath.includes('/admin/chat-lieu') ||
+        currentPath.includes('/admin/danh-muc') ||
+        currentPath.includes('/admin/loai-thu') ||
+        currentPath.includes('/admin/mau-sac') ||
+        currentPath.includes('/admin/size')) {
+
+        console.log('Product-related page detected, forcing submenu show');
+
+        setTimeout(function() {
+            $('#ui-basic').addClass('show');
+            $('#ui-basic').closest('.nav-item').addClass('active');
+
+            // Also activate the specific menu item
+            $('a[href="' + currentPath + '"]').addClass('active').closest('.nav-item').addClass('active');
+
+            console.log('Submenu forced to show');
+        }, 100);
+    }
+
+    // Handle sidebar toggle for mobile
+    $('.navbar-toggler').on('click', function() {
+        $('.sidebar').toggleClass('show');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    $(document).on('click', function(e) {
+        if ($(window).width() <= 991.98) {
+            if (!$(e.target).closest('.sidebar, .navbar-toggler').length) {
+                $('.sidebar').removeClass('show');
+            }
+        }
+    });
+
+    // Handle window resize
+    $(window).on('resize', function() {
+        if ($(window).width() > 991.98) {
+            $('.sidebar').removeClass('show');
+        }
+    });
+});
+</script>
 
 </body>
 </html>

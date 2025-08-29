@@ -38,11 +38,22 @@ public class DanhMucController {
         if (danhMuc.getId() == null) {
             // THÊM MỚI
             danhMuc.setNgayTao(LocalDateTime.now());
+            DanhMuc last = danhMucRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
+            if (last != null && last.getMa() != null && last.getMa().startsWith("DM")) {
+                try {
+                    // Cắt phần số sau "TH"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            danhMuc.setMa(String.format("DM%03d", nextNumber));
         } else {
-            // SỬA: Lấy bản gốc để giữ nguyên ngày tạo
             DanhMuc existing = danhMucRepository.findById(danhMuc.getId()).orElse(null);
             if (existing != null) {
                 danhMuc.setNgayTao(existing.getNgayTao());
+                danhMuc.setMa(existing.getMa());
             }
         }
 

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>D&C Fashions - Trang chủ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-pink-50 text-gray-800 font-sans">
+
+<!-- 🌸 Header -->
+<header class="bg-white shadow sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center px-4 py-4">
+        <h1 class="text-2xl font-bold text-pink-600">D&C Fashions</h1>
+        <nav class="space-x-6 hidden md:flex text-sm">
+            <a href="#" class="hover:text-pink-600">Trang chủ</a>
+            <a th:href="@{/san-pham}" class="hover:text-pink-600">Sản phẩm</a>
+            <a href="#" class="hover:text-pink-600">Blog</a>
+            <a href="#" class="hover:text-pink-600">Liên hệ</a>
+        </nav>
+        <div class="flex items-center gap-4">
+            <a th:if="${session.khachHang == null}"
+               th:href="@{/khach-hang/dang-nhap}"
+               class="text-sm bg-pink-500 text-white px-3 py-1.5 rounded hover:bg-pink-600">
+                Đăng nhập
+            </a>
+
+            <div th:if="${session.khachHang != null}" class="relative group">
+                <img src='/uploads/3cb9ad05-ebce-4331-9e34-ae73d3c33364_364547917_670262361332031_5054924062400926916_n.jpg'
+                     }
+                     alt="Avatar"
+                     class="w-10 h-10 rounded-full border-2 border-pink-500 cursor-pointer"
+                     id="avatarDropdownToggle"/>
+
+                <!-- Dropdown menu -->
+                <div id="avatarDropdownMenu"
+                     class="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50 hidden">
+                    <a th:href="@{/tai-khoan/thong-tin}"
+                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-100">👤 Thông tin tài khoản</a>
+
+                    <form th:action="@{/khach-hang/dang-xuat}" method="post">
+                        <button type="submit"
+                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100">
+                            🔓 Đăng xuất
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <a th:href="@{/gio-hang/hien_thi}" class="relative text-2xl text-pink-600">
+                🛒
+                <span th:if="${soLuongTrongGio > 0}" th:text="${soLuongTrongGio}"
+                      class="absolute -top-2 -right-2 text-xs bg-pink-500 text-white rounded-full px-1.5 py-0.5">0</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- 🐶 Hero Banner -->
+<section class="bg-pink-100 py-16 text-center">
+    <div class="max-w-3xl mx-auto">
+        <h2 class="text-4xl font-extrabold mb-4">Thời trang thú cưng siêu đáng yêu 🐶🐱</h2>
+        <p class="text-lg mb-6 text-gray-700">Khám phá bộ sưu tập quần áo & phụ kiện siêu xinh cho chó mèo.</p>
+        <a th:href="@{/san-pham}" class="bg-pink-600 text-white px-6 py-3 rounded-full hover:bg-pink-700 transition">
+            Mua sắm ngay
+        </a>
+    </div>
+</section>
+
+<!-- 🎀 Danh mục nổi bật -->
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4">
+        <h3 class="text-2xl font-bold text-center mb-10 text-pink-600">Danh mục nổi bật</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div class="shadow-lg rounded-lg p-4 bg-pink-50 hover:shadow-xl transition">
+                <img src="https://i.imgur.com/xN0QKzJ.png" class="w-24 h-24 mx-auto mb-3"/>
+                <h4 class="font-medium">Áo cho chó</h4>
+            </div>
+            <div class="shadow-lg rounded-lg p-4 bg-pink-50 hover:shadow-xl transition">
+                <img src="https://i.imgur.com/xYrOig9.png" class="w-24 h-24 mx-auto mb-3"/>
+                <h4 class="font-medium">Áo cho mèo</h4>
+            </div>
+            <div class="shadow-lg rounded-lg p-4 bg-pink-50 hover:shadow-xl transition">
+                <img src="https://i.imgur.com/IuZbGoU.png" class="w-24 h-24 mx-auto mb-3"/>
+                <h4 class="font-medium">Phụ kiện xinh</h4>
+            </div>
+            <div class="shadow-lg rounded-lg p-4 bg-pink-50 hover:shadow-xl transition">
+                <img src="https://i.imgur.com/PUJ7v0M.png" class="w-24 h-24 mx-auto mb-3"/>
+                <h4 class="font-medium">Giường & chăn</h4>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 🌟 Sản phẩm mới -->
+<section class="py-12">
+    <div class="max-w-7xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center text-pink-600 mb-10">Sản phẩm mới nhất</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <!-- Đặt th:each ở đây -->
+            <div th:each="sp : ${danhSachSanPham}"
+                 class="product-card relative bg-white rounded-lg shadow hover:shadow-lg p-4 flex flex-col">
+
+                <div class="relative">
+                    <img th:src="${sp.hinhAnhs[0]?.url}" alt="Ảnh sản phẩm"
+                         class="w-full h-56 object-cover rounded-md mb-4"/>
+
+                    <!-- Badge phần trăm giảm -->
+                    <div th:if="${phanTramGiamMap[sp.id] != null and phanTramGiamMap[sp.id] > 0}"
+                         class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        <span th:text="'-' + ${phanTramGiamMap[sp.id]} + '%'">-10%</span>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold text-pink-600 mb-1" th:text="${sp.ten}">Tên sản phẩm</h3>
+                <p class="text-sm text-gray-600 flex-grow" th:text="${sp.moTa}">Mô tả sản phẩm</p>
+
+                <div th:with="giaBan = ${giaBanMinMap[sp.id]}, giaGoc = ${giaGocMinMap[sp.id]}, giaGocMax = ${giaGocMaxMap[sp.id]}">
+                    <span th:if="${giaBan != null and giaGoc != null and giaBan.compareTo(giaGoc) < 0}">
+                        <span class="line-through text-gray-500 mr-2"
+                              th:text="${#numbers.formatDecimal(giaGoc,0,'COMMA',0,'POINT')} + ' đ'">100,000 đ</span>
+                        <span th:text="${#numbers.formatDecimal(giaBan,0,'COMMA',0,'POINT')} + ' đ'">80,000 đ</span>
+                    </span>
+                                    <span th:if="${giaBan != null and giaGoc != null and giaBan.compareTo(giaGoc) >= 0}"
+                                          th:text="${#numbers.formatDecimal(giaGoc,0,'COMMA',0,'POINT')+ ' đ – ' + #numbers.formatDecimal(giaGocMax,0,'COMMA',0,'POINT')} + ' đ'">
+                        100.000 đ – 150.000 đ
+                    </span>
+                </div>
+
+
+                <a th:href="@{/khach-hang/chi-tiet/{id}(id=${sp.id})}"
+                   class="mt-4 inline-block text-center bg-pink-600 text-white py-2 px-4 rounded-full hover:bg-pink-700 transition">
+                    Xem chi tiết
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.getElementById("avatarDropdownToggle");
+        const menu = document.getElementById("avatarDropdownMenu");
+
+        // Toggle khi click vào avatar
+        toggle.addEventListener("click", function (e) {
+            menu.classList.toggle("hidden");
+        });
+
+        // Ẩn menu khi click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!toggle.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add("hidden");
+            }
+        });
+    });
+</script>
+
+<!-- 🐾 Footer -->
+<footer class="bg-white border-t mt-12">
+    <div class="max-w-7xl mx-auto px-4 py-6 text-center text-sm text-gray-600">
+        © 2025 D&C Fashions. Yêu thương thú cưng mỗi ngày 🐾
+    </div>
+</footer>
+
+</body>
+</html>

@@ -39,17 +39,30 @@ public class ChatLieuController {
     public String save(@ModelAttribute ChatLieu chatLieu) {
         if (chatLieu.getId() == null) {
             // THÊM MỚI
-            chatLieu.setNgayTao(LocalDateTime.from(LocalDate.now()));
+            chatLieu.setNgayTao(LocalDateTime.now());
+            ChatLieu last = chatLieuRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
+            if (last != null && last.getMa() != null && last.getMa().startsWith("CL")) {
+                try {
+                    // Cắt phần số sau "CL"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            chatLieu.setMa(String.format("CL%03d" , nextNumber));
         } else {
             // SỬA: Lấy bản gốc để giữ nguyên ngày tạo
             ChatLieu existing = chatLieuRepository.findById(chatLieu.getId()).orElse(null);
             if (existing != null) {
                 chatLieu.setNgayTao(existing.getNgayTao());
+                chatLieu.setMa(existing.getMa());
             }
         }
 
         // Ngày sửa luôn được cập nhật
-        chatLieu.setNgaySua(LocalDateTime.from(LocalDate.now()));
+        chatLieu.setNgaySua(LocalDateTime.now());
         chatLieuRepository.save(chatLieu);
         return "redirect:/admin/chat-lieu"; // Trở lại trang chính
     }

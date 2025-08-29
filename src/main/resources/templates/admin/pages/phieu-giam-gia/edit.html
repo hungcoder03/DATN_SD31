@@ -8,46 +8,46 @@
     <!--          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">-->
 
     <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">-->
-<!--    <style>-->
-<!--        .filter-section {-->
-<!--            background-color: #f8f9fa;-->
-<!--            padding: 20px;-->
-<!--            border-radius: 8px;-->
-<!--            margin-bottom: 30px;-->
-<!--        }-->
+    <!--    <style>-->
+    <!--        .filter-section {-->
+    <!--            background-color: #f8f9fa;-->
+    <!--            padding: 20px;-->
+    <!--            border-radius: 8px;-->
+    <!--            margin-bottom: 30px;-->
+    <!--        }-->
 
-<!--        .filter-buttons .btn {-->
-<!--            margin-right: 10px;-->
-<!--            margin-bottom: 10px;-->
-<!--        }-->
+    <!--        .filter-buttons .btn {-->
+    <!--            margin-right: 10px;-->
+    <!--            margin-bottom: 10px;-->
+    <!--        }-->
 
-<!--        .table-section {-->
-<!--            background-color: #fff;-->
-<!--            padding: 20px;-->
-<!--            border-radius: 8px;-->
-<!--            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);-->
-<!--        }-->
+    <!--        .table-section {-->
+    <!--            background-color: #fff;-->
+    <!--            padding: 20px;-->
+    <!--            border-radius: 8px;-->
+    <!--            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);-->
+    <!--        }-->
 
-<!--        .table-section .table thead th {-->
-<!--            background-color: #f1f1f1;-->
-<!--        }-->
+    <!--        .table-section .table thead th {-->
+    <!--            background-color: #f1f1f1;-->
+    <!--        }-->
 
-<!--        .action-btn {-->
-<!--            border: none;-->
-<!--            background: none;-->
-<!--            cursor: pointer;-->
-<!--            font-size: 1.2rem;-->
-<!--            padding: 5px;-->
-<!--        }-->
+    <!--        .action-btn {-->
+    <!--            border: none;-->
+    <!--            background: none;-->
+    <!--            cursor: pointer;-->
+    <!--            font-size: 1.2rem;-->
+    <!--            padding: 5px;-->
+    <!--        }-->
 
-<!--        .action-btn.accept {-->
-<!--            color: green;-->
-<!--        }-->
+    <!--        .action-btn.accept {-->
+    <!--            color: green;-->
+    <!--        }-->
 
-<!--        .action-btn.cancel {-->
-<!--            color: red;-->
-<!--        }-->
-<!--    </style>-->
+    <!--        .action-btn.cancel {-->
+    <!--            color: red;-->
+    <!--        }-->
+    <!--    </style>-->
     <style>
         /*CSS Thong bao*/
         .custom-toast {
@@ -196,13 +196,13 @@
 
             <div class="mb-3" id="divGiamToiDa">
                 <label>Giảm tối đa</label>
-                <input type="number" class="form-control" th:field="*{giamToiDa}" />
+                <input type="number" id="giamToiDa" class="form-control" th:field="*{giamToiDa}" oninput="limitNumberLength(this, 18)"/>
                 <div class="text-danger" th:errors="*{giamToiDa}"></div>
             </div>
 
             <div class="mb-3">
                 <label>Điều kiện</label>
-                <input type="number" class="form-control" th:field="*{dieuKien}" />
+                <input type="number" class="form-control" th:field="*{dieuKien}" oninput="limitNumberLength(this, 18)"/>
                 <div class="text-danger" th:errors="*{dieuKien}"></div>
             </div>
 
@@ -211,6 +211,30 @@
                 <input type="number" class="form-control" th:field="*{soLuongTon}" />
                 <div class="text-danger" th:errors="*{soLuongTon}"></div>
             </div>
+            <div class="mb-3">
+                <label>Trạng thái</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input"
+                               type="radio"
+                               th:field="*{trangThai}"
+                               value="true"
+                               id="trangThaiHoatDong"
+                               th:disabled="${phieuGiamGia.ngayKetThuc != null and phieuGiamGia.ngayKetThuc.isBefore(T(java.time.LocalDate).now())}">
+                        <label class="form-check-label" for="trangThaiHoatDong">Hoạt động</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input"
+                               type="radio"
+                               th:field="*{trangThai}"
+                               value="false"
+                               id="trangThaiNgung">
+                        <label class="form-check-label" for="trangThaiNgung">Ngừng hoạt động</label>
+                    </div>
+                </div>
+                <div class="text-danger" th:errors="*{trangThai}"></div>
+            </div>
+
 
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Lưu</button>

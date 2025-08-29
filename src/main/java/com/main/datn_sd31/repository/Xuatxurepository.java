@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface Xuatxurepository extends JpaRepository<XuatXu,Integer> {
-
+    XuatXu findTopByOrderByMaDesc();
 }

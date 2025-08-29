@@ -51,24 +51,21 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
     }
 
     @Override
-    public void capNhatTrangThai(String maHoaDon, Integer trangThaiMoi, String ghiChu, NhanVien nhanVien, Integer lyDoGiaoKhongThanhCong) {
+    public void capNhatTrangThai(String maHoaDon, Integer trangThaiMoi, String ghiChu, NhanVien nhanVien) {
         HoaDon hoaDon = hoaDonRepository.findByMaContainingIgnoreCase(maHoaDon).get(0);
         if (hoaDon == null) return;
 
         List<LichSuHoaDon> lichSuList = lichSuHoaDonRepository.findLichSuHoaDonsByHoaDon(hoaDon);
 
-        String finalGhiChu = (trangThaiMoi == 10)
-                ? LyDoGiaoKhongThanhCong.fromValue(lyDoGiaoKhongThanhCong).getMoTa()
-                : (ghiChu != null && !ghiChu.isBlank()
-                    ? ghiChu
-                    : "Cập nhật trạng thái: " + TrangThaiLichSuHoaDon.fromValue(trangThaiMoi).getMoTa());
-
+        String finalGhiChu = (ghiChu != null && !ghiChu.isBlank())
+                ? ghiChu
+                : "Cập nhật trạng thái: " + TrangThaiLichSuHoaDon.fromValue(trangThaiMoi).getMoTa();
 
         LichSuHoaDon lichSu = LichSuHoaDon.builder()
                 .hoaDon(hoaDon)
                 .trangThai(trangThaiMoi)
                 .ghiChu(finalGhiChu)
-                .lyDoGiaoKhongThanhCong(lyDoGiaoKhongThanhCong)
+//                .lyDoGiaoKhongThanhCong(lyDoGiaoKhongThanhCong)
                 .ngayTao(LocalDateTime.now())
                 .nguoiTao(nhanVien.getId())
                 .build();
@@ -101,26 +98,78 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
     @Override
     public List<TrangThaiLichSuHoaDon> getTrangThaiTiepTheoHopLe(TrangThaiLichSuHoaDon hienTai, HoaDonDTO hoaDonDTO) {
         return switch (hienTai) {
-            case CHO_XAC_NHAN -> List.of(TrangThaiLichSuHoaDon.XAC_NHAN, TrangThaiLichSuHoaDon.HUY);
+            case CHO_XAC_NHAN -> List.of(
+                    TrangThaiLichSuHoaDon.XAC_NHAN,
+                    TrangThaiLichSuHoaDon.HUY);
             case XAC_NHAN -> {
-                if (hoaDonDTO.getDiaChi().isEmpty()) {
-                    yield List.of(TrangThaiLichSuHoaDon.CHO_GIAO_HANG);
+                if (hoaDonDTO.getPhiVanChuyen().compareTo(BigDecimal.ZERO) != 0) {
+                    yield List.of(
+                            TrangThaiLichSuHoaDon.CHO_GIAO_HANG,
+                            TrangThaiLichSuHoaDon.HUY);
                 }
-                yield List.of(TrangThaiLichSuHoaDon.CHO_GIAO_HANG, TrangThaiLichSuHoaDon.HOAN_THANH, TrangThaiLichSuHoaDon.HUY);
-            }
-            case CHO_GIAO_HANG -> {
-//                if ("Chưa thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
-//                    yield List.of();
-//                }
-                yield List.of(TrangThaiLichSuHoaDon.DA_GIAO, TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG);
-            }
 
-            case GIAO_KHONG_THANH_CONG -> List.of(TrangThaiLichSuHoaDon.DON_CHUYEN_HOAN, TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG, TrangThaiLichSuHoaDon.HUY);
-            case YEU_CAU_HOAN_HANG -> List.of(TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG);
-            case DON_CHUYEN_HOAN, XAC_NHAN_HOAN_HANG -> List.of(TrangThaiLichSuHoaDon.DA_HOAN);
+                yield List.of(TrangThaiLichSuHoaDon.CHO_GIAO_HANG,
+                        TrangThaiLichSuHoaDon.HOAN_THANH,
+                        TrangThaiLichSuHoaDon.HUY);
+            }
+            case CHO_GIAO_HANG -> List.of(
+                    TrangThaiLichSuHoaDon.DA_GIAO,
+                    TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG);
+
+            case DA_GIAO -> List.of(
+                    TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG);
+
+            case GIAO_KHONG_THANH_CONG -> List.of(
+                    TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG,
+                    TrangThaiLichSuHoaDon.HUY);
+
+            case YEU_CAU_HOAN_HANG -> List.of(
+                    TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG,
+                    TrangThaiLichSuHoaDon.HOAN_THANH);
+
+            case XAC_NHAN_HOAN_HANG -> List.of(
+                    TrangThaiLichSuHoaDon.DA_HOAN);
             default -> List.of(); // HOAN_THANH, DA_HOAN, HUY không được chuyển tiếp
         };
     }
+
+    @Override
+    public List<TrangThaiLichSuHoaDon> getTrangThaiTiepTheoHopLeKhachHang(TrangThaiLichSuHoaDon hienTai, HoaDonDTO hoaDonDTO) {
+        return switch (hienTai) {
+            case CHO_XAC_NHAN -> List.of(
+                    TrangThaiLichSuHoaDon.XAC_NHAN,
+                    TrangThaiLichSuHoaDon.HUY);
+            case XAC_NHAN -> {
+                if (hoaDonDTO.getPhiVanChuyen().compareTo(BigDecimal.ZERO) == 0) {
+                    yield List.of(
+                            TrangThaiLichSuHoaDon.CHO_GIAO_HANG,
+                            TrangThaiLichSuHoaDon.HUY);
+                }
+
+                yield List.of(
+                        TrangThaiLichSuHoaDon.CHO_GIAO_HANG,
+                        TrangThaiLichSuHoaDon.HOAN_THANH,
+                        TrangThaiLichSuHoaDon.HUY);
+            }
+            case CHO_GIAO_HANG ->List.of(
+                    TrangThaiLichSuHoaDon.DA_GIAO,
+                    TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG);
+
+            case DA_GIAO -> List.of(TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG);
+
+            case GIAO_KHONG_THANH_CONG -> List.of(
+                    TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG,
+                    TrangThaiLichSuHoaDon.HUY);
+
+            case YEU_CAU_HOAN_HANG -> List.of(
+                    TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG,
+                    TrangThaiLichSuHoaDon.HOAN_THANH);
+
+            case XAC_NHAN_HOAN_HANG -> List.of(TrangThaiLichSuHoaDon.DA_HOAN);
+            default -> List.of(); // HOAN_THANH, DA_HOAN, HUY không được chuyển tiếp
+        };
+    }
+
 
     @Override
     public List<LichSuHoaDonDTO> getLichSuHoaDonDTOByHoaDon(String maHoaDon) {
@@ -138,7 +187,7 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
         dto.setGhiChu(lichSuHoaDon.getGhiChu());
         dto.setNguoiTao(lichSuHoaDon.getNguoiTao());
         dto.setTrangThaiLichSuHoaDon(TrangThaiLichSuHoaDon.fromValue(lichSuHoaDon.getTrangThai()));
-        dto.setLyDoGiaoKhongThanhCong(lichSuHoaDon.getLyDoGiaoKhongThanhCong());
+//        dto.setLyDoGiaoKhongThanhCong(lichSuHoaDon.getLyDoGiaoKhongThanhCong());
 
         // Giả sử người tạo là nhân viên → lấy tên nhân viên theo ID
         if (lichSuHoaDon.getNguoiTao() != null) {
@@ -171,7 +220,7 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
     }
 
     @Override
-    public KetQuaCapNhatTrangThai xuLyCapNhatTrangThai(String maHoaDon, Integer trangThaiMoi, Integer lyDoGiaoKhongThanhCong, String ghiChu, NhanVien nhanVien) {
+    public KetQuaCapNhatTrangThai xuLyCapNhatTrangThai(String maHoaDon, Integer trangThaiMoi, String ghiChu, NhanVien nhanVien) {
         HoaDonDTO hoaDonDTO = hoaDonService.getHoaDonByMa(maHoaDon);
         TrangThaiLichSuHoaDon trangThaiHienTai = hoaDonDTO.getTrangThaiLichSuHoaDon();
 
@@ -185,44 +234,61 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
             return new KetQuaCapNhatTrangThai(false, "Trạng thái mới không được trùng với trạng thái hiện tại");
         }
 
-        //Cho phép thay đổi các trạng thái tiếp theo
+        String message = null;
         boolean hopLe = switch (trangThaiHienTai) {
-            case CHO_XAC_NHAN -> trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN || trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+            case CHO_XAC_NHAN -> {
+                if (hoaDonDTO.getTrangThaiHoaDonInteger() == 1) {
+                    message = "Hóa đơn đang chờ thanh toán, không thể chuyển về trạng thái này";
+                    yield false;
+                }
+                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN ||
+                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+            }
             case XAC_NHAN -> {
                 if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH
                         && "Chưa thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
+                    message = "Không thể hoàn thành khi chưa thanh toán";
                     yield false;
-                } else if (hoaDonDTO.getDiaChi() == null || hoaDonDTO.getDiaChi().isEmpty()) {
-                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH;
-                }
-                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.CHO_GIAO_HANG || trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
-            }
-            case CHO_GIAO_HANG -> trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_GIAO || trangThaiMoiEnum == TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG;
-            case DA_GIAO -> {
-                if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH && !"Đã thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
-                    yield false;
-                }
-                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH || trangThaiMoiEnum == TrangThaiLichSuHoaDon.YEU_CAU_HOAN_HANG;
-            }
-            case GIAO_KHONG_THANH_CONG -> {
-                if (xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 0) {
-                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY|| trangThaiMoiEnum == TrangThaiLichSuHoaDon.DON_CHUYEN_HOAN ||
-                trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
-                }
-                if (xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 1) {
+                } else if (hoaDonDTO.getPhiVanChuyen().equals(BigDecimal.ZERO)) {
+                    message = "Không thể hoàn thành vì chưa có địa chỉ giao hàng";
                     yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
-                } else if (xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 2) {
-                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.DON_CHUYEN_HOAN;
-                } yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
+                }
+                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.CHO_GIAO_HANG ||
+                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
             }
-            case YEU_CAU_HOAN_HANG -> trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
-            case XAC_NHAN_HOAN_HANG, DON_CHUYEN_HOAN -> trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_HOAN;
-            case HOAN_THANH, HUY, DA_HOAN -> false;
+            case DA_GIAO -> {
+                if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH &&
+                        !"Đã thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
+                    message = "Không thể hoàn thành vì hóa đơn chưa được thanh toán";
+                    yield false;
+                }
+                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH ||
+                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
+            }
+            case CHO_GIAO_HANG ->
+                    trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_GIAO ||
+                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG;
+            case GIAO_KHONG_THANH_CONG -> {
+                message = "Đơn giao không thành công, chỉ có thể hủy hoặc xác nhận hoàn hàng";
+                yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY ||
+                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
+            }
+            case YEU_CAU_HOAN_HANG ->
+                    trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG ||
+                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH;
+            case XAC_NHAN_HOAN_HANG ->
+                    trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_HOAN;
+            case HOAN_THANH, HUY, DA_HOAN -> {
+                message = "Đơn hàng đã kết thúc, không thể thay đổi trạng thái nữa";
+                yield false;
+            }
         };
 
         if (!hopLe) {
-            return new KetQuaCapNhatTrangThai(false, "Trạng thái mới không hợp lệ theo luồng xử lý");
+            return new KetQuaCapNhatTrangThai(false,
+                    message != null ? message : "Trạng thái mới không hợp lệ theo luồng xử lý");
         }
+
 
         List<HoaDonChiTietDTO> hdctList = hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(maHoaDon);
 
@@ -257,11 +323,19 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
 
                 // Nếu trước đó đã XÁC NHẬN => cộng lại số lượng
                 if (getTrangThaiTruocDo(maHoaDon) == TrangThaiLichSuHoaDon.XAC_NHAN) {
-                    if (xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 2 || xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 0) {
+//                    if (xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 2 || xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 0) {
                         spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
                         chitietsanphamrepository.save(spct);
-                    }
+//                    }
                 }
+
+                // Nếu trước đó đã GIAO_KHONG_THANH_CONG => K cong so luong
+//                if (getTrangThaiTruocDo(maHoaDon) == TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG) {
+////                    if (xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 2 || xuLyDonHangGiaoKhongThanhCong(lyDoGiaoKhongThanhCong) == 0) {
+//                    spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+//                    chitietsanphamrepository.save(spct);
+////                    }
+//                }
             }
 
         }
@@ -300,23 +374,40 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
 
             //Đổi trạng thái thành đã thanh toán cho hóa đơn đã giao
             HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
-            hoaDon.setTrangThai(2);
+            hoaDon.setTrangThai(5);
             hoaDon.setNgaySua(LocalDateTime.now());
 //            hoaDon.setThanhTien(BigDecimal.valueOf(0));
             hoaDonRepository.save(hoaDon);
 
+//            System.out.println("cap nhat hoa don");
+
+            for (HoaDonChiTietDTO ct : hdctList) {
+//                System.out.println("Xem list sp");
+                ChiTietSanPham spct = chitietsanphamrepository.findById(ct.getIdCTSP()).orElse(null);
+//                System.out.println("Da tim thay sp");
+                if (spct == null) {
+//                    System.out.println("K thay sp");
+                    return new KetQuaCapNhatTrangThai(false, "Không tìm thấy sản phẩm có ID: " + ct.getIdCTSP());
+                }
+
+                spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+//                System.out.println("tru sl");
+                chitietsanphamrepository.save(spct);
+//                System.out.println("da tru");
+            }
+
         }
 
-        if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.DON_CHUYEN_HOAN) {
-
-            //Đổi trạng thái thành đã thanh toán cho hóa đơn đã giao
-            HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
-            hoaDon.setTrangThai(2);
-            hoaDon.setNgaySua(LocalDateTime.now());
-//            hoaDon.setThanhTien(BigDecimal.valueOf(0));
-            hoaDonRepository.save(hoaDon);
-
-        }
+//        if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.DON_CHUYEN_HOAN) {
+//
+//            //Đổi trạng thái thành đã thanh toán cho hóa đơn đã giao
+//            HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
+//            hoaDon.setTrangThai(2);
+//            hoaDon.setNgaySua(LocalDateTime.now());
+////            hoaDon.setThanhTien(BigDecimal.valueOf(0));
+//            hoaDonRepository.save(hoaDon);
+//
+//        }
 
         if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY &&
                 HoaDonUtils.choPhepHuyDonKhachHang(trangThaiMoiEnum)) {
@@ -328,7 +419,7 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
 //            return new KetQuaCapNhatTrangThai(false, "Đơn hàng chưa được giao nên không thể hoàn.");
 //        }
 
-        capNhatTrangThai(maHoaDon, trangThaiMoi, ghiChu, nhanVien, lyDoGiaoKhongThanhCong);
+        capNhatTrangThai(maHoaDon, trangThaiMoi, ghiChu, nhanVien);
         return new KetQuaCapNhatTrangThai(true, "Cập nhật trạng thái thành công");
     }
 
@@ -395,7 +486,7 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
             }
             case YEU_CAU_HOAN_HANG -> trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
             case XAC_NHAN_HOAN_HANG -> trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_HOAN;
-            case HOAN_THANH, HUY, DA_HOAN, GIAO_KHONG_THANH_CONG,DON_CHUYEN_HOAN -> false;
+            case HOAN_THANH, HUY, DA_HOAN, GIAO_KHONG_THANH_CONG -> false;
         };
 
         if (!hopLe) {
@@ -474,10 +565,11 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
 
             //Đổi trạng thái thành đã thanh toán cho hóa đơn đã giao
             HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
-            hoaDon.setTrangThai(2);
+            hoaDon.setTrangThai(5);
             hoaDon.setNgaySua(LocalDateTime.now());
 //            hoaDon.setThanhTien(BigDecimal.valueOf(0));
             hoaDonRepository.save(hoaDon);
+
 
         }
 
@@ -487,19 +579,25 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
 
     @Override
     public void updateStatusAfter3Days() {
+
         List<LichSuHoaDon> listLshd = lichSuHoaDonRepository.findAll();
 
         for (LichSuHoaDon lshd : listLshd) {
+//            System.out.println("1");
             if (lshd.getTrangThai() == TrangThaiLichSuHoaDon.DA_GIAO.getValue()) {
+//                System.out.println("Tìm thấy Da_Giao");
                 long daysBetween = ChronoUnit.DAYS.between(lshd.getNgayTao(), java.time.LocalDateTime.now());
                 if (daysBetween >= 3) {
+//                    System.out.println("ngayTao >= 3");
                     HoaDon hoaDon = lshd.getHoaDon();
 
                     // Kiểm tra đã có trạng thái HOAN_THANH chưa
                     boolean daHoanThanh = lichSuHoaDonRepository
                             .existsByHoaDonAndTrangThai(hoaDon, TrangThaiLichSuHoaDon.HOAN_THANH.getValue());
                     if (daHoanThanh) {
-                        continue; // Bỏ qua nếu đã hoàn thành rồi
+//                        System.out.println("Bo qua");
+                        continue; //Bỏ qua nếu đã hoàn thành rồi
+
                     }
 
                     // Tạo bản ghi mới trong LichSuHoaDon
@@ -510,6 +608,7 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
                     moi.setNguoiTao(0);
                     moi.setGhiChu("Tự động cập nhật trạng thái");
                     lichSuHoaDonRepository.save(moi);
+                    System.out.println("Tự động cập nhật trạng thái Đã giao > Hoàn thành");
                 }
             }
         }

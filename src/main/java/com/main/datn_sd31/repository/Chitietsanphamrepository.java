@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 //import java.util.function.Predicate;
 
 @Repository
@@ -27,6 +28,8 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
     """)
     List<ChiTietSanPham> findBySanPhamId(@Param("id") Integer id);
 
+    Page<ChiTietSanPham> findBySanPham_Id(Integer id, Pageable pageable);
+
     @Modifying
     @Transactional
     @Query("""
@@ -35,7 +38,7 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
     int findBydeleteid(@Param("id") Integer id);
 
     @Query("""
-        select n from ChiTietSanPham n where n.sanPham.id = :sanphamId and n.size.id = :sizeId and n.mauSac.id = :mauSacId
+        select n from ChiTietSanPham n where n.sanPham.id = :sanphamId and n.size.id = :mauSacId and n.mauSac.id = :mauSacId
     """)
     ChiTietSanPham findBySanPhamIdAndSizeIdAndMauSacId(Integer sanphamId, Integer sizeId, Integer mauSacId);
 
@@ -68,7 +71,7 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
 
     // ChiTietSanPhamRepository.java
     @Query("SELECT ct FROM ChiTietSanPham ct " +
-            "WHERE ct.maVach = :maVach")
+            "WHERE ct.id = :maVach")
     ChiTietSanPham findByMaVach(@Param("maVach") String maVach);
 
     Page<ChiTietSanPham> findByDotGiamGia_Id(Integer dotId, Pageable pageable);
@@ -76,6 +79,7 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
     @Query("""
     SELECT
         ctsp.id,
+        ctsp.sanPham.ma,
         ctsp.tenCt,
         MAX(hdct.tenCtsp),
         COALESCE(SUM(hdct.soLuong), 0),
@@ -84,7 +88,7 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
     LEFT JOIN HoaDonChiTiet hdct
       ON hdct.chiTietSanPham = ctsp
       AND hdct.ngayTao BETWEEN :startDate AND :endDate
-    GROUP BY ctsp.id, ctsp.tenCt, ctsp.soLuong
+    GROUP BY ctsp.id, ctsp.tenCt, ctsp.soLuong, ctsp.sanPham.ma
     HAVING MAX(hdct.tenCtsp) IS NOT NULL AND MAX(hdct.tenCtsp) <> ''
     ORDER BY ctsp.id
     """)
@@ -116,6 +120,7 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
             var ms = root.join("mauSac");
             var sz = root.join("size");
 
+
             var concat = cb.concat(cb.concat(sp.get("ten"), " "), cb.concat(ms.get("ten"), " "));
             var finalConcat = cb.lower(cb.concat(concat, sz.get("ten")));
 
@@ -126,5 +131,27 @@ public interface Chitietsanphamrepository extends JpaRepository<ChiTietSanPham,I
             return cb.and(predicates);
         });
     }
+
+    List<ChiTietSanPham> findBySanPham_TenContainingIgnoreCase(String keyword);
+
+    // Kiểm tra biến thể có được sử dụng trong đơn hàng không
+    @Query("SELECT COUNT(hdct) > 0 FROM HoaDonChiTiet hdct WHERE hdct.chiTietSanPham.id = :bienTheId")
+    boolean existsInHoaDonChiTiet(@Param("bienTheId") Integer bienTheId);
+
+    // Kiểm tra biến thể có trong giỏ hàng không
+    @Query("SELECT COUNT(ghct) > 0 FROM GioHangChiTiet ghct WHERE ghct.chiTietSp.id = :bienTheId")
+    boolean existsInGioHangChiTiet(@Param("bienTheId") Integer bienTheId);
+
+    // Tìm biến thể theo ID với đầy đủ thông tin
+    @Query("SELECT ctsp FROM ChiTietSanPham ctsp " +
+            "JOIN FETCH ctsp.sanPham " +
+            "JOIN FETCH ctsp.mauSac " +
+            "JOIN FETCH ctsp.size " +
+            "WHERE ctsp.id = :id")
+    Optional<ChiTietSanPham> findByIdWithDetails(@Param("id") Integer id);
+
+    // --- Bổ sung cho Đợt giảm giá ---
+    boolean existsByDotGiamGia_Id(Integer dotId);
+    long countByDotGiamGia_Id(Integer dotId);
 }
 

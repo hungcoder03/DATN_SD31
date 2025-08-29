@@ -1,0 +1,101 @@
+/* Product List Page Styles */
+
+/* Status badges */
+.status-active {
+    background-color: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.status-inactive {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.status-default {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+/* Product row selection */
+.product-row.selected {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+/* Filter section */
+.filter-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Price display */
+.price-original {
+    text-decoration: line-through;
+    color: #6b7280;
+}
+
+.price-discounted {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* Quantity display */
+.quantity-display {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+/* Action buttons */
+.action-btn {
+    transition: all 0.15s ease-in-out;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-table {
+        font-size: 0.875rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Animation for status changes */
+.status-badge {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar for table */
+.product-table::-webkit-scrollbar {
+    height: 8px;
+}
+
+.product-table::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.product-table::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.product-table::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+} 

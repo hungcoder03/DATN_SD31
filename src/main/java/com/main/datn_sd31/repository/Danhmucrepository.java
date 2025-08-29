@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface Danhmucrepository extends JpaRepository<DanhMuc,Integer> {
-
+    DanhMuc findTopByOrderByMaDesc();
 }

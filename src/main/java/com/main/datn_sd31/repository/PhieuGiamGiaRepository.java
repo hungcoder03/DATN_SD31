@@ -20,4 +20,6 @@ public interface PhieuGiamGiaRepository extends JpaRepository<PhieuGiamGia, Inte
     where n.trangThai = true
     """)
     List<PhieuGiamGia> findAllStatusTrue();
+
+    boolean existsByMa(String maPhieu);
 }

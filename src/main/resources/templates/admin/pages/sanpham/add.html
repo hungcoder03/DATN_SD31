@@ -6,113 +6,267 @@
     <meta charset="UTF-8">
     <title>Thêm Sản Phẩm</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- CSRF Token -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <script>
+        tailwind.config = {
+            prefix: 'tw-',
+            theme: {
+                extend: {
+                    colors: {
+                        'project-primary': '#dead6f',
+                        'project-primary-dark': '#c19b5b',
+                        'project-primary-light': '#f0d4a0',
+                        'project-gray': '#f8f9fa',
+                        'project-dark': '#2c3e50'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/admin/sanpham/add.css}">
 </head>
-<body>
+<body class="tw-bg-gray-50">
 <section layout:fragment="content">
-<div>
-    <h2 class="mb-4">Thêm Sản Phẩm</h2>
-
-    <form th:action="@{/admin/san-pham/them}" th:object="${form}" method="post" enctype="multipart/form-data" class="row g-3">
-
-        <!-- Mã sản phẩm -->
-        <div class="col-md-6">
-            <label class="form-label">Mã sản phẩm</label>
-            <input type="text" th:field="*{ma}" class="form-control" required>
+<div class="tw-min-h-screen tw-bg-gradient-to-br tw-from-gray-50 tw-to-gray-100 tw-py-8 tw-px-4">
+    <div class="tw-max-w-4xl tw-mx-auto">
+        <!-- Header -->
+        <div class="tw-text-center tw-mb-8">
+            <h1 class="tw-text-3xl tw-font-semibold tw-text-project-dark tw-mb-2">Thêm Sản Phẩm Mới</h1>
+            <p class="tw-text-gray-600">Điền thông tin chi tiết về sản phẩm của bạn</p>
         </div>
 
-        <!-- Tên sản phẩm -->
-        <div class="col-md-6">
-            <label class="form-label">Tên sản phẩm</label>
-            <input type="text" th:field="*{ten}" class="form-control" required>
-        </div>
+        <!-- Main Form Card -->
+        <div class="tw-bg-white tw-rounded-2xl tw-shadow-xl tw-border tw-border-gray-100 tw-overflow-hidden">
+            <form id="formSanPham" th:action="@{/admin/san-pham/them}" th:object="${form}" method="post" enctype="multipart/form-data" class="tw-p-8">
+                
+                <!-- Basic Information Section -->
+                <div class="tw-mb-8">
+                    <h2 class="tw-text-xl tw-font-semibold tw-text-project-dark tw-mb-6 tw-flex tw-items-center">
+                        <i class="fas fa-info-circle section-icon tw-mr-3"></i>
+                        Thông Tin Cơ Bản
+                    </h2>
+                    
+                    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6">
+                        <!-- Mã sản phẩm -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Mã sản phẩm <span class="tw-text-red-500">*</span></label>
+                            <div class="tw-flex">
+                                <input type="text" th:field="*{ma}" id="maSanPham" 
+                                       class="form-input-custom tw-flex-1 tw-rounded-l-lg" 
+                                       required placeholder="VD: SP000001">
+                                <button type="button" onclick="taoMaNgauNhien()" 
+                                        class="btn-primary-custom tw-rounded-r-lg tw-flex tw-items-center">
+                                    <i class="fas fa-dice tw-mr-2"></i>
+                                    Tạo mã
+                                </button>
+                            </div>
+                            <div id="maMessage" class="tw-mt-2 tw-text-sm"></div>
+                            <div class="error-message" id="maError"></div>
+                            <p class="tw-text-sm tw-text-gray-500 tw-mt-1">Mã sản phẩm phải có định dạng SP + 6 chữ số (VD: SP000001)</p>
+                        </div>
 
-        <!-- Mô tả -->
-        <div class="col-12">
-            <label class="form-label">Mô tả</label>
-            <textarea th:field="*{mota}" class="form-control" rows="3"></textarea>
-        </div>
+                        <!-- Tên sản phẩm -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Tên sản phẩm <span class="tw-text-red-500">*</span></label>
+                            <input type="text" th:field="*{ten}" id="tenSanPham"
+                                   class="form-input-custom tw-w-full" 
+                                   required placeholder="Nhập tên sản phẩm">
+                            <div class="error-message" id="tenError"></div>
+                            <p class="tw-text-sm tw-text-gray-500 tw-mt-1">Tên sản phẩm phải từ 2-100 ký tự</p>
+                        </div>
+                    </div>
 
-        <!-- Trạng thái -->
-        <div class="col-md-4">
-            <label class="form-label">Trạng thái</label>
-            <select th:field="*{trangthai}" class="form-select">
-                <option value="1">Đang hoạt động</option>
-                <option value="0">Ngưng hoạt động</option>
-            </select>
-        </div>
+                    <!-- Mô tả -->
+                    <div class="tw-mt-6">
+                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Mô tả</label>
+                        <textarea th:field="*{mota}" id="motaSanPham" rows="3" 
+                                  class="form-textarea-custom tw-w-full" 
+                                  placeholder="Nhập mô tả sản phẩm (không bắt buộc)"></textarea>
+                        <div class="error-message" id="motaError"></div>
+                        <p class="tw-text-sm tw-text-gray-500 tw-mt-1">Mô tả tối đa 1000 ký tự</p>
+                    </div>
+                </div>
 
-        <!-- Chất liệu -->
-        <div class="col-md-4">
-            <label class="form-label">Chất liệu</label>
-            <select th:field="*{chatLieuId}" class="form-select">
-                <option th:each="cl : ${chatLieus}" th:value="${cl.id}" th:text="${cl.ten}"></option>
-            </select>
-        </div>
+                <!-- Product Details Section -->
+                <div class="tw-mb-8">
+                    <h2 class="tw-text-xl tw-font-semibold tw-text-project-dark tw-mb-6 tw-flex tw-items-center">
+                        <i class="fas fa-tags section-icon tw-mr-3"></i>
+                        Chi Tiết Sản Phẩm
+                    </h2>
+                    
+                    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6">
+                        <!-- Trạng thái -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Trạng thái <span class="tw-text-red-500">*</span></label>
+                            <select th:field="*{trangthai}" id="trangThai" class="form-select-custom tw-w-full" required>
+                                <option value="">-- Chọn trạng thái --</option>
+                                <option value="1">Đang hoạt động</option>
+                                <option value="0">Ngưng hoạt động</option>
+                            </select>
+                            <div class="error-message" id="trangThaiError"></div>
+                        </div>
 
-        <!-- Xuất xứ -->
-        <div class="col-md-4">
-            <label class="form-label">Xuất xứ</label>
-            <select th:field="*{xuatXuId}" class="form-select">
-                <option th:each="xx : ${xuatXus}" th:value="${xx.id}" th:text="${xx.ten}"></option>
-            </select>
-        </div>
+                        <!-- Chất liệu -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Chất liệu <span class="tw-text-red-500">*</span></label>
+                            <select th:field="*{chatLieuId}" id="chatLieuId" class="form-select-custom tw-w-full" required>
+                                <option value="">-- Chọn chất liệu --</option>
+                                <option th:each="cl : ${chatLieus}" th:value="${cl.id}" th:text="${cl.ten}"></option>
+                            </select>
+                            <div class="error-message" id="chatLieuError"></div>
+                        </div>
 
-        <!-- Danh mục -->
-        <div class="col-md-4">
-            <label class="form-label">Danh mục</label>
-            <select th:field="*{danhMucId}" class="form-select">
-                <option th:each="dm : ${danhMucs}" th:value="${dm.id}" th:text="${dm.ten}"></option>
-            </select>
-        </div>
+                        <!-- Xuất xứ -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Xuất xứ <span class="tw-text-red-500">*</span></label>
+                            <select th:field="*{xuatXuId}" id="xuatXuId" class="form-select-custom tw-w-full" required>
+                                <option value="">-- Chọn xuất xứ --</option>
+                                <option th:each="xx : ${xuatXus}" th:value="${xx.id}" th:text="${xx.ten}"></option>
+                            </select>
+                            <div class="error-message" id="xuatXuError"></div>
+                        </div>
 
-        <!-- Kiểu dáng -->
-        <div class="col-md-4">
-            <label class="form-label">Kiểu dáng</label>
-            <select th:field="*{kieuDangId}" class="form-select">
-                <option th:each="kd : ${kieuDangs}" th:value="${kd.id}" th:text="${kd.ten}"></option>
-            </select>
-        </div>
+                        <!-- Danh mục -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Danh mục <span class="tw-text-red-500">*</span></label>
+                            <select th:field="*{danhMucId}" id="danhMucId" class="form-select-custom tw-w-full" required>
+                                <option value="">-- Chọn danh mục --</option>
+                                <option th:each="dm : ${danhMucs}" th:value="${dm.id}" th:text="${dm.ten}"></option>
+                            </select>
+                            <div class="error-message" id="danhMucError"></div>
+                        </div>
 
-        <!-- Thương hiệu -->
-        <div class="col-md-4">
-            <label class="form-label">Thương hiệu</label>
-            <select th:field="*{thuongHieuId}" class="form-select">
-                <option th:each="th : ${thuongHieus}" th:value="${th.id}" th:text="${th.ten}"></option>
-            </select>
-        </div>
+                        <!-- Kiểu dáng -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Kiểu dáng <span class="tw-text-red-500">*</span></label>
+                            <select th:field="*{kieuDangId}" id="kieuDangId" class="form-select-custom tw-w-full" required>
+                                <option value="">-- Chọn kiểu dáng --</option>
+                                <option th:each="kd : ${kieuDangs}" th:value="${kd.id}" th:text="${kd.ten}"></option>
+                            </select>
+                            <div class="error-message" id="kieuDangError"></div>
+                        </div>
 
-        <!-- Loại thú -->
-        <div class="col-md-6">
-            <label class="form-label">Loại thú</label>
-            <select th:field="*{loaiThuId}" class="form-select">
-                <option th:each="l : ${loaiThus}" th:value="${l.id}" th:text="${l.ten}"></option>
-            </select>
-        </div>
+                        <!-- Thương hiệu -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Thương hiệu <span class="tw-text-red-500">*</span></label>
+                            <select th:field="*{thuongHieuId}" id="thuongHieuId" class="form-select-custom tw-w-full" required>
+                                <option value="">-- Chọn thương hiệu --</option>
+                                <option th:each="th : ${thuongHieus}" th:value="${th.id}" th:text="${th.ten}"></option>
+                            </select>
+                            <div class="error-message" id="thuongHieuError"></div>
+                        </div>
 
-        <!-- Ảnh chính -->
-        <div class="col-md-6">
-            <label class="form-label">Ảnh chính</label>
-            <input type="file" name="anhChinh" class="form-control" required>
-        </div>
+                        <!-- Loại thú -->
+                        <div class="md:tw-col-span-2 lg:tw-col-span-1">
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Loại thú <span class="tw-text-red-500">*</span></label>
+                            <select th:field="*{loaiThuId}" id="loaiThuId" class="form-select-custom tw-w-full" required>
+                                <option value="">-- Chọn loại thú --</option>
+                                <option th:each="l : ${loaiThus}" th:value="${l.id}" th:text="${l.ten}"></option>
+                            </select>
+                            <div class="error-message" id="loaiThuError"></div>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- Ảnh phụ -->
-        <div class="col-12">
-            <label class="form-label">Ảnh phụ (album)</label>
-            <input type="file" name="anhPhu" class="form-control" multiple>
-        </div>
+                <!-- Image Upload Section -->
+                <div class="tw-mb-8">
+                    <h2 class="tw-text-xl tw-font-semibold tw-text-project-dark tw-mb-6 tw-flex tw-items-center">
+                        <i class="fas fa-images section-icon tw-mr-3"></i>
+                        Hình Ảnh Sản Phẩm
+                    </h2>
+                    
+                    <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-8">
+                        <!-- Ảnh chính -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-4">Ảnh chính <span class="tw-text-red-500">*</span></label>
+                            <div class="tw-relative">
+                                <input type="file" name="anhChinh" id="anhChinh" class="tw-sr-only" required accept="image/*" />
+                                <label for="anhChinh" class="upload-area tw-relative tw-flex tw-min-h-[200px] tw-items-center tw-justify-center tw-rounded-xl tw-p-8 tw-text-center tw-cursor-pointer">
+                                    <div>
+                                        <i class="fas fa-cloud-upload-alt tw-text-4xl tw-text-gray-400 tw-mb-4"></i>
+                                        <span class="tw-block tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-2">
+                                            Chọn ảnh chính
+                                        </span>
+                                        <span class="tw-block tw-text-sm tw-text-gray-500 tw-mb-2">
+                                            Hoặc kéo thả file vào đây
+                                        </span>
+                                        <span class="tw-inline-flex tw-rounded-lg tw-border tw-border-gray-300 tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-gray-700 hover:tw-bg-gray-50 tw-transition-colors tw-duration-200">
+                                            Browse Files
+                                        </span>
+                                    </div>
+                                </label>
+                                <div id="anhChinhPreview" class="tw-mt-4 tw-hidden">
+                                    <div class="file-preview">
+                                        <div class="tw-flex tw-items-center tw-justify-between">
+                                            <span class="file-name" id="anhChinhName"></span>
+                                            <button type="button" onclick="removeFile('anhChinh')" class="file-remove">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="error-message" id="anhChinhError"></div>
+                            <p class="tw-text-sm tw-text-gray-500 tw-mt-1">Chỉ chấp nhận file JPG, PNG, WEBP, tối đa 5MB</p>
+                        </div>
 
-        <!-- Nút submit -->
-        <div class="col-12 d-flex justify-content-between mt-4">
-            <a th:href="@{/admin/san-pham/hien_thi}" class="btn btn-secondary">← Quay lại</a>
-            <button type="submit" class="btn btn-success">Lưu sản phẩm</button>
+                        <!-- Ảnh phụ -->
+                        <div>
+                            <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-4">Ảnh phụ (album)</label>
+                            <div class="tw-relative">
+                                <input type="file" name="anhPhu" id="anhPhu" class="tw-sr-only" multiple accept="image/*" />
+                                <label for="anhPhu" class="upload-area tw-relative tw-flex tw-min-h-[200px] tw-items-center tw-justify-center tw-rounded-xl tw-p-8 tw-text-center tw-cursor-pointer">
+                                    <div>
+                                        <i class="fas fa-images tw-text-4xl tw-text-gray-400 tw-mb-4"></i>
+                                        <span class="tw-block tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-2">
+                                            Chọn ảnh phụ
+                                        </span>
+                                        <span class="tw-block tw-text-sm tw-text-gray-500 tw-mb-2">
+                                            Có thể chọn nhiều file
+                                        </span>
+                                        <span class="tw-inline-flex tw-rounded-lg tw-border tw-border-gray-300 tw-py-2 tw-px-4 tw-text-sm tw-font-medium tw-text-gray-700 hover:tw-bg-gray-50 tw-transition-colors tw-duration-200">
+                                            Browse Files
+                                        </span>
+                                    </div>
+                                </label>
+                                <div id="anhPhuPreview" class="tw-mt-4 tw-hidden">
+                                    <div class="file-preview" id="anhPhuList"></div>
+                                </div>
+                            </div>
+                            <div class="error-message" id="anhPhuError"></div>
+                            <p class="tw-text-sm tw-text-gray-500 tw-mt-1">Tối đa 10 ảnh, mỗi ảnh tối đa 5MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-items-center tw-gap-4 tw-pt-6 tw-border-t tw-border-gray-200">
+                    <a th:href="@{/admin/san-pham/hien_thi}" 
+                       class="btn-secondary-custom tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center">
+                        <i class="fas fa-arrow-left tw-mr-2"></i>
+                        Quay lại
+                    </a>
+                    <button type="submit" id="submitBtn"
+                            class="btn-primary-custom tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center">
+                        <i class="fas fa-save tw-mr-2"></i>
+                        Lưu sản phẩm
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 
+<!-- Custom JavaScript -->
+<script th:src="@{/js/admin/sanpham/add.js}"></script>
+
 </section>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

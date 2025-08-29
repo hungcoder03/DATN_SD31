@@ -71,9 +71,10 @@ public class ThongKeServiceIpml implements ThongKeService {
         return rawData.stream()
                 .map(obj -> new ThongKeSanPhamDTO(
                         (Integer) obj[0],           // id
-                        (String) obj[2],            // tenCt
-                        (Long) obj[3],              // soLuongDaBan (SUM trả về Long)
-                        (Integer) obj[4]            // soLuongTon
+                        (String) obj[1],            // maSp
+                        (String) obj[3],            // tenCt
+                        ((Number) obj[4]).longValue(),  // soLuongDaBan (dùng Number để an toàn)
+                        (Integer) obj[5]            // soLuongTon
                 ))
                 .collect(Collectors.toList());
     }

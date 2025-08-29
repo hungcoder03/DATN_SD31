@@ -1,0 +1,120 @@
+/* CSS cho trang chi tiết sản phẩm */
+
+/* Wrapper cho màu sắc */
+.mau-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Button màu sắc */
+.mau-button {
+    display: inline-block;
+    padding: 10px 15px;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    min-width: 100px;
+    text-align: center;
+}
+
+.mau-button:hover {
+    opacity: 0.8;
+}
+
+/* Chữ màu đen nếu nền sáng */
+.mau-button[style*="yellow"],
+.mau-button[style*="white"] {
+    color: black;
+}
+
+/* Button thêm màu */
+.btn-them-mau {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 2px dashed #999;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    min-width: 100px;
+    text-align: center;
+    font-weight: bold;
+    color: #555;
+}
+
+.btn-them-mau:hover {
+    background-color: #e9ecef;
+}
+
+/* Block chi tiết */
+.chi-tiet-block {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+/* Button quay lại */
+.btn-quay-lai {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    border-radius: 20px;
+    padding: 10px 20px;
+    box-shadow: 2px 2px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid #ccc;
+    font-weight: bold;
+    background-color: #f8f9fa;
+    z-index: 999;
+    transition: 0.3s ease;
+}
+
+.btn-quay-lai:hover {
+    background-color: #e2e6ea;
+    color: #000;
+    text-decoration: none;
+}
+
+/* Chip màu sắc */
+.color-chip {
+    transition: all 0.3s ease;
+    min-width: 80px;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.color-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Indicator màu nhỏ */
+.color-indicator {
+    transition: all 0.3s ease;
+    border: 1px solid #d1d5db;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .mau-wrapper {
+        gap: 8px;
+    }
+    
+    .mau-button,
+    .btn-them-mau {
+        min-width: 80px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .btn-quay-lai {
+        bottom: 20px;
+        right: 20px;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+} 

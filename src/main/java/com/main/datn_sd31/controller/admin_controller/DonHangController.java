@@ -69,7 +69,7 @@ public class DonHangController {
             trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
         }
         model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
-        model.addAttribute("lyDoGiaoKhongThanhCongList", LyDoGiaoKhongThanhCong.values());
+//        model.addAttribute("lyDoGiaoKhongThanhCongList", LyDoGiaoKhongThanhCong.values());
 
         return "admin/pages/don-hang/don-hang";
     }
@@ -91,6 +91,39 @@ public class DonHangController {
         model.addAttribute("pageInfo", hoaDonList);
         model.addAttribute("keyword", keyword);
         model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
+
+        Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
+        for (HoaDonDTO hd : hoaDonList.getContent()) {
+            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
+        }
+        model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
+
+        return "admin/pages/don-hang/don-hang";
+    }
+
+    @GetMapping("/filter")
+    public String searchHoaDonByLoaiHoaDon(
+            Model model,
+            @RequestParam(value = "loaiHoaDon", required = false, defaultValue = "") String loaiHoaDon,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        if (loaiHoaDon == null || loaiHoaDon.trim().isEmpty()) {
+            return "redirect:/admin/don-hang";
+        }
+
+        Pagination<HoaDonDTO> hoaDonList = hoaDonService.searchByLoaiDonHang(loaiHoaDon, page, size);
+
+        model.addAttribute("hoaDonList", hoaDonList.getContent());
+        model.addAttribute("pageInfo", hoaDonList);
+        model.addAttribute("loaiHoaDon", loaiHoaDon);
+        model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
+
+        Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
+        for (HoaDonDTO hd : hoaDonList.getContent()) {
+            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
+        }
+        model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
 
         return "admin/pages/don-hang/don-hang";
     }
@@ -116,7 +149,7 @@ public class DonHangController {
         var ketQua = lichSuHoaDonService.xuLyCapNhatTrangThai(
                 maHoaDon,
                 trangThaiMoi,
-                lyDoGiaoKhongThanhCong,
+//                lyDoGiaoKhongThanhCong,
                 ghiChu,
                 getNhanVien.getCurrentNhanVien()
         );

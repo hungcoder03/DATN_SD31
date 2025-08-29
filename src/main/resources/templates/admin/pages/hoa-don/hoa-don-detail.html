@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <link rel="stylesheet" th:href="@{/bootstrap-5.3.7-dist/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/btn-back.css}"/>
+    
+    <!-- Custom colors for hoa don -->
+    <link rel="stylesheet" th:href="@{/css/admin/hoa-don-custom.css}"/>
+    
     <script th:src="@{/bootstrap-5.3.7-dist/js/bootstrap.bundle.min.js}"></script>
 
     <style>
@@ -259,6 +264,7 @@
 
     <!-- Tiêu đề -->
     <div class="container mt-4 text-center">
+        <a th:href="@{/admin/hoa-don}" class="btn-primary">Quay lại</a>
         <h2 class="mb-4">
             <a th:href="@{/admin/hoa-don}" class="text-decoration-none">Danh Sách Hóa Đơn</a>
             <span class="mx-2 text-muted">/</span>
@@ -389,7 +395,8 @@
                         <div class="mb-3" id="trangThaiMoiGroup"
                              th:if="${hoaDon.trangThaiLichSuHoaDon.name() != 'HOAN_THANH'
                                       and hoaDon.trangThaiLichSuHoaDon.name() != 'DA_HOAN'
-                                      and hoaDon.trangThaiLichSuHoaDon.name() != 'HUY'}">
+                                      and hoaDon.trangThaiLichSuHoaDon.name() != 'HUY'
+                                      and hoaDon.trangThaiLichSuHoaDon.name() != 'GIAO_KHONG_THANH_CONG'}">
                             <label for="trangThaiMoi" class="form-label">Chọn trạng thái mới:</label>
                             <select name="trangThaiMoi" id="trangThaiMoi" class="form-select">
                                 <option th:each="tt : ${trangThaiHopLe}"
@@ -428,31 +435,22 @@
         <div class="row mb-2">
             <div class="col-md-6">
                 <p><strong>Mã hóa đơn:</strong> <span th:text="${hoaDon.ma}"></span></p>
-                <p><strong>Khách hàng:</strong> <span th:text="${hoaDon.tenKH}"></span></p>
+                <p><strong>Tên người nhận:</strong> <span th:text="${hoaDon.tenNguoiNhan}"></span></p>
                 <p><strong>Email:</strong> <span th:text="${hoaDon.email}"></span></p>
             </div>
             <div class="col-md-6">
+                <p><strong>Mã KH:</strong> <span th:text="${hoaDon.maKH}"></span></p>
                 <p><strong>SĐT:</strong> <span th:text="${hoaDon.soDienThoai}"></span></p>
                 <p><strong>Địa chỉ:</strong> <span th:text="${hoaDon.diaChi}"></span></p>
-                <p><strong>Nhân viên:</strong> <span th:text="${hoaDon.tenNhanVien}"></span></p>
             </div>
         </div>
-        <p><strong>Cập nhật lần cuối bởi:</strong> <span th:text="${lichSuMoiNhat.tenNguoiTao}"></span></p>
+        <p><strong>Nhân viên:</strong> <span th:text="${hoaDon.tenNhanVien}"></span></p>
+        <!--        <p><strong>Cập nhật lần cuối bởi:</strong> <span th:text="${lichSuMoiNhat.tenNguoiTao}"></span></p>-->
         <p><strong>Trạng thái:</strong> <span th:text="${hoaDon.getTrangThaiLichSuHoaDonMoTa()}"></span></p>
-        <p >
+        <p>
             <strong>Ghi chú:</strong>
-
-            <span th:if="${!@hoa_don_utils.choPhepSuaGhiChuHoaDon(lichSuMoiNhat.getTrangThaiLichSuHoaDon())}"
-                  th:text="${!hoaDon.ghiChu.isEmpty() ? hoaDon.ghiChu.toString() : 'Không có ghi chú'}">
+            <span th:utext="${!#strings.isEmpty(hoaDon.ghiChu) ? hoaDon.ghiChu.replaceAll('\n','<br/>') : 'Không có ghi chú'}">
             </span>
-
-            <form th:action="@{/admin/hoa-don/detail/cap-nhat-ghi-chu}" method="post"
-                  th:if="${@hoa_don_utils.choPhepSuaGhiChuHoaDon(lichSuMoiNhat.getTrangThaiLichSuHoaDon())}">
-                <input type="hidden" name="maHoaDon" th:value="${hoaDon.ma}" />
-
-                <input type="text" name="ghiChuHoaDon" th:value="${hoaDon.ghiChu}" class="form-control"/>
-                <button type="submit" class="btn btn-primary mt-2">Cập nhật ghi chú</button>
-            </form>
         </p>
     </div>
 
@@ -465,32 +463,33 @@
                 <thead class="text-center">
                 <tr>
                     <th>STT</th>
+                    <th>Mã sản phẩm</th>
                     <th>Tên sản phẩm</th>
                     <th>Giá bán</th>
                     <th>Số lượng</th>
                     <th>Tổng tiền</th>
-                    <th>Thao tác</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="hdct, index : ${hdctList}">
                     <td th:text="${index.count}" class="text-center"></td>
+                    <td th:text="${hdct.maSp}" class="text-center"></td>
                     <td th:text="${hdct.tenCTSP}" class="text-center"></td>
                     <td th:text="${@utils.formatCurrency(hdct.giaSauGiam)}" class="text-end"></td>
-<!--                    <td th:text="${hdct.soLuong}" class="text-center"></td>-->
-                    <td class="text-center">
-                        <div class="input-group input-group-sm justify-content-center"
-                             th:if="${hoaDon.trangThaiLichSuHoaDon.name() == 'CHO_XAC_NHAN'}">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="thayDoiSoLuong(this, -1)">-</button>
-                            <input type="number" class="form-control text-center so-luong-input" th:value="${hdct.soLuong}"
-                                   min="1" th:data-id="${hdct.idHoaDonChiTiet}" onchange="capNhatSoLuong(this)">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="thayDoiSoLuong(this, 1)">+</button>
-                        </div>
+                    <td th:text="${hdct.soLuong}" class="text-center"></td>
+<!--                    <td class="text-center">-->
+<!--                        <div class="input-group input-group-sm justify-content-center"-->
+<!--                             th:if="${hoaDon.trangThaiLichSuHoaDon.name() == 'CHO_XAC_NHAN'}">-->
+<!--                            <button class="btn btn-outline-secondary btn-sm" onclick="thayDoiSoLuong(this, -1)">-</button>-->
+<!--                            <input type="number" class="form-control text-center so-luong-input" th:value="${hdct.soLuong}"-->
+<!--                                   min="1" th:data-id="${hdct.idHoaDonChiTiet}" onchange="capNhatSoLuong(this)">-->
+<!--                            <button class="btn btn-outline-secondary btn-sm" onclick="thayDoiSoLuong(this, 1)">+</button>-->
+<!--                        </div>-->
 
-                        <!-- Nếu không được thay đổi -->
-                        <span th:if="${hoaDon.trangThaiLichSuHoaDon.name() != 'CHO_XAC_NHAN'}"
-                              th:text="${hdct.soLuong}"></span>
-                    </td>
+<!--                        &lt;!&ndash; Nếu không được thay đổi &ndash;&gt;-->
+<!--                        <span th:if="${hoaDon.trangThaiLichSuHoaDon.name() != 'CHO_XAC_NHAN'}"-->
+<!--                              th:text="${hdct.soLuong}"></span>-->
+<!--                    </td>-->
                     <td class="text-end tong-tien" th:text="${@utils.formatCurrency(hdct.tongTien)}"></td>
                 </tr>
                 </tbody>
@@ -504,10 +503,13 @@
         <hr>
         <div class="row">
             <div class="col-md-6">
-                <p><strong>Phiếu giảm giá:</strong> <span th:text="${hoaDon.maGiamGia}"></span></p>
+                <p>
+                    <strong>Phiếu giảm giá:</strong>
+                    <span th:text="${hoaDon.maGiamGia != null ? hoaDon.maGiamGia + ' - ' + hoaDon.giamGia : 'Không'}"></span>
+                </p>
             </div>
             <div class="col-md-6">
-                <p><strong>Giảm giá:</strong> <span th:text="${hoaDon.giamGia}"></span></p>
+<!--                <p><strong>Giảm giá:</strong> <span th:text="${hoaDon.giamGia}"></span></p>-->
             </div>
             <div class="col-md-6">
                 <p><strong>Giá gốc:</strong> <span th:text="${@utils.formatCurrency(hoaDon.giaGoc)}" style="color: green"></span></p>
@@ -519,9 +521,12 @@
             <div class="col-md-6">
                 <p><strong>Ngày tạo:</strong> <span th:text="${hoaDon.ngayTao}"></span></p>
                 <p><strong>Thanh toán:</strong> <span th:text="${hoaDon.trangThaiHoaDonString}"></span></p>
+                <p><strong>Phương thức thanh toán:</strong> <span th:text="${hoaDon.phuongThuc}"></span></p>
             </div>
         </div>
     </div>
+
+    <a th:href="@{/admin/hoa-don}" class="btn-back">⬅ Quay lại</a>
 
     <!-- JavaScript -->
     <script>

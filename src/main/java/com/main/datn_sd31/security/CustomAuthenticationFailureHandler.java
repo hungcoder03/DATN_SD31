@@ -26,6 +26,8 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             error = "Không tìm thấy tài khoản với email: " + request.getParameter("username");
         } else if (exception instanceof BadCredentialsException) {
             error = "Mật khẩu không đúng cho tài khoản: " + request.getParameter("username");
+        } else if (exception instanceof DisabledException) {
+            error = exception.getMessage(); // Sử dụng message từ CustomUserDetailsService
         } else {
             error = "Đăng nhập thất bại!";
         }

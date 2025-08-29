@@ -1,0 +1,14 @@
+.btn-back {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.btn-back:hover {
+    background-color: #0056b3;
+}

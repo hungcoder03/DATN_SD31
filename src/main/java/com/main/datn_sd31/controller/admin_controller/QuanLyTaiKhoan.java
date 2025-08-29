@@ -2,6 +2,7 @@ package com.main.datn_sd31.controller.admin_controller;
 
 import com.main.datn_sd31.entity.KhachHang;
 import com.main.datn_sd31.entity.NhanVien;
+import com.main.datn_sd31.entity.ThuongHieu;
 import com.main.datn_sd31.repository.KhachHangRepository;
 import com.main.datn_sd31.repository.NhanVienRepository;
 import jakarta.validation.Valid;
@@ -382,34 +383,30 @@ public class QuanLyTaiKhoan {
     // Cập nhật nhân viên
     @PostMapping("/nhanvien/update")
     public String updateNhanVien(
-            @ModelAttribute("nhanvien") NhanVien nv,
+            @Valid @ModelAttribute("nhanvien") NhanVien nv,  // thêm @Valid
+            BindingResult result,
             @RequestParam(value = "newPassword", required = false) String newPassword,
             @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
-            BindingResult result,
             @RequestParam(value = "anhFile", required = false) MultipartFile anhFile,
             Model model,
             RedirectAttributes ra) {
 
-        // Update employee validation and processing
-
         NhanVien old = nhanVienRepository.findById(nv.getId()).orElseThrow();
 
-        // Validation cho update
+        // custom validate
         validateNhanVienUpdate(nv, result);
 
-        // Xử lý validation mật khẩu mới
         boolean isChangingPassword = newPassword != null && !newPassword.trim().isEmpty();
-        
         if (isChangingPassword) {
             if (newPassword.length() < 6) {
                 result.rejectValue("matKhau", "invalid", "Mật khẩu phải có ít nhất 6 ký tự");
             }
-            
             if (confirmPassword == null || confirmPassword.trim().isEmpty() || !newPassword.equals(confirmPassword)) {
                 result.rejectValue("matKhau", "mismatch", "Mật khẩu xác nhận không khớp");
             }
         }
 
+        // Nếu có lỗi → ở lại form chi tiết
         if (result.hasErrors()) {
             model.addAttribute("nhanvien", nv);
             model.addAttribute("readonly", false);
@@ -431,15 +428,13 @@ public class QuanLyTaiKhoan {
             nv.setAnh(old.getAnh());
         }
 
-        // Xử lý mật khẩu
+        // Mật khẩu
         nv.setMatKhau(old.getMatKhau());
-        
         if (isChangingPassword) {
-            String encodedPassword = passwordEncoder.encode(newPassword);
-            nv.setMatKhau(encodedPassword);
+            nv.setMatKhau(passwordEncoder.encode(newPassword));
         }
 
-        // Giữ nguyên các thông tin audit
+        // Audit
         nv.setNgayThamGia(old.getNgayThamGia());
         nv.setNgayTao(old.getNgayTao());
         nv.setNguoiTao(old.getNguoiTao());
@@ -449,6 +444,7 @@ public class QuanLyTaiKhoan {
         ra.addFlashAttribute("updated", true);
         return "redirect:/admin/quanlytaikhoan/nhanvien";
     }
+
 
     // Validation cho update
     private void validateNhanVienUpdate(NhanVien nhanVien, BindingResult result) {
@@ -582,7 +578,29 @@ public class QuanLyTaiKhoan {
             BindingResult result,
             Model model,
             RedirectAttributes ra) {
+        if (khachHang.getId() == null) {
+            // Lấy thương hiệu có mã lớn nhất
+            KhachHang last = khachHangRepository.findTopByOrderByMaDesc();
+            int nextNumber = 1;
 
+            if (last != null && last.getMa() != null && last.getMa().startsWith("KH")) {
+                try {
+                    // Cắt phần số sau "KH"
+                    nextNumber = Integer.parseInt(last.getMa().substring(2)) + 1;
+                } catch (NumberFormatException e) {
+                    nextNumber = 1;
+                }
+            }
+            // Format mã theo dạng TH001, TH002...
+            khachHang.setMa(String.format("KH%03d", nextNumber));
+
+        } else {
+            // === SỬA ===
+            KhachHang existing = khachHangRepository.findById(khachHang.getId()).orElse(null);
+            if (existing != null) {
+                khachHang.setMa(existing.getMa()); // Giữ nguyên mã khi sửa
+            }
+        }
         // Validation
         validateKhachHang(khachHang, result);
 
@@ -693,9 +711,9 @@ public class QuanLyTaiKhoan {
 
     // Validation cho khách hàng
     private void validateKhachHang(KhachHang khachHang, BindingResult result) {
-        // Kiểm tra mã khách hàng
-        if (khachHang.getMa() == null || !khachHang.getMa().matches("^KH\\d{3,5}$")) {
-            result.rejectValue("ma", "invalid", "Mã phải có dạng KH + 3-5 chữ số");
+        // Kiểm tra mã khách hàng - chỉ cần không null
+        if (khachHang.getMa() == null || khachHang.getMa().trim().isEmpty()) {
+            result.rejectValue("ma", "required", "Mã khách hàng không được để trống");
         }
         
         // Kiểm tra trùng mã

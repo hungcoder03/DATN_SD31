@@ -6,8 +6,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class PasswordEncoderTool {
     public static void main(String[] args) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String rawPassword = "quyen";
+        String rawPassword = "hung";
         String encodedPassword = encoder.encode(rawPassword);
-        // System.out.println("Mật khẩu mã hóa: " + encodedPassword);
+         System.out.println("Mật khẩu mã hóa: " + encodedPassword);
     }
 }

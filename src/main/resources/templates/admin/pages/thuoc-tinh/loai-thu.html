@@ -1,192 +1,179 @@
 <!DOCTYPE html>
-<!--Cấu hình layout cho Thymleaf-->
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout}">
 <head>
-    <title>Quản lý loại thú</title>
-    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"-->
-    <!--          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">-->
-
-    <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">-->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f7f7f7;
+    <title>Quản lý Loại Thú</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/custom-colors.css}">
+    <script>
+        tailwind.config = {
+            prefix: 'tw-',
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-dark': '#333333',
+                        'custom-brown': '#997351',
+                        'custom-light': '#F2EFE8',
+                        'custom-brown-light': '#b08a6b',
+                        'custom-brown-dark': '#7a5d3f',
+                    }
+                },
+            },
+            plugins: [],
         }
-
-        h2 {
-            color: #333;
-        }
-
-        form {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            width: 100%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        button {
-            background-color: #3498db;
-            color: white;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #2980b9;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background-color: #f0f0f0;
-        }
-
-        .actions a {
-            margin-right: 8px;
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-        }
-
-        .actions a:hover {
-            color: #e74c3c;
-        }
-
-        .date {
-            font-size: 0.9em;
-            color: #555;
-        }
-        .radio-group {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            margin-top: 5px;
-        }
-
-        .radio-item {
-            display: flex;
-            align-items: center;
-        }
-
-        .radio-item input[type="radio"] {
-            margin-right: 5px;
-        }
-
-    </style>
+    </script>
 </head>
-<body>
+<body class="tw-bg-gray-50">
 
 <section layout:fragment="content">
-    <div class="container mt-4">
-        <h2 th:text="${loaiThu.id == null} ? 'Thêm loại thú mới' : 'Cập nhật loại thú'"></h2>
+    <div class="tw-container tw-mx-auto tw-px-4 tw-py-6 tw-bg-gradient-to-br tw-from-custom-light tw-to-white tw-min-h-screen">
+        <!-- Header -->
+        <div class="tw-mb-8">
+            <h1 class="tw-text-3xl tw-font-bold tw-text-custom-dark tw-mb-2">
+                <span th:text="${loaiThu.id == null} ? 'Thêm loại thú mới' : 'Cập nhật loại thú'"></span>
+            </h1>
+            <p class="tw-text-custom-brown">Quản lý thông tin loại thú sản phẩm</p>
+        </div>
 
-        <form th:action="@{/admin/loai-thu/save}" th:object="${loaiThu}" method="post">
-            <input type="hidden" th:field="*{id}">
+        <!-- Form -->
+        <div class="tw-bg-custom-light tw-rounded-lg tw-shadow-md tw-p-6 tw-mb-8 tw-border tw-border-custom-brown/20 card-custom fade-in">
+            <form th:action="@{/admin/loai-thu/save}" th:object="${loaiThu}" method="post">
+                <input type="hidden" th:field="*{id}">
 
-            <div style="display: flex; gap: 50px; flex-wrap: wrap; margin-bottom: 20px;">
-                <div style="flex: 1; min-width: 220px;">
-                    <label for="ma">Mã loại thú</label>
-                    <input type="text" id="ma" th:field="*{ma}" placeholder="Nhập mã loại thú" class="form-control" required>
+                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6 tw-mb-6">
+                    <!-- Tên loại thú -->
+                    <div>
+                        <label for="ten" class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Tên loại thú <span class="tw-text-red-500">*</span>
+                        </label>
+                        <input type="text"
+                               id="ten"
+                               th:field="*{ten}"
+                               placeholder="Nhập tên loại thú"
+                               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-custom-brown/30 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-custom-brown focus:tw-border-transparent tw-bg-white"
+                               required>
+                    </div>
+
+                    <!-- Ngày tạo -->
+                    <div>
+                        <label for="ngayTao" class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Ngày tạo
+                        </label>
+                        <input type="text"
+                               id="ngayTao"
+                               th:field="*{ngayTao}"
+                               th:value="${#temporals.format(loaiThu.ngayTao, 'dd/MM/yyyy')}"
+                               readonly
+                               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-custom-brown/30 tw-rounded-md tw-bg-custom-light tw-text-custom-brown">
+                    </div>
+
+                    <!-- Ngày sửa -->
+                    <div>
+                        <label for="ngaySua" class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-2">
+                            Ngày sửa
+                        </label>
+                        <input type="text"
+                               id="ngaySua"
+                               th:field="*{ngaySua}"
+                               th:value="${#temporals.format(loaiThu.ngaySua, 'dd/MM/yyyy')}"
+                               readonly
+                               class="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-custom-brown/30 tw-rounded-md tw-bg-custom-light tw-text-custom-brown">
+                    </div>
                 </div>
 
-                <div style="flex: 1; min-width: 220px;">
-                    <label for="ten">Tên loại thú</label>
-                    <input type="text" id="ten" th:field="*{ten}" placeholder="Nhập tên loại thú" class="form-control" required>
-                </div>
-
-                <div style="flex: 1; min-width: 220px;">
-                    <label for="ngayTao">Ngày tạo</label>
-                    <input type="text" id="ngayTao" th:field="*{ngayTao}" th:value="${#temporals.format(loaiThu.ngayTao, 'dd/MM/yyyy ')}" readonly class="form-control">
-                </div>
-
-                <div style="flex: 1; min-width: 320px;">
-                    <label for="ngaySua">Ngày sửa</label>
-                    <input type="text" id="ngaySua" th:field="*{ngaySua}" th:value="${#temporals.format(loaiThu.ngaySua, 'dd/MM/yyyy ')}" readonly class="form-control">
-                </div>
-            </div>
-            <div>
-                <label>Trạng thái</label><br>
-                <div class="radio-group">
-                    <label class="radio-item" for="active">
-                        <input type="radio" th:field="*{trangThai}" th:value="true" id="active">
-                        Hoạt động
+                <!-- Trạng thái -->
+                <div class="tw-mb-6">
+                    <label class="tw-block tw-text-sm tw-font-medium tw-text-custom-dark tw-mb-3">
+                        Trạng thái <span class="tw-text-red-500">*</span>
                     </label>
-
-                    <label class="radio-item" for="inactive">
-                        <input type="radio" th:field="*{trangThai}" th:value="false" id="inactive">
-                        Không hoạt động
-                    </label>
+                    <div class="tw-flex tw-space-x-6">
+                        <label class="tw-flex tw-items-center">
+                            <input type="radio"
+                                   th:field="*{trangThai}"
+                                   th:value="true"
+                                   id="active"
+                                   class="tw-w-4 tw-h-4 tw-text-custom-brown tw-border-custom-brown/30 focus:tw-ring-custom-brown">
+                            <span class="tw-ml-2 tw-text-sm tw-text-custom-dark">Hoạt động</span>
+                        </label>
+                        <label class="tw-flex tw-items-center">
+                            <input type="radio"
+                                   th:field="*{trangThai}"
+                                   th:value="false"
+                                   id="inactive"
+                                   class="tw-w-4 tw-h-4 tw-text-custom-brown tw-border-custom-brown/30 focus:tw-ring-custom-brown">
+                            <span class="tw-ml-2 tw-text-sm tw-text-custom-dark">Không hoạt động</span>
+                        </label>
+                    </div>
                 </div>
+
+                <!-- Buttons -->
+                <div class="tw-flex tw-space-x-4">
+                    <button type="submit"
+                            class="tw-px-6 tw-py-2 tw-bg-custom-brown tw-text-white tw-rounded-md hover:tw-bg-custom-brown-dark focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-custom-brown focus:tw-ring-offset-2 tw-transition-colors btn-custom-primary">
+                        <span th:text="${loaiThu.id == null} ? 'Thêm mới' : 'Cập nhật'"></span>
+                    </button>
+                    <a href="/admin/loai-thu"
+                       class="tw-px-6 tw-py-2 tw-bg-custom-dark tw-text-white tw-rounded-md hover:tw-bg-gray-700 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-custom-dark focus:tw-ring-offset-2 tw-transition-colors btn-custom-secondary">
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Danh sách -->
+        <div class="tw-bg-custom-light tw-rounded-lg tw-shadow-md tw-border tw-border-custom-brown/20 card-custom slide-in">
+            <div class="tw-px-6 tw-py-4 tw-border-b tw-border-custom-brown/20">
+                <h2 class="tw-text-xl tw-font-semibold tw-text-custom-dark">Danh sách Loại Thú</h2>
             </div>
 
-            <button type="submit" class="btn btn-primary" th:text="${loaiThu.id == null} ? 'Thêm mới' : 'Cập nhật'"></button>
-        </form>
-
-        <h2>Danh sách Chất Liệu</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>Mã loại thú</th>
-                <th>Tên loại thú</th>
-                <th>Ngày tạo</th>
-                <th>Ngày sửa</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="lth : ${loaiThus}">
-                <td th:text="${lth.id}"></td>
-                <td th:text="${lth.ma}"></td>
-                <td th:text="${lth.ten}"></td>
-                <td class="date" th:text="${#temporals.format(lth.ngayTao, 'dd/MM/yyyy ')}"></td>
-                <td class="date" th:text="${#temporals.format(lth.ngaySua, 'dd/MM/yyyy ')}"></td>
-                <td th:text="${lth.trangThai} ? 'Hoạt động' : 'Không hoạt động'"></td>
-                <td class="actions">
-                    <a th:href="@{/admin/loai-thu/edit/{id}(id=${lth.id})}">Sửa</a> |
-                    <a th:href="@{/admin/loai-thu/delete/{id}(id=${lth.id})}"
-                       onclick="return confirm('Bạn có chắc muốn xóa không?')">Xóa</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+            <div class="tw-overflow-x-auto">
+                <table class="tw-min-w-full tw-divide-y tw-divide-custom-brown/20">
+                    <thead class="tw-bg-custom-brown/10">
+                        <tr>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">#</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">Mã loại thú</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">Tên loại thú</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-brown tw-uppercase tw-tracking-wider">Ngày tạo</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-brown tw-uppercase tw-tracking-wider">Ngày sửa</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">Trạng thái</th>
+                            <th class="tw-px-6 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-text-custom-dark tw-uppercase tw-tracking-wider">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="tw-bg-white tw-divide-y tw-divide-custom-brown/20">
+                        <tr th:each="lth : ${loaiThus}" class="hover:tw-bg-custom-light/50">
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-custom-dark" th:text="${lth.id}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-custom-dark" th:text="${lth.ma}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-custom-dark" th:text="${lth.ten}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-custom-brown" th:text="${#temporals.format(lth.ngayTao, 'dd/MM/yyyy')}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-custom-brown" th:text="${#temporals.format(lth.ngaySua, 'dd/MM/yyyy')}"></td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                                <span th:if="${lth.trangThai}"
+                                      class="tw-inline-flex tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-green-100 tw-text-green-800">
+                                    Hoạt động
+                                </span>
+                                <span th:unless="${lth.trangThai}"
+                                      class="tw-inline-flex tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full tw-bg-red-100 tw-text-red-800">
+                                    Không hoạt động
+                                </span>
+                            </td>
+                            <td class="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-font-medium">
+                                <a th:href="@{/admin/loai-thu/edit/{id}(id=${lth.id})}"
+                                   class="tw-text-custom-brown hover:tw-text-custom-brown-dark tw-mr-4 tw-transition-colors">
+                                    Sửa
+                                </a>
+                                <a th:href="@{/admin/loai-thu/delete/{id}(id=${lth.id})}"
+                                   onclick="return confirm('Bạn có chắc muốn xóa loại thú này không?')"
+                                   class="tw-text-red-600 hover:tw-text-red-900 tw-transition-colors">
+                                    Xóa
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </section>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
-        crossorigin="anonymous"></script>
 
 </body>
 </html>

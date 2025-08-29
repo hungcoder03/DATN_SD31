@@ -13,7 +13,8 @@ import java.util.List;
 @Repository
 public interface Hinhanhrepository extends JpaRepository<HinhAnh,Integer> {
     @Query("""
-        select n from HinhAnh n where n.sanPham.id = :id
+        select n from HinhAnh n where n.sanPham.id = :id and n.trangThai = true
+        order by n.loaiAnh asc, n.ngayTao asc
     """)
     List<HinhAnh> findByhinhanhid(@Param("id") Integer id);
 

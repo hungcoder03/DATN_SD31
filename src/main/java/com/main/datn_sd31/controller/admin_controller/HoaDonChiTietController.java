@@ -82,20 +82,20 @@ public class HoaDonChiTietController {
         return "admin/pages/hoa-don/hoa-don-detail";
     }
 
-    @PostMapping("/cap-nhat-ghi-chu")
-    public String capNhatGhiChu(
-            @RequestParam("maHoaDon") String maHoaDon,
-            @RequestParam(value = "ghiChuHoaDon", required = false) String ghiChuHoaDon,
-            RedirectAttributes redirectAttributes
-    ) {
-        if (ghiChuHoaDon == null) {
-            return "redirect:/admin/hoa-don/detail";
-        }
-        hoaDonService.capNhatGhiChuHoaDon(maHoaDon, ghiChuHoaDon);
-        redirectAttributes.addFlashAttribute("success", "Cập nhật ghi chú thành công.");
-        redirectAttributes.addAttribute("maHoaDon", maHoaDon);
-        return "redirect:/admin/hoa-don/detail";
-    }
+//    @PostMapping("/cap-nhat-ghi-chu")
+//    public String capNhatGhiChu(
+//            @RequestParam("maHoaDon") String maHoaDon,
+//            @RequestParam(value = "ghiChuHoaDon", required = false) String ghiChuHoaDon,
+//            RedirectAttributes redirectAttributes
+//    ) {
+//        if (ghiChuHoaDon == null) {
+//            return "redirect:/admin/hoa-don/detail";
+//        }
+//        hoaDonService.capNhatGhiChuHoaDon(maHoaDon, ghiChuHoaDon);
+//        redirectAttributes.addFlashAttribute("success", "Cập nhật ghi chú thành công.");
+//        redirectAttributes.addAttribute("maHoaDon", maHoaDon);
+//        return "redirect:/admin/hoa-don/detail";
+//    }
 
     @PostMapping("/cap-nhat-trang-thai")
     public String capNhatTrangThai(
@@ -108,7 +108,7 @@ public class HoaDonChiTietController {
         var ketQua = lichSuHoaDonService.xuLyCapNhatTrangThai(
                 maHoaDon,
                 trangThaiMoi,
-                lyDoGiaoKhongThanhCong,
+//                lyDoGiaoKhongThanhCong,
                 ghiChu,
                 getCurrentNhanVien()
         );
@@ -145,7 +145,9 @@ public class HoaDonChiTietController {
         document.add(new Paragraph("HÓA ĐƠN BÁN HÀNG", boldFont));
         document.add(new Paragraph("Mã hóa đơn: " + hoaDon.getMa(), normalFont));
         document.add(new Paragraph("Khách hàng: " + hoaDon.getTenKH(), normalFont));
-        document.add(new Paragraph("Email: " + hoaDon.getEmail(), normalFont));
+        document.add(new Paragraph("Email: " + (hoaDon.getEmail() == null ? " " : hoaDon.getEmail() ), normalFont));
+        document.add(new Paragraph("Số điện thoại: " + (hoaDon.getSoDienThoai().equals("Khách lẻ") ? " " : hoaDon.getSoDienThoai() ), normalFont));
+        document.add(new Paragraph("Địa chỉ: " + (hoaDon.getDiaChi().equals("-- Chọn tỉnh ----") ? " " : hoaDon.getDiaChi()), normalFont));
         document.add(new Paragraph("Ngày tạo: " + hoaDon.getNgayTao(), normalFont));
         document.add(new Paragraph(" "));
 
@@ -173,26 +175,34 @@ public class HoaDonChiTietController {
         document.add(table);
         document.add(new Paragraph(" ", normalFont));
 
-        document.add(new Paragraph("Tổng tiền: " + hoaDon.getThanhTien(), boldFont));
+        document.add(new Paragraph("Tổng tiền: " + hoaDon.getGiaGoc(), boldFont));
+        document.add(new Paragraph("Giá giảm: " + hoaDon.getGiaGiamGia(), boldFont));
+        document.add(new Paragraph("Phí vận chuyển: " + hoaDon.getPhiVanChuyen(), boldFont));
+        document.add(new Paragraph("Thành tiền: " + hoaDon.getThanhTien(), boldFont));
+
+        document.add(new Paragraph(" ", normalFont));
+
+        document.add(new Paragraph("Thanh toán: " + (hoaDon.getTrangThaiHoaDonString()), boldFont));
+
         document.close();
     }
 
-    @PostMapping("/api/cap-nhat-so-luong")
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> apiCapNhatSoLuong(@RequestBody Map<String, Object> payload) {
-        Integer id = Integer.valueOf(payload.get("id").toString());
-        Integer soLuong = Integer.valueOf(payload.get("soLuong").toString());
-
-        HoaDonChiTietDTO hdct = hoaDonChiTietService.capNhatSoLuong(id, soLuong);
-        BigDecimal tongTien = hdct.getGiaSauGiam().multiply(BigDecimal.valueOf(soLuong));
-
-        String tongTienFormatted = ThymleafHelper.formatCurrency(tongTien); // bạn đã có hàm này rồi
-
-        Map<String, String> response = new HashMap<>();
-        response.put("tongTienFormatted", tongTienFormatted);
-
-        return ResponseEntity.ok(response);
-    }
+//    @PostMapping("/api/cap-nhat-so-luong")
+//    @ResponseBody
+//    public ResponseEntity<Map<String, String>> apiCapNhatSoLuong(@RequestBody Map<String, Object> payload) {
+//        Integer id = Integer.valueOf(payload.get("id").toString());
+//        Integer soLuong = Integer.valueOf(payload.get("soLuong").toString());
+//
+//        HoaDonChiTietDTO hdct = hoaDonChiTietService.capNhatSoLuong(id, soLuong);
+//        BigDecimal tongTien = hdct.getGiaSauGiam().multiply(BigDecimal.valueOf(soLuong));
+//
+//        String tongTienFormatted = ThymleafHelper.formatCurrency(tongTien); // bạn đã có hàm này rồi
+//
+//        Map<String, String> response = new HashMap<>();
+//        response.put("tongTienFormatted", tongTienFormatted);
+//
+//        return ResponseEntity.ok(response);
+//    }
 
 
 
