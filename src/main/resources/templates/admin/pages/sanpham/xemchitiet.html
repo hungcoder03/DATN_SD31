@@ -110,41 +110,35 @@
 
                                   <!-- Số lượng -->
                                     <td class="tw-text-right tw-px-6 tw-py-4">
-                                        <form th:action="@{/admin/san-pham/cap-nhat-chi-tiet/so-luong}" method="post">
+                                        <form th:action="@{/admin/san-pham/cap-nhat-chi-tiet/so-luong}" method="post" novalidate>
                                             <input type="hidden" id="id" name="id" th:value="${ct.id}"></input>
                                             <input type="number" name="soLuongm"
-                                                   th:value="${ct.soLuong}" min="0" max="1000"
-                                                   class="tw-text-right tw-border tw-rounded-lg tw-px-2 tw-py-1 tw-w-20 focus:tw-border-blue-400 focus:tw-ring focus:tw-ring-blue-100"
-                                                   required />
+                                                   th:value="${ct.soLuong}" step="1"
+                                                   class="tw-text-right tw-border tw-rounded-lg tw-px-2 tw-py-1 tw-w-20 focus:tw-border-blue-400 focus:tw-ring focus:tw-ring-blue-100" />
+                                            <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                                         </form>
                                     </td>
                                     <!-- Giá gốc -->
                                     <td class="tw-text-right tw-px-6 tw-py-4">
-                                        <form th:action="@{/admin/san-pham/cap-nhat-chi-tiet/gia-goc}" method="post">
+                                        <form th:action="@{/admin/san-pham/cap-nhat-chi-tiet/gia-goc}" method="post" novalidate>
                                             <input type="hidden" id="id" name="id" th:value="${ct.id}"></input>
                                             <input type="text" name="giaGoc"
                                                    th:value="${ct.giaGoc}"
-                                                   maxlength="10"
-                                                   pattern="\d{1,10}"
-                                                   oninvalid="this.setCustomValidity('Chỉ được nhập tối đa 10 chữ số')"
-                                                   oninput="this.setCustomValidity('')"
                                                    class="tw-text-right tw-border tw-rounded-lg tw-px-2 tw-py-1 tw-w-28 format-vnd focus:tw-border-blue-400 focus:tw-ring focus:tw-ring-blue-100"
-                                                   required />
+                                                   data-min="1000" data-max="100000000" />
+                                            <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                                         </form>
                                     </td>
 
                                     <!-- Giá nhập -->
                                     <td class="tw-text-right tw-px-6 tw-py-4">
-                                        <form th:action="@{/admin/san-pham/cap-nhat-chi-tiet/gia-nhap}" method="post">
+                                        <form th:action="@{/admin/san-pham/cap-nhat-chi-tiet/gia-nhap}" method="post" novalidate>
                                             <input type="hidden" id="id" name="id" th:value="${ct.id}"></input>
                                             <input type="text" name="giaNhap"
                                                    th:value="${ct.giaNhap}"
-                                                   maxlength="10"
-                                                   pattern="\d{1,10}"
-                                                   oninvalid="this.setCustomValidity('Chỉ được nhập tối đa 10 chữ số')"
-                                                   oninput="this.setCustomValidity('')"
                                                    class="tw-text-right tw-border tw-rounded-lg tw-px-2 tw-py-1 tw-w-28 format-vnd focus:tw-border-blue-400 focus:tw-ring focus:tw-ring-blue-100"
-                                                   required />
+                                                   data-min="1000" data-max="100000000" />
+                                            <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                                         </form>
                                     </td>
                                     <!-- Thao tác -->
@@ -152,10 +146,10 @@
                                     <td class="tw-text-right tw-px-6 tw-py-4" th:text="${ct.giaBan != null ? #numbers.formatDecimal(ct.giaBan,0,'COMMA',0,'POINT') + ' ₫' : '—'}"></td>
                                     <td class="tw-px-6 tw-py-4" th:text="${ct.dotGiamGia != null ? ct.dotGiamGia.ten : 'Không'}"></td>
                                     <td class="tw-text-center tw-px-6 tw-py-4">
-<!--                                        <button type="submit"-->
-<!--                                                class="tw-bg-blue-500 tw-text-white tw-px-3 tw-py-1 tw-rounded-lg hover:tw-bg-blue-600 tw-shadow-sm tw-transition">-->
-<!--                                            Cập nhật-->
-<!--                                        </button>-->
+<!--                                        <button type="submit"
+                                                class="tw-bg-blue-500 tw-text-white tw-px-3 tw-py-1 tw-rounded-lg hover:tw-bg-blue-600 tw-shadow-sm tw-transition">
+                                            Cập nhật
+                                        </button>-->
                                         <button type="button"
                                                 th:onclick="'openDeleteConfirm(' + ${ct.id} + ', this)'"
                                                 class="tw-text-gray-400 hover:tw-text-gray-600 hover:tw-scale-110 tw-transition-all tw-duration-200 tw-ease-in-out tw-cursor-pointer tw-p-2">
@@ -197,7 +191,7 @@
                 <i class="fas fa-palette tw-mr-2 tw-text-project-primary"></i>
                 Chọn màu (nhiều lựa chọn)
             </h4>
-            <form id="colorForm" th:action="@{/admin/san-pham/xem/{id}(id=${sanPham.id})}" method="get" class="tw-space-y-4">
+            <form id="colorForm" th:action="@{/admin/san-pham/xem/{id}(id=${sanPham.id})}" method="get" class="tw-space-y-4" novalidate>
                 <div class="tw-flex tw-flex-wrap tw-gap-3">
                     <label th:each="mau : ${cacMau}" class="tw-inline-flex tw-items-center tw-cursor-pointer">
                         <input type="checkbox" name="colorIds" th:value="${mau.id}" class="tw-sr-only color-check" th:checked="${selectedColorIds != null and selectedColorIds.contains(mau.id)}">
@@ -264,30 +258,34 @@
             </div>
 
             <form th:action="@{/admin/san-pham/chitietsanpham/them(sanPhamId=${sanPham.id})}"
-                  th:object="${block.form}" method="post" class="tw-p-6">
+                  th:object="${block.form}" method="post" class="tw-p-6" novalidate>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
                 <!-- Default values for this color -->
                 <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-5 tw-gap-4 tw-mb-6 tw-p-4 tw-bg-gray-50 tw-rounded-lg">
                     <div>
                         <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Giá nhập (₫)</label>
-                        <input th:id="'colorDefaultGiaNhap__' + ${block.mau.id}" type="number" min="0" step="1"
+                        <input th:id="'colorDefaultGiaNhap__' + ${block.mau.id}" type="number" step="1"
                                class="tw-w-full tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-2 focus:tw-border-project-primary focus:tw-ring-1 focus:tw-ring-project-primary">
+                        <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                     </div>
                     <div>
                         <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Giá gốc (₫)</label>
-                        <input th:id="'colorDefaultGiaGoc__' + ${block.mau.id}" type="number" min="0" step="1"
+                        <input th:id="'colorDefaultGiaGoc__' + ${block.mau.id}" type="number" step="1"
                                class="tw-w-full tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-2 focus:tw-border-project-primary focus:tw-ring-1 focus:tw-ring-project-primary">
+                        <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                     </div>
 <!--                    <div>-->
 <!--                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Giá bán (₫)</label>-->
 <!--                        <input th:id="'colorDefaultGiaBan__' + ${block.mau.id}" type="number" min="0" step="1"-->
 <!--                               class="tw-w-full tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-2 focus:tw-border-project-primary focus:tw-ring-1 focus:tw-ring-project-primary">-->
+<!--                        <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>-->
 <!--                    </div>-->
                     <div>
                         <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Số lượng</label>
-                        <input th:id="'colorDefaultSoLuong__' + ${block.mau.id}" type="number" min="5" max="1000" step="1"
+                        <input th:id="'colorDefaultSoLuong__' + ${block.mau.id}" type="number" step="1"
                                class="tw-w-full tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-2 focus:tw-border-project-primary focus:tw-ring-1 focus:tw-ring-project-primary">
+                        <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                     </div>
                     <div class="tw-flex tw-items-end">
                         <button type="button"
@@ -344,24 +342,28 @@
                             </td>
                             <td class="tw-px-4 tw-py-3" th:if="${!row.existed}" th:text="${row.size.ten}">M</td>
                             <td class="tw-px-4 tw-py-3" th:if="${!row.existed}">
-                                <input type="number" min="0" step="1" data-role="giaNhap"
+                                <input type="number" step="1" data-role="giaNhap"
                                        class="tw-w-32 tw-text-left tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-2 focus:tw-border-project-primary focus:tw-ring-1 focus:tw-ring-project-primary"
                                        th:name="'chiTietList[' + ${row.formIndex} + '].giaNhap'" th:value="${row.giaNhap}">
+                                <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                             </td>
                             <td class="tw-px-4 tw-py-3" th:if="${!row.existed}">
-                                <input type="number" min="0" step="1" data-role="giaGoc"
+                                <input type="number" step="1" data-role="giaGoc"
                                        class="tw-w-32 tw-text-left tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-2 focus:tw-border-project-primary focus:tw-ring-1 focus:tw-ring-project-primary"
                                        th:name="'chiTietList[' + ${row.formIndex} + '].giaGoc'" th:value="${row.giaGoc}">
+                                <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                             </td>
 <!--                            <td class="tw-px-4 tw-py-3" th:if="${!row.existed}">-->
 <!--                                <input type="number" min="0" step="1" data-role="giaBan"-->
 <!--                                       class="tw-w-32 tw-text-right tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-2 focus:tw-border-project-primary focus:tw-ring-1 focus:tw-ring-project-primary"-->
 <!--                                       th:name="'chiTietList[' + ${row.formIndex} + '].giaBan'" th:value="${row.giaBan}">-->
+<!--                                <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>-->
 <!--                            </td>-->
                             <td class="tw-px-4 tw-py-3" th:if="${!row.existed}">
-                                <input type="number" min="5" max="1000" step="1" data-role="soLuong"
+                                <input type="number" step="1" data-role="soLuong"
                                        class="tw-w-28 tw-text-left tw-border tw-border-gray-300 tw-rounded-lg tw-px-3 tw-py-2 focus:tw-border-project-primary focus:tw-ring-1 focus:tw-ring-project-primary"
                                        th:name="'chiTietList[' + ${row.formIndex} + '].soLuong'" th:value="${row.soLuong}">
+                                <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                             </td>
                             <td class="tw-px-4 tw-py-3" th:if="${!row.existed}">
                                 <span class="tw-text-xs tw-text-green-600 tw-font-medium">CHƯA CÓ</span>
@@ -440,19 +442,73 @@
             });
         });
 
-        // Khi submit form, gửi số chuẩn (không dấu, không thập phân)
-        document.querySelector('form').addEventListener('submit', function() {
-            document.querySelectorAll('.format-vnd').forEach(input => {
-                let num = unformatNumber(input.value);
-                if (num) {
-                    // Chuyển sang số nguyên
-                    num = Math.floor(Number(num));
+        // Validate helpers
+        function isNonNegativeInt(val){ return /^\d+$/.test(String(val)); }
+        function inRange(val, min, max){ const n = Number(val); return n >= min && n <= max; }
+        function setError(el, msg){ const m = el && el.parentElement ? el.parentElement.querySelector('.error-msg') : null; if(m){ m.textContent = msg || ''; } }
+        function clearErrors(scope){ (scope || document).querySelectorAll('.error-msg').forEach(function(s){ s.textContent = ''; }); }
+
+        // Khi submit form, normalize và validate trong phạm vi từng form
+        document.querySelectorAll('form').forEach(function(form){
+            form.addEventListener('submit', function(e) {
+                clearErrors(form);
+
+                // Normalize các input .format-vnd trong form hiện tại
+                form.querySelectorAll('.format-vnd').forEach(function(input){
+                    let num = unformatNumber(input.value);
+                    if (num) num = Math.floor(Number(num));
+                    input.value = num;
+                });
+
+                // Validate giá cho cả bảng "đã có" và form "thêm mới"
+                let ok = true;
+
+                // Bảng "đã có": dùng data-min/max trên .format-vnd
+                form.querySelectorAll('.format-vnd').forEach(function(input){
+                    const raw = input.value;
+                    const min = Number(input.dataset.min || 1000);
+                    const max = Number(input.dataset.max || 100000000);
+                    if(!isNonNegativeInt(raw) || !inRange(raw, min, max)) {
+                        ok = false;
+                        setError(input, 'Giá phải từ 1,000 đến 100,000,000');
+                    }
+                });
+
+                // Bảng "đã có": validate số lượng cập nhật nhanh nếu có
+                const quickQty = form.querySelector('input[name="soLuongm"]');
+                if (quickQty) {
+                    const val = quickQty.value;
+                    if(!isNonNegativeInt(val) || Number(val) < 0 || Number(val) > 1000) {
+                        ok = false;
+                        setError(quickQty, 'Số lượng 0 - 1,000');
+                    }
                 }
-                input.value = num;
+
+                // Form "thêm mới": chỉ kiểm các dòng đã tick
+                form.querySelectorAll('tr').forEach(function(tr){
+                    const checked = tr.querySelector('.row-check:checked');
+                    if(!checked) return;
+                    const giaNhapEl = tr.querySelector('input[data-role="giaNhap"]');
+                    const giaGocEl  = tr.querySelector('input[data-role="giaGoc"]');
+                    const soLuongEl = tr.querySelector('input[data-role="soLuong"]');
+
+                    const giaNhap = giaNhapEl?.value ?? '';
+                    const giaGoc  = giaGocEl?.value ?? '';
+                    const soLuong = soLuongEl?.value ?? '';
+
+                    if(!isNonNegativeInt(giaNhap) || !inRange(giaNhap, 1000, 100000000)) { ok = false; setError(giaNhapEl, 'Giá nhập 1,000 - 100,000,000'); }
+                    if(!isNonNegativeInt(giaGoc)  || !inRange(giaGoc,  1000, 100000000)) { ok = false; setError(giaGocEl,  'Giá gốc 1,000 - 100,000,000'); }
+                    if(!isNonNegativeInt(soLuong) || Number(soLuong) < 5 || Number(soLuong) > 1000) { ok = false; setError(soLuongEl, 'Số lượng 5 - 1,000'); }
+                });
+
+                if(!ok){
+                    e.preventDefault();
+                }
             });
         });
 
     </script>
+
 
 </section>
 </body>

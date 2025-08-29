@@ -4,15 +4,8 @@
       layout:decorate="~{admin/layout}">
 <head>
     <title>Quản Lý Nhân Viên</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Configure Tailwind to not interfere with existing layout
-        tailwind.config = {
-            corePlugins: {
-                preflight: false, // Disable Tailwind's CSS reset
-            }
-        }
-    </script>
+    <!-- Sử dụng Tailwind CSS qua CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         /* Custom animations */
