@@ -1,0 +1,334 @@
+<div th:fragment="chatWidget" id="chat-widget" style="position: fixed; bottom: 16px; right: 16px; z-index: 2147483647;">
+    <button id="chat-toggle" style="background:#2563eb;color:#fff;border:none;border-radius:9999px;width:48px;height:48px;box-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);cursor:pointer;font-size:20px;">💬</button>
+    <div id="chat-panel" style="display:none; width: 320px; height: 420px; background:#fff; border-radius:12px; margin-top:8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1); border:1px solid #e5e7eb; display:flex; flex-direction:column;">
+        <div style="padding:10px 12px; border-bottom:1px solid #e5e7eb; font-weight:600;">Hỗ trợ khách hàng</div>
+        <div id="chat-content" style="flex:1; overflow:auto; padding:10px; display:flex; flex-direction:column; gap:8px;"></div>
+        
+        <!-- Form đăng nhập để chat -->
+        <div id="login-to-chat" style="padding:10px; display:flex; flex-direction:column; gap:8px;">
+            <div style="text-align:center; color:#6b7280; font-size:14px; margin-bottom:10px;">
+                Vui lòng đăng nhập để sử dụng chat hỗ trợ
+            </div>
+            <a href="/khach-hang/dang-nhap" style="width:100%; background:#2563eb; color:#fff; border:none; border-radius:8px; padding:8px; cursor:pointer; text-decoration:none; text-align:center;">
+                Đăng nhập
+            </a>
+            <a href="/khach-hang/dang-ky" style="width:100%; background:#6b7280; color:#fff; border:none; border-radius:8px; padding:8px; cursor:pointer; text-decoration:none; text-align:center;">
+                Đăng ký tài khoản
+            </a>
+        </div>
+        
+        <!-- Form chat (chỉ hiển thị khi đã đăng nhập) -->
+        <div id="chat-input" style="display:none; padding:10px; gap:8px; display:flex;">
+            <input id="chatMessage" placeholder="Nhập tin nhắn..." style="flex:1; border:1px solid #e5e7eb; border-radius:8px; padding:8px;"/>
+            <button id="sendChat" style="background:#2563eb; color:#fff; border:none; border-radius:8px; padding:8px 12px; cursor:pointer;">Gửi</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script th:inline="javascript">
+        (function(){
+            var stompClient = null;
+            var conversationId = localStorage.getItem('conversationId');
+            var content = document.getElementById('chat-content');
+            var panel = document.getElementById('chat-panel');
+            var loginToChat = document.getElementById('login-to-chat');
+            var chatInput = document.getElementById('chat-input');
+            
+            // Biến để lưu thông tin khách hàng
+            var isLoggedIn = false;
+            var customerName = '';
+            var customerPhone = '';
+            var customerEmail = '';
+            var guideMessageShown = false; // Biến để theo dõi đã hiển thị tin nhắn hướng dẫn chưa
+            
+            console.log('Chat widget initialized - conversationId from localStorage:', conversationId);
+            
+            // Function để validate conversationId
+            async function validateConversationId() {
+                if (!conversationId) return false;
+                
+                try {
+                    const response = await fetch('/api/chat/messages/all/' + conversationId);
+                    if (!response.ok) {
+                        console.log('Conversation not found, removing from localStorage');
+                        localStorage.removeItem('conversationId');
+                        conversationId = null;
+                        return false;
+                    }
+                    return true;
+                } catch (error) {
+                    console.log('Error validating conversation, removing from localStorage');
+                    localStorage.removeItem('conversationId');
+                    conversationId = null;
+                    return false;
+                }
+            }
+            
+            // Function để load thông tin khách hàng
+            async function loadCustomerInfo() {
+                try {
+                    const response = await fetch('/khach-hang/current-user');
+                    const data = await response.json();
+                    
+                    // Chỉ cập nhật nếu thông tin thay đổi
+                    var newIsLoggedIn = data.isLoggedIn || false;
+                    var newCustomerName = data.customerName || '';
+                    var newCustomerPhone = data.customerPhone || '';
+                    var newCustomerEmail = data.customerEmail || '';
+                    
+                    // Kiểm tra xem có thay đổi không
+                    if (newIsLoggedIn !== isLoggedIn || 
+                        newCustomerName !== customerName || 
+                        newCustomerPhone !== customerPhone || 
+                        newCustomerEmail !== customerEmail) {
+                        
+                        console.log('Customer info changed, updating...');
+                        
+                        isLoggedIn = newIsLoggedIn;
+                        customerName = newCustomerName;
+                        customerPhone = newCustomerPhone;
+                        customerEmail = newCustomerEmail;
+                        
+                        // Reset flag khi thông tin thay đổi
+                        guideMessageShown = false;
+                        
+                        // Cập nhật UI
+                        updateUI();
+                    }
+                } catch (error) {
+                    console.error('Error loading customer info:', error);
+                    // Chỉ cập nhật nếu trước đó đã đăng nhập
+                    if (isLoggedIn) {
+                        isLoggedIn = false;
+                        guideMessageShown = false;
+                        updateUI();
+                    }
+                }
+            }
+            
+            // Function để cập nhật UI
+            function updateUI() {
+                console.log('updateUI called - isLoggedIn:', isLoggedIn, 'conversationId:', conversationId);
+                
+                if (isLoggedIn) {
+                    if (conversationId) {
+                        // Đã có conversation, hiển thị chat
+                        console.log('Showing existing conversation');
+                        loginToChat.style.display = 'none';
+                        chatInput.style.display = 'flex';
+                        connectAndSubscribe();
+                    } else {
+                        // Chưa có conversation, hiển thị nút bắt đầu chat
+                        console.log('Showing chat input for new conversation');
+                        loginToChat.style.display = 'none';
+                        chatInput.style.display = 'flex';
+                        
+                        // Chỉ thêm tin nhắn hướng dẫn nếu chưa hiển thị
+                        if (!guideMessageShown && content.children.length === 0) {
+                            var guideMsg = {
+                                content: 'Nhấn nút chat để bắt đầu cuộc trò chuyện với nhân viên hỗ trợ',
+                                senderType: 'EMPLOYEE'
+                            };
+                            appendMsg(guideMsg);
+                            guideMessageShown = true; // Đánh dấu đã hiển thị
+                        }
+                    }
+                } else {
+                    // Chưa đăng nhập, hiển thị form đăng nhập
+                    console.log('Showing login form');
+                    loginToChat.style.display = 'block';
+                    chatInput.style.display = 'none';
+                    
+                    // Xóa conversationId cũ nếu có
+                    if (conversationId) {
+                        localStorage.removeItem('conversationId');
+                        conversationId = null;
+                    }
+                    
+                    // Xóa tất cả tin nhắn khi chưa đăng nhập
+                    content.innerHTML = '';
+                    guideMessageShown = false; // Reset flag
+                }
+            }
+            
+            document.getElementById('chat-toggle').addEventListener('click', function(){
+                console.log('Chat toggle clicked - isLoggedIn:', isLoggedIn, 'conversationId:', conversationId);
+                panel.style.display = panel.style.display === 'none' || panel.style.display === '' ? 'flex' : 'none';
+                
+                // Nếu đã đăng nhập và chưa có conversation, tạo mới
+                if (isLoggedIn && !conversationId) {
+                    console.log('Auto-starting new chat for logged in user');
+                    startNewChat();
+                }
+            });
+
+            function connectAndSubscribe() {
+                if (!conversationId) return;
+                
+                var socket = new SockJS('/ws');
+                stompClient = Stomp.over(socket);
+                stompClient.connect({}, function () {
+                    stompClient.subscribe('/topic/conversation.' + conversationId, function (msg) {
+                        var data = JSON.parse(msg.body);
+                        appendMsg(data);
+                    });
+                });
+            }
+
+            function appendMsg(m){
+                var div = document.createElement('div');
+                div.style.padding = '8px 12px';
+                div.style.borderRadius = '8px';
+                div.style.maxWidth = '80%';
+                div.style.wordWrap = 'break-word';
+                
+                if (m.senderType === 'EMPLOYEE') {
+                    div.style.background = '#e3f2fd';
+                    div.style.color = '#1565c0';
+                    div.style.alignSelf = 'flex-start';
+                } else {
+                    div.style.background = '#f3e5f5';
+                    div.style.color = '#7b1fa2';
+                    div.style.alignSelf = 'flex-end';
+                }
+                
+                div.textContent = m.content;
+                content.appendChild(div);
+                content.scrollTop = content.scrollHeight;
+            }
+
+            function startNewChat() {
+                console.log('startNewChat called - isLoggedIn:', isLoggedIn);
+                
+                if (!isLoggedIn) {
+                    console.log('Customer not logged in');
+                    return;
+                }
+                
+                // Reset flag khi bắt đầu chat mới
+                guideMessageShown = false;
+                
+                // Sử dụng thông tin từ session
+                var customerData = {
+                    name: customerName || 'Khách hàng',
+                    contact: customerPhone || customerEmail || 'Không có thông tin liên hệ'
+                };
+                
+                console.log('Starting chat with customer data:', customerData);
+                
+                fetch('/api/chat/start', {
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }, 
+                    body: JSON.stringify(customerData)
+                })
+                .then(function(r) { 
+                    console.log('Response status:', r.status);
+                    console.log('Response headers:', r.headers);
+                    
+                    if (!r.ok) {
+                        return r.text().then(function(text) {
+                            console.log('Error response body:', text);
+                            throw new Error('HTTP ' + r.status + ': ' + text);
+                        });
+                    }
+                    return r.json(); 
+                })
+                .then(function(data) {
+                    console.log('Chat started successfully:', data);
+                    conversationId = data.conversationId;
+                    localStorage.setItem('conversationId', conversationId);
+                    
+                    // Ẩn form đăng nhập, hiển thị chat
+                    loginToChat.style.display = 'none';
+                    chatInput.style.display = 'flex';
+                    
+                    // Thêm tin nhắn chào mừng
+                    var welcomeMsg = {
+                        content: 'Xin chào! Tôi có thể giúp gì cho bạn?',
+                        senderType: 'EMPLOYEE'
+                    };
+                    appendMsg(welcomeMsg);
+                    
+                    connectAndSubscribe();
+                })
+                .catch(function(error) {
+                    console.error('Error starting chat:', error);
+                    alert('Có lỗi xảy ra khi bắt đầu chat: ' + error.message);
+                });
+            }
+
+            var sendBtn = document.getElementById('sendChat');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', function(){
+                    console.log('Send button clicked');
+                    var text = document.getElementById('chatMessage').value.trim();
+                    console.log('Message text:', text, 'conversationId:', conversationId);
+                    
+                    if(!text || !conversationId) {
+                        console.log('Cannot send message - text:', text, 'conversationId:', conversationId);
+                        return;
+                    }
+                    
+                    // Hiển thị tin nhắn của khách hàng ngay lập tức
+                    var customerMsg = {
+                        content: text,
+                        senderType: 'CUSTOMER'
+                    };
+                    appendMsg(customerMsg);
+                    
+                    console.log('Sending message via WebSocket:', {
+                        senderType: 'CUSTOMER', 
+                        senderId: null, 
+                        content: text
+                    });
+                    
+                    stompClient.send('/app/chat/' + conversationId, {}, JSON.stringify({
+                        senderType: 'CUSTOMER', 
+                        senderId: null, 
+                        content: text
+                    }));
+                    document.getElementById('chatMessage').value = '';
+                });
+            }
+
+            // Xử lý Enter key
+            var chatMessageInput = document.getElementById('chatMessage');
+            if (chatMessageInput) {
+                chatMessageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('sendChat').click();
+                    }
+                });
+            }
+
+            // Load thông tin khách hàng khi khởi tạo
+            async function initializeChat() {
+                console.log('Initializing chat...');
+                
+                // Validate conversationId trước
+                if (conversationId) {
+                    const isValid = await validateConversationId();
+                    console.log('Conversation validation result:', isValid);
+                }
+                
+                // Sau đó load thông tin khách hàng
+                await loadCustomerInfo();
+            }
+            
+            // Khởi tạo chat
+            initializeChat();
+            
+            // Kiểm tra trạng thái đăng nhập định kỳ (mỗi 30 giây thay vì 5 giây)
+            setInterval(function() {
+                // Chỉ kiểm tra nếu đang ở trạng thái đã đăng nhập
+                if (isLoggedIn) {
+                    loadCustomerInfo();
+                }
+            }, 30000); // 30 giây
+        })();
+    </script>
+</div> 

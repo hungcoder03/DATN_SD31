@@ -451,10 +451,20 @@
                              alt="Ảnh mặc định">
                     </a>
 
+                    <a class="btn btn-sm btn-primary ml-3" th:href="@{/admin/chat}" title="Chat với khách hàng" id="chatNavBtn">
+                        <i class="bi bi-chat-dots"></i> Chat
+                        <span id="chatNavBadge" class="badge bg-danger ms-1" style="display: none;">0</span>
+                    </a>
+
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
+                        <a class="dropdown-item d-flex align-items-center gap-2 py-3 px-4" th:href="@{/admin/chat}" style="color: #333; font-weight: 500; border-radius: 8px; transition: background 0.2s;" id="chatDropdownBtn">
+                            <i class="bi bi-chat-dots" style="font-size: 1.1rem;"></i>
+                            <span>Chat với khách hàng</span>
+                            <span id="chatDropdownBadge" class="badge bg-danger ms-auto" style="display: none;">0</span>
+                        </a>
                         <a class="dropdown-item d-flex align-items-center gap-2 py-3 px-4" th:href="@{/admin/logout}" style="color: #dead6f; font-weight: 500; border-radius: 8px; transition: background 0.2s;">
                             <i class="fas fa-sign-out-alt" style="font-size: 1.2rem;"></i>
-                            <span>Sign Out</span>
+                            <span>Đăng xuất</span>
                         </a>
                     </div>
                 </li>
@@ -789,5 +799,135 @@ $(document).ready(function() {
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<!-- Chat notification system -->
+<script>
+let chatStompClient = null;
+let unreadCount = 0;
+
+// Khởi tạo WebSocket connection cho chat notifications
+function initChatNotifications() {
+    const socket = new SockJS('/ws');
+    chatStompClient = Stomp.over(socket);
+    chatStompClient.connect({}, function () {
+        console.log('Chat notification WebSocket connected');
+        
+        // Subscribe để nhận thông báo tin nhắn mới
+        chatStompClient.subscribe('/topic/chat.notifications', function(message) {
+            try {
+                const data = JSON.parse(message.body);
+                if (data.type === 'NEW_MESSAGE' && data.senderType === 'CUSTOMER') {
+                    incrementUnreadCount();
+                } else if (data.type === 'MARK_READ') {
+                    // Reset số đếm khi admin đánh dấu đã đọc
+                    resetUnreadCount();
+                } else if (data.type === 'CONVERSATION_READ') {
+                    // Cập nhật số đếm khi admin đọc một cuộc trò chuyện cụ thể
+                    loadUnreadCount();
+                }
+            } catch (e) {
+                console.error('Error parsing chat notification:', e);
+            }
+        });
+        
+        // Load số tin nhắn chưa đọc ban đầu
+        loadUnreadCount();
+    }, function(error) {
+        console.error('Chat notification WebSocket connection failed:', error);
+        // Retry after 5 seconds
+        setTimeout(initChatNotifications, 5000);
+    });
+}
+
+// Tăng số đếm tin nhắn chưa đọc
+function incrementUnreadCount() {
+    unreadCount++;
+    updateBadgeDisplay();
+}
+
+// Reset số đếm khi vào trang chat
+function resetUnreadCount() {
+    unreadCount = 0;
+    updateBadgeDisplay();
+}
+
+// Đánh dấu tất cả tin nhắn đã đọc
+function markAllAsRead() {
+    if (chatStompClient && chatStompClient.connected) {
+        chatStompClient.send('/app/chat.mark-read', {}, JSON.stringify({
+            timestamp: new Date().toISOString()
+        }));
+    }
+}
+
+// Cập nhật hiển thị badge
+function updateBadgeDisplay() {
+    const navBadge = document.getElementById('chatNavBadge');
+    const dropdownBadge = document.getElementById('chatDropdownBadge');
+    
+    if (unreadCount > 0) {
+        if (navBadge) {
+            navBadge.style.display = 'inline';
+            navBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        }
+        if (dropdownBadge) {
+            dropdownBadge.style.display = 'inline';
+            dropdownBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        }
+    } else {
+        if (navBadge) navBadge.style.display = 'none';
+        if (dropdownBadge) dropdownBadge.style.display = 'none';
+    }
+}
+
+// Load số tin nhắn chưa đọc từ server
+async function loadUnreadCount() {
+    try {
+        const response = await fetch('/api/chat/unread-count');
+        if (response.ok) {
+            const data = await response.json();
+            unreadCount = data.count || 0;
+            updateBadgeDisplay();
+        }
+    } catch (error) {
+        console.error('Error loading unread count:', error);
+    }
+}
+
+// Khởi tạo khi trang load
+document.addEventListener('DOMContentLoaded', function() {
+    // Chỉ khởi tạo chat notifications nếu không phải trang chat
+    if (!window.location.pathname.includes('/admin/chat')) {
+        initChatNotifications();
+    }
+    
+    // Reset số đếm khi click vào menu chat
+    const chatNavBtn = document.getElementById('chatNavBtn');
+    const chatDropdownBtn = document.getElementById('chatDropdownBtn');
+    
+    if (chatNavBtn) {
+        chatNavBtn.addEventListener('click', function() {
+            // Reset count khi vào trang chat
+            resetUnreadCount();
+        });
+    }
+    
+    if (chatDropdownBtn) {
+        chatDropdownBtn.addEventListener('click', function() {
+            // Reset count khi vào trang chat
+            resetUnreadCount();
+        });
+    }
+});
+
+// Reset count khi rời khỏi trang chat
+window.addEventListener('beforeunload', function() {
+    if (window.location.pathname.includes('/admin/chat')) {
+        resetUnreadCount();
+    }
+});
+</script>
 </body>
 </html>

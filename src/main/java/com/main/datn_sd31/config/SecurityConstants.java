@@ -46,8 +46,8 @@ public final class SecurityConstants {
         "/", "/home", "/login",
         "/uploads/**", "/css/**", "/js/**", "/images/**",
         "/vendors/**", "/webjars/**", "/static/**", "/favicon.ico",
-        "/san-pham/**", "/san-pham/chi-tiet/**", "/client-static/**", "/bootstrap-5.3.7-dist/**",
-        "/api/auth/**"
+        "/san-pham/**", "/client-static/**", "/bootstrap-5.3.7-dist/**",
+        "/api/auth/**", "/ws/**"
     };
     
     public static final String[] ADMIN_PERMIT_ALL = {
@@ -81,7 +81,8 @@ public final class SecurityConstants {
     public static final String[] CUSTOMER_PERMIT_ALL = {
         CUSTOMER_LOGIN, CUSTOMER_REGISTER, CUSTOMER_FORGOT_PASSWORD,
         "/khach-hang/danh-sach", "/khach-hang/chi-tiet/**",
-        "/khach-hang/public/**", CUSTOMER_LOGOUT, "/api/auth/logout"
+        "/khach-hang/public/**", CUSTOMER_LOGOUT, "/api/auth/logout",
+        "/khach-hang/current-user"
     };
     
     public static final String[] CUSTOMER_PROTECTED = {
