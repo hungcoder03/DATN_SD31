@@ -15,9 +15,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Cấu hình cho uploads
+        // Cấu hình cho uploads - hỗ trợ cả classpath và file system
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("classpath:/static/uploads/")
+                .addResourceLocations(
+                    "classpath:/static/uploads/",
+                    "file:uploads/",
+                    "file:./uploads/"
+                )
                 .setCachePeriod(3600);
 
         // Cấu hình cho images

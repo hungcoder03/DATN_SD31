@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "conversation")
+@Table(name = "conversation", indexes = {
+    @Index(name = "IX_conversation_customer_active", columnList = "customer_id, active")
+})
 public class Conversation {
 
     @Id
@@ -26,6 +28,11 @@ public class Conversation {
     @Nationalized
     @Column(name = "customer_contact", length = 100)
     private String customerContact; // phone or email
+
+    // Relationship với KhachHang - Mỗi khách hàng chỉ có 1 conversation active
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", unique = true)
+    private KhachHang customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_employee_id")
@@ -41,4 +48,9 @@ public class Conversation {
     @Column(name = "active")
     @Builder.Default
     private Boolean active = true;
+
+    // Trường để theo dõi hoạt động cuối cùng - Cập nhật mỗi khi có tin nhắn mới
+    @Column(name = "last_activity")
+    @Builder.Default
+    private LocalDateTime lastActivity = LocalDateTime.now();
 } 

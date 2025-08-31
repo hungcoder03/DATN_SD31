@@ -607,6 +607,14 @@
         const dropdowns = document.querySelectorAll('.dropdown-menu.show');
         dropdowns.forEach(dropdown => dropdown.classList.remove('show'));
         
+        // Clear chat widget state
+        if (window.clearChatState) {
+          window.clearChatState();
+        }
+        
+        // Clear localStorage
+        localStorage.removeItem('conversationId');
+        
         // Chuyển đến trang logout
         window.location.href = '/khach-hang/dang-xuat';
       }

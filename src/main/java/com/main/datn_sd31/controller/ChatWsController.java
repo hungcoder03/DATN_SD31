@@ -3,8 +3,11 @@ package com.main.datn_sd31.controller;
 import com.main.datn_sd31.Enum.MessageSenderType;
 import com.main.datn_sd31.entity.Conversation;
 import com.main.datn_sd31.entity.Message;
+import com.main.datn_sd31.entity.NhanVien;
 import com.main.datn_sd31.repository.ConversationRepository;
 import com.main.datn_sd31.repository.MessageRepository;
+import com.main.datn_sd31.repository.NhanVienRepository;
+import com.main.datn_sd31.service.ChatSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -13,6 +16,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.messaging.handler.annotation.SendTo;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 
 @Controller
@@ -22,21 +28,110 @@ public class ChatWsController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final ChatSessionService chatSessionService;
+    private final NhanVienRepository nhanVienRepository;
 
     @MessageMapping("/chat/{conversationId}")
     @SendTo("/topic/conversation.{conversationId}")
     public ChatMessageView handleChatMessage(@DestinationVariable Long conversationId, ChatMessagePayload payload) {
         try {
+            if (conversationId == null) {
+                throw new RuntimeException("Conversation ID cannot be null");
+            }
+            
+            // Cập nhật lastActivity của conversation
+            Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
+            if (conversation == null) {
+                // Thay vì throw exception, log lỗi và gửi thông báo lỗi
+                System.err.println("Warning: Conversation not found with ID: " + conversationId + ". This might indicate a stale conversation ID.");
+                
+                // Gửi thông báo lỗi về client
+                messagingTemplate.convertAndSend("/topic/conversation." + conversationId, 
+                    new ChatMessageView(null, "Lỗi: Cuộc trò chuyện không tồn tại. Vui lòng tạo cuộc trò chuyện mới.", 
+                    MessageSenderType.EMPLOYEE, null, LocalDateTime.now(), false));
+                
+                return null;
+            }
+            conversation.setLastActivity(LocalDateTime.now());
+            conversationRepository.save(conversation);
+            
+            // Xử lý ChatSession khi nhân viên gửi tin nhắn
+            if (payload.senderType() == MessageSenderType.EMPLOYEE) {
+                // Kiểm tra xem conversation đã có nhân viên chưa
+                var currentEmployee = chatSessionService.getCurrentEmployee(conversation);
+                
+                if (currentEmployee.isEmpty()) {
+                    // Chưa có nhân viên, tạo session mới với nhân viên gửi tin nhắn
+                    System.out.println("=== EMPLOYEE JOINED CONVERSATION ===");
+                    System.out.println("Conversation ID: " + conversationId);
+                    System.out.println("Employee ID: " + payload.senderId());
+                    System.out.println("Creating new chat session...");
+                    
+                    // Tạo session mới với nhân viên có ID = senderId
+                    if (payload.senderId() != null) {
+                        var employee = nhanVienRepository.findById(payload.senderId());
+                        if (employee.isPresent()) {
+                            chatSessionService.createSession(conversation, employee.get());
+                            System.out.println("Created chat session for employee: " + employee.get().getTen());
+                            
+                            // Gửi thông báo cập nhật thông tin nhân viên cho client
+                            Map<String, Object> employeeUpdate = new HashMap<>();
+                            employeeUpdate.put("type", "EMPLOYEE_ASSIGNED");
+                            employeeUpdate.put("conversationId", conversationId);
+                            employeeUpdate.put("employeeId", employee.get().getId());
+                            employeeUpdate.put("employeeName", employee.get().getTen());
+                            employeeUpdate.put("employeeAvatar", employee.get().getAnh() != null && !employee.get().getAnh().startsWith("/uploads/") ? 
+                                             "/uploads/" + employee.get().getAnh() : employee.get().getAnh());
+                            
+                            messagingTemplate.convertAndSend("/topic/conversation." + conversationId, employeeUpdate);
+                        } else {
+                            System.err.println("Employee not found with ID: " + payload.senderId());
+                        }
+                    }
+                } else {
+                    // Đã có nhân viên, cập nhật session hiện tại
+                    var activeSession = chatSessionService.getActiveSession(conversation);
+                    if (activeSession.isPresent()) {
+                        chatSessionService.incrementMessageCount(activeSession.get());
+                    }
+                }
+            }
+            
+            // Xử lý ChatSession khi nhân viên gửi tin nhắn
+            if (payload.senderType() == MessageSenderType.EMPLOYEE) {
+                // Kiểm tra xem conversation đã có nhân viên chưa
+                var currentEmployee = chatSessionService.getCurrentEmployee(conversation);
+                
+                if (currentEmployee.isEmpty()) {
+                    // Chưa có nhân viên, tạo session mới với nhân viên gửi tin nhắn
+                    // Cần lấy thông tin nhân viên từ senderId
+                    // TODO: Cần xác định cách lấy thông tin nhân viên từ senderId
+                    System.out.println("=== EMPLOYEE JOINED CONVERSATION ===");
+                    System.out.println("Conversation ID: " + conversationId);
+                    System.out.println("Employee ID: " + payload.senderId());
+                    System.out.println("Creating new chat session...");
+                    
+                    // Tạm thời tạo session với nhân viên có ID = senderId
+                    // Cần implement logic để lấy NhanVien từ senderId
+                } else {
+                    // Đã có nhân viên, cập nhật session hiện tại
+                    var activeSession = chatSessionService.getActiveSession(conversation);
+                    if (activeSession.isPresent()) {
+                        chatSessionService.incrementMessageCount(activeSession.get());
+                    }
+                }
+            }
+            
             // Lưu tin nhắn vào database
             Message message = Message.builder()
-                    .conversation(conversationRepository.findById(conversationId).orElseThrow())
+                    .conversation(conversation)
                     .senderType(payload.senderType())
                     .senderId(payload.senderId())
                     .content(payload.content())
-                    .isRead(false) // Tin nhắn mới luôn chưa đọc
+                    .isRead(false)
                     .build();
             
-            messageRepository.save(message);
+            Message savedMessage = messageRepository.save(message);
             
             // Gửi thông báo tin nhắn mới nếu là từ khách hàng
             if (payload.senderType() == MessageSenderType.CUSTOMER) {
@@ -49,7 +144,7 @@ public class ChatWsController {
                 messagingTemplate.convertAndSend("/topic/chat.notifications", notification);
             }
             
-            return ChatMessageView.from(message);
+            return ChatMessageView.from(savedMessage);
         } catch (Exception e) {
             throw new RuntimeException("Error processing chat message", e);
         }
@@ -75,28 +170,14 @@ public class ChatWsController {
     @MessageMapping("/chat.mark-conversation-read/{conversationId}")
     public void markConversationAsRead(@DestinationVariable Long conversationId) {
         try {
-            System.out.println("=== MARKING CONVERSATION AS READ ===");
-            System.out.println("Conversation ID: " + conversationId);
-            
             // Kiểm tra conversation có tồn tại không
             Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
             if (conversation == null) {
-                System.err.println("Conversation not found: " + conversationId);
                 return;
             }
-            System.out.println("Found conversation: " + conversation.getCustomerName());
-            
-            // Đếm số tin nhắn trước khi update
-            long beforeCount = messageRepository.countByConversationActiveTrueAndSenderTypeAndIsReadFalse(MessageSenderType.CUSTOMER);
-            System.out.println("Unread messages before update: " + beforeCount);
             
             // Đánh dấu tất cả tin nhắn từ khách hàng trong cuộc trò chuyện là đã đọc
-            int updatedCount = messageRepository.markAsReadByConversationAndSenderType(conversationId, MessageSenderType.CUSTOMER);
-            System.out.println("Updated " + updatedCount + " messages as read");
-            
-            // Đếm số tin nhắn sau khi update
-            long afterCount = messageRepository.countByConversationActiveTrueAndSenderTypeAndIsReadFalse(MessageSenderType.CUSTOMER);
-            System.out.println("Unread messages after update: " + afterCount);
+            messageRepository.markAsReadByConversationAndSenderType(conversationId, MessageSenderType.CUSTOMER);
             
             // Gửi thông báo cập nhật số đếm
             ChatNotificationPayload notification = new ChatNotificationPayload(
@@ -106,11 +187,7 @@ public class ChatWsController {
                 null
             );
             messagingTemplate.convertAndSend("/topic/chat.notifications", notification);
-            System.out.println("Sent CONVERSATION_READ notification");
-            System.out.println("=== END MARKING CONVERSATION AS READ ===");
         } catch (Exception e) {
-            System.err.println("Error marking conversation as read: " + e.getMessage());
-            e.printStackTrace();
             throw new RuntimeException("Error marking conversation as read", e);
         }
     }

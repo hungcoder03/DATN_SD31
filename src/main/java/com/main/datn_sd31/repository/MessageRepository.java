@@ -24,10 +24,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     // Đếm số tin nhắn chưa đọc cho một cuộc trò chuyện cụ thể
     @Query("SELECT COUNT(m) FROM Message m WHERE m.conversation = :conversation AND m.senderType = :senderType AND m.isRead = false")
     default long countByConversationAndSenderTypeAndIsReadFalse(@Param("conversation") Conversation conversation, @Param("senderType") MessageSenderType senderType) {
-        System.out.println("Counting unread messages for conversation " + conversation.getId() + " with senderType " + senderType);
-        long count = countByConversationAndSenderTypeAndIsReadFalseImpl(conversation, senderType);
-        System.out.println("Found " + count + " unread messages");
-        return count;
+        return countByConversationAndSenderTypeAndIsReadFalseImpl(conversation, senderType);
     }
     
     @Query("SELECT COUNT(m) FROM Message m WHERE m.conversation = :conversation AND m.senderType = :senderType AND m.isRead = false")

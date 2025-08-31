@@ -19,12 +19,36 @@ public class ChatAssignmentServiceImpl implements ChatAssignmentService {
 
     @Override
     public NhanVien findLeastLoadedAvailableEmployee() {
-        List<NhanVien> activeEmployees = nhanVienRepository.findAll()
-                .stream()
-                .filter(nv -> Boolean.TRUE.equals(nv.getTrangThai()))
-                .toList();
-        return activeEmployees.stream()
+        // Lấy tất cả nhân viên (không filter theo trạng thái)
+        List<NhanVien> allEmployees = nhanVienRepository.findAll();
+        
+        System.out.println("=== CHAT ASSIGNMENT DEBUG ===");
+        System.out.println("Total employees found: " + allEmployees.size());
+        
+        // Log thông tin từng nhân viên
+        allEmployees.forEach(nv -> {
+            System.out.println("Employee ID: " + nv.getId() + 
+                             ", Name: " + nv.getTen() + 
+                             ", Status: " + nv.getTrangThai() + 
+                             ", Avatar: " + nv.getAnh());
+        });
+        
+        // Tạm thời bỏ filter trạng thái để test
+        List<NhanVien> availableEmployees = allEmployees;
+        
+        if (availableEmployees.isEmpty()) {
+            System.out.println("No employees available");
+            return null;
+        }
+        
+        // Tìm nhân viên có ít conversation nhất
+        NhanVien selected = availableEmployees.stream()
                 .min(Comparator.comparingLong(nv -> conversationRepository.countByAssignedEmployeeAndActiveTrue(nv)))
                 .orElse(null);
+        
+        System.out.println("Selected employee: " + (selected != null ? selected.getTen() : "NULL"));
+        System.out.println("=============================");
+        
+        return selected;
     }
 } 
