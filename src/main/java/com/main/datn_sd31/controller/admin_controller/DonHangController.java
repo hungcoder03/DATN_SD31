@@ -1,10 +1,8 @@
 package com.main.datn_sd31.controller.admin_controller;
 
-import com.main.datn_sd31.Enum.LyDoGiaoKhongThanhCong;
 import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
 import com.main.datn_sd31.dto.Pagination;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonDTO;
-import com.main.datn_sd31.repository.NhanVienRepository;
 import com.main.datn_sd31.service.HoaDonChiTietService;
 import com.main.datn_sd31.service.HoaDonService;
 import com.main.datn_sd31.service.LichSuHoaDonService;
@@ -31,12 +29,11 @@ import java.util.Map;
 public class DonHangController {
 
     private final GetNhanVien getNhanVien;
-
     private final HoaDonService hoaDonService;
-
     private final HoaDonChiTietService hoaDonChiTietService;
-
     private final LichSuHoaDonService lichSuHoaDonService;
+
+
 
     @GetMapping("")
     public String hoaDon(
@@ -45,98 +42,122 @@ public class DonHangController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "loaiHoaDon", required = false) String loaiHoaDon
     ) {
-        //Giá tri mac định
+//        // Xử lý và validate ngày tháng
+//        LocalDate startDate = parseDate(startDateStr, LocalDate.of(2025, 1, 1));
+//        LocalDate endDate = parseDate(endDateStr, LocalDate.now());
+
+        // Gán giá trị mặc định nếu không có
         if (startDate == null) {
-            startDate = LocalDate.of(2025, 1, 1);
+            startDate = LocalDate.of(2025, 1, 1); // ví dụ mặc định từ đầu năm
         }
         if (endDate == null) {
-            endDate = LocalDate.now();
+            endDate = LocalDate.now(); // mặc định đến hôm nay
         }
 
-        Pagination<HoaDonDTO> hoaDonList = (trangThai == null)
-                ? hoaDonService.getAllDonHang(page, size, startDate, endDate)
-                : hoaDonService.getAllDonHangByStatus(trangThai, page, size);
+        Pagination<HoaDonDTO> hoaDonList;
+
+        // Xử lý tìm kiếm theo keyword
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            hoaDonList = hoaDonService.searchByKeyword(keyword, page, size);
+            model.addAttribute("keyword", keyword);
+        }
+        // Xử lý filter theo loại hóa đơn
+        else if (loaiHoaDon != null && !loaiHoaDon.trim().isEmpty()) {
+            hoaDonList = hoaDonService.searchByLoaiDonHang(loaiHoaDon, page, size);
+            model.addAttribute("loaiHoaDon", loaiHoaDon);
+        }
+        // Xử lý filter theo trạng thái
+        else if (trangThai != null) {
+            hoaDonList = hoaDonService.getAllDonHangByStatus(trangThai, page, size);
+        }
+        // Hiển thị tất cả với filter theo ngày
+        else {
+            hoaDonList = hoaDonService.getAllDonHang(page, size, startDate, endDate);
+        }
+
+        // Thiết lập các attribute cho model
         model.addAttribute("hoaDonList", hoaDonList.getContent());
         model.addAttribute("pageInfo", hoaDonList);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonService.getAllHoaDon()));
 
+        // Tạo map trạng thái hợp lệ cho từng hóa đơn
         Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
         for (HoaDonDTO hd : hoaDonList.getContent()) {
             trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
         }
         model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
-//        model.addAttribute("lyDoGiaoKhongThanhCongList", LyDoGiaoKhongThanhCong.values());
 
         return "admin/pages/don-hang/don-hang";
     }
 
+    /**
+     * Helper method để parse string thành LocalDate với xử lý lỗi an toàn
+     */
+    private LocalDate parseDate(String dateStr, LocalDate defaultValue) {
+        if (dateStr == null || dateStr.trim().isEmpty() || "undefined".equals(dateStr)) {
+            return defaultValue;
+        }
+        try {
+            return LocalDate.parse(dateStr);
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
+
+    // Redirect các endpoint cũ về method chính
     @GetMapping("/search")
     public String searchHoaDon(
-            Model model,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "startDate", required = false) String startDateStr,
+            @RequestParam(value = "endDate", required = false) String endDateStr
     ) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return "redirect:/admin/don-hang";
         }
 
-        Pagination<HoaDonDTO> hoaDonList = hoaDonService.searchByKeyword(keyword, page, size);
+        StringBuilder redirectUrl = new StringBuilder("redirect:/admin/don-hang?keyword=" + keyword + "&page=" + page + "&size=" + size);
 
-        model.addAttribute("hoaDonList", hoaDonList.getContent());
-        model.addAttribute("pageInfo", hoaDonList);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
-
-        Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
-        for (HoaDonDTO hd : hoaDonList.getContent()) {
-            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
+        if (startDateStr != null && !startDateStr.trim().isEmpty() && !"undefined".equals(startDateStr)) {
+            redirectUrl.append("&startDate=").append(startDateStr);
         }
-        model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
+        if (endDateStr != null && !endDateStr.trim().isEmpty() && !"undefined".equals(endDateStr)) {
+            redirectUrl.append("&endDate=").append(endDateStr);
+        }
 
-        return "admin/pages/don-hang/don-hang";
+        return redirectUrl.toString();
     }
 
     @GetMapping("/filter")
     public String searchHoaDonByLoaiHoaDon(
-            Model model,
             @RequestParam(value = "loaiHoaDon", required = false, defaultValue = "") String loaiHoaDon,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "startDate", required = false) String startDateStr,
+            @RequestParam(value = "endDate", required = false) String endDateStr
     ) {
         if (loaiHoaDon == null || loaiHoaDon.trim().isEmpty()) {
             return "redirect:/admin/don-hang";
         }
 
-        Pagination<HoaDonDTO> hoaDonList = hoaDonService.searchByLoaiDonHang(loaiHoaDon, page, size);
+        StringBuilder redirectUrl = new StringBuilder("redirect:/admin/don-hang?loaiHoaDon=" + loaiHoaDon + "&page=" + page + "&size=" + size);
 
-        model.addAttribute("hoaDonList", hoaDonList.getContent());
-        model.addAttribute("pageInfo", hoaDonList);
-        model.addAttribute("loaiHoaDon", loaiHoaDon);
-        model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
-
-        Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
-        for (HoaDonDTO hd : hoaDonList.getContent()) {
-            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
+        if (startDateStr != null && !startDateStr.trim().isEmpty() && !"undefined".equals(startDateStr)) {
+            redirectUrl.append("&startDate=").append(startDateStr);
         }
-        model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
+        if (endDateStr != null && !endDateStr.trim().isEmpty() && !"undefined".equals(endDateStr)) {
+            redirectUrl.append("&endDate=").append(endDateStr);
+        }
 
-        return "admin/pages/don-hang/don-hang";
+        return redirectUrl.toString();
     }
-
-//    @GetMapping("/detail")
-//    public String getHoaDonDetail(
-//            @RequestParam("ma") String ma,
-//            Model model
-//    ) {
-//        model.addAttribute("hoaDonDetail", hoaDonService.getHoaDonByMa(ma));
-//        model.addAttribute("hdctList", hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(ma));
-//        return "/admin/pages/hoa-don/hoa-don-detail-modal";
-//    }
 
     @PostMapping("/cap-nhat-trang-thai")
     public String capNhatTrangThai(
@@ -149,12 +170,11 @@ public class DonHangController {
         var ketQua = lichSuHoaDonService.xuLyCapNhatTrangThai(
                 maHoaDon,
                 trangThaiMoi,
-//                lyDoGiaoKhongThanhCong,
                 ghiChu,
                 getNhanVien.getCurrentNhanVien()
         );
 
-        //Sử dụng thông báo
+        // Sử dụng thông báo
         if (ketQua.thanhCong()) {
             ThongBaoUtils.addSuccess(redirectAttributes, ketQua.message());
         } else {
@@ -165,5 +185,4 @@ public class DonHangController {
 
         return "redirect:/admin/don-hang";
     }
-
 }

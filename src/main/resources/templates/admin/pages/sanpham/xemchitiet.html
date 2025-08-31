@@ -88,8 +88,8 @@
                         <th class="tw-text-left tw-px-6 tw-py-3 tw-font-semibold">Màu</th>
                         <th class="tw-text-left tw-px-6 tw-py-3 tw-font-semibold">Size</th>
                         <th class="tw-text-right tw-px-6 tw-py-3 tw-font-semibold">Số lượng</th>
-                        <th class="tw-text-right tw-px-6 tw-py-3 tw-font-semibold">Giá gốc</th>
                         <th class="tw-text-right tw-px-6 tw-py-3 tw-font-semibold">Giá nhập</th>
+                        <th class="tw-text-right tw-px-6 tw-py-3 tw-font-semibold">Giá gốc</th>
                         <th class="tw-text-right tw-px-6 tw-py-3 tw-font-semibold">Giá bán</th>
                         <th class="tw-text-left tw-px-6 tw-py-3 tw-font-semibold">Đợt giảm</th>
                         <th class="tw-text-center tw-px-6 tw-py-3 tw-font-semibold">Thao tác</th>
@@ -118,17 +118,6 @@
                                             <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                                         </form>
                                     </td>
-                                    <!-- Giá gốc -->
-                                    <td class="tw-text-right tw-px-6 tw-py-4">
-                                        <form th:action="@{/admin/san-pham/cap-nhat-chi-tiet/gia-goc}" method="post" novalidate>
-                                            <input type="hidden" id="id" name="id" th:value="${ct.id}"></input>
-                                            <input type="text" name="giaGoc"
-                                                   th:value="${ct.giaGoc}"
-                                                   class="tw-text-right tw-border tw-rounded-lg tw-px-2 tw-py-1 tw-w-28 format-vnd focus:tw-border-blue-400 focus:tw-ring focus:tw-ring-blue-100"
-                                                   data-min="1000" data-max="100000000" />
-                                            <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
-                                        </form>
-                                    </td>
 
                                     <!-- Giá nhập -->
                                     <td class="tw-text-right tw-px-6 tw-py-4">
@@ -141,6 +130,19 @@
                                             <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
                                         </form>
                                     </td>
+                                    <!-- Giá gốc -->
+                                    <td class="tw-text-right tw-px-6 tw-py-4">
+                                        <form th:action="@{/admin/san-pham/cap-nhat-chi-tiet/gia-goc}" method="post" novalidate>
+                                            <input type="hidden" id="id" name="id" th:value="${ct.id}"></input>
+                                            <input type="text" name="giaGoc"
+                                                   th:value="${ct.giaGoc}"
+                                                   class="tw-text-right tw-border tw-rounded-lg tw-px-2 tw-py-1 tw-w-28 format-vnd focus:tw-border-blue-400 focus:tw-ring focus:tw-ring-blue-100"
+                                                   data-min="1000" data-max="100000000" />
+                                            <div class="tw-text-red-500 tw-text-xs tw-mt-1 error-msg"></div>
+                                        </form>
+                                    </td>
+
+
                                     <!-- Thao tác -->
 
                                     <td class="tw-text-right tw-px-6 tw-py-4" th:text="${ct.giaBan != null ? #numbers.formatDecimal(ct.giaBan,0,'COMMA',0,'POINT') + ' ₫' : '—'}"></td>

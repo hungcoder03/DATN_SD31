@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" 
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:th="http://www.thymeleaf.org"
       layout:decorate="~{client/layout}">
 
@@ -11,7 +11,7 @@
     <th:block layout:fragment="css">
         <!-- Custom CSS for product detail -->
         <link rel="stylesheet" th:href="@{/client-static/css/product-detail.css}">
-        
+
         <!-- Lightbox CSS for image gallery -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css">
     </th:block>
@@ -96,25 +96,25 @@
                         <div class="product-gallery">
                             <!-- Main Image -->
                             <div class="main-image-container">
-                                <a th:href="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}" 
-                                   data-lightbox="product-gallery" 
+                                <a th:href="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}"
+                                   data-lightbox="product-gallery"
                                    class="main-image-link">
-                                    <img th:src="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}" 
-                                         th:alt="${sanPham.ten}" 
-                                         class="main-image" 
+                                    <img th:src="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}"
+                                         th:alt="${sanPham.ten}"
+                                         class="main-image"
                                          id="mainImage"
                                          onerror="this.src='/client-static/images/item1.jpg'">
                                 </a>
                             </div>
-                            
+
                             <!-- Thumbnail Images -->
                             <div class="thumbnail-container" th:if="${!hinhanhs.isEmpty()}">
-                                <div th:each="img, iterStat : ${hinhanhs}" 
-                                     class="thumbnail-item" 
+                                <div th:each="img, iterStat : ${hinhanhs}"
+                                     class="thumbnail-item"
                                      th:classappend="${iterStat.first} ? 'active' : ''"
                                      th:data-image="@{${img.url}}"
                                      th:data-lightbox-url="@{${img.url}}">
-                                    <img th:src="@{${img.url}}" th:alt="${sanPham.ten}" 
+                                    <img th:src="@{${img.url}}" th:alt="${sanPham.ten}"
                                          onerror="this.src='/client-static/images/item1.jpg'">
                                 </div>
                             </div>
@@ -130,7 +130,7 @@
                                 <span th:text="${success}">Thành công</span>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
-                            
+
                             <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <iconify-icon icon="mdi:alert-circle" class="me-2"></iconify-icon>
                                 <span th:text="${error}">Lỗi</span>
@@ -199,13 +199,13 @@
                                             0₫
                                         </span>
                                     </div>
-                                    
+
                                     <!-- Current Price (prominent) -->
                                     <div class="current-price">
                                         <span class="price-amount" id="currentPrice" th:text="${#numbers.formatDecimal(giaBanMin, 0, 'COMMA', 0, 'POINT') + '₫'}">
                                             0₫
                                         </span>
-                                        
+
                                         <!-- Discount Badge -->
                                         <div class="discount-badge" th:if="${giaGocMin > 0 && giaGocMin > giaBanMin}">
                                             <span class="discount-text" id="discountPercent">
@@ -235,10 +235,10 @@
                                     <label class="variant-label">Kích thước:</label>
                                     <div class="variant-options">
                                         <div th:each="size : ${dsSize}" class="variant-option" data-variant-type="size">
-                                            <input type="radio" 
-                                                   th:id="'size-' + ${size.id}" 
-                                                   th:name="selectedSize" 
-                                                   th:value="${size.id}" 
+                                            <input type="radio"
+                                                   th:id="'size-' + ${size.id}"
+                                                   th:name="selectedSize"
+                                                   th:value="${size.id}"
                                                    th:data-size="${size.ten}"
                                                    class="variant-radio"
                                                    required>
@@ -248,7 +248,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Color Selection -->
                                 <div class="variant-group" th:if="${mauSacCount > 0}">
                                     <div class="color-selection-header">
@@ -257,10 +257,10 @@
                                     </div>
                                     <div class="variant-options">
                                         <div th:each="mauSac : ${dsMauSac}" class="variant-option" data-variant-type="color">
-                                            <input type="radio" 
-                                                   th:id="'color-' + ${mauSac.id}" 
-                                                   th:name="selectedColor" 
-                                                   th:value="${mauSac.id}" 
+                                            <input type="radio"
+                                                   th:id="'color-' + ${mauSac.id}"
+                                                   th:name="selectedColor"
+                                                   th:value="${mauSac.id}"
                                                    th:data-color="${mauSac.ten}"
                                                    class="variant-radio"
                                                    required>
@@ -275,7 +275,7 @@
                                         <span class="stock-text">Còn lại: </span>
                                         <span class="stock-amount" id="stockAmount">--</span>
                                     </div>
-                                    
+
                                     <div class="validation-message" id="validationMessage"></div>
                                 </div>
 
@@ -300,7 +300,7 @@
                                     <span class="attribute-value" th:text="${sanPham.kieuDang.ten}">Kiểu dáng</span>
                                 </div>
                             </div>
-                            
+
                             <!-- Service Policy Section -->
                             <div class="service-policy-section">
                                 <div class="policy-grid">
@@ -314,7 +314,7 @@
                                             <div class="policy-desc">hỗ trợ từ 8h30 - 22h</div>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Thời gian đổi trả -->
                                     <div class="policy-item">
                                         <div class="policy-icon">
@@ -325,7 +325,7 @@
                                             <div class="policy-desc">sản phẩm chưa qua sử dụng và còn nguyên nhãn mác</div>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Đổi trả dễ dàng -->
                                     <div class="policy-item">
                                         <div class="policy-icon">
@@ -336,7 +336,7 @@
                                             <div class="policy-desc">chỉ cần số điện thoại</div>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Dịch vụ tại nhà -->
                                     <div class="policy-item">
                                         <div class="policy-icon">
@@ -439,10 +439,10 @@
                                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                         <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${currentPage - 1})}">Trước</a>
                                     </li>
-                                    <li th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" 
-                                        class="page-item" 
+                                    <li th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                                        class="page-item"
                                         th:classappend="${pageNum == currentPage} ? 'active'">
-                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${pageNum})}" 
+                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${pageNum})}"
                                            th:text="${pageNum + 1}">1</a>
                                     </li>
                                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
@@ -469,7 +469,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Fixed Bottom Bar for Mobile/Tablet -->
         <div class="fixed-bottom-cart-bar" id="fixedCartBar">
             <div class="container">
@@ -477,8 +477,8 @@
                     <!-- Product Info -->
                     <div class="fixed-product-info">
                         <div class="fixed-product-image">
-                            <img th:src="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}" 
-                                 th:alt="${sanPham.ten}" 
+                            <img th:src="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}"
+                                 th:alt="${sanPham.ten}"
                                  onerror="this.src='/client-static/images/item1.jpg'">
                         </div>
                         <div class="fixed-product-details">
@@ -486,7 +486,7 @@
                             <div class="fixed-product-category" th:text="${sanPham.danhMuc != null ? sanPham.danhMuc.ten : 'Sản phẩm'}">Danh mục</div>
                         </div>
                     </div>
-                    
+
                     <!-- Quantity and Add to Cart -->
                     <div class="fixed-cart-controls">
                         <div class="fixed-quantity-group">
@@ -497,11 +497,11 @@
                                 <button type="button" class="fixed-qty-btn" id="fixedIncreaseBtn">+</button>
                             </div>
                         </div>
-                        
+
                         <form th:action="@{/gio-hang/them}" method="post" id="fixedAddToCartForm" class="fixed-add-to-cart-form">
                             <input type="hidden" id="fixedSelectedChiTietId" name="chiTietId">
                             <input type="hidden" id="fixedSelectedQuantity" name="soLuong" value="1">
-                            
+
                             <button type="submit" class="fixed-add-to-card-btn" id="fixedAddToCartBtn" disabled>
                                 ADD TO CARD
                             </button>
@@ -672,13 +672,13 @@
                 originalPrice: /*[[${giaGocMin}]]*/ 0,
                 currentPrice: /*[[${giaBanMin}]]*/ 0
             };
-            
+
 
         </script>
     </th:block>
 
 
-    
+
 
 </body>
 

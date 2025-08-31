@@ -318,15 +318,66 @@ public class GiohangController {
             selectedIds = Collections.emptyList();
         }
 
+        // Lấy khách hàng đang đăng nhập
         KhachHang kh = getCurrentKhachHang();
+        model.addAttribute("khachHang", kh);
+
+        // Nếu KH có lưu địa chỉ dạng string => parse ra
+        if (kh.getDiaChi() != null && !kh.getDiaChi().isEmpty()) {
+            try {
+                String[] parts = kh.getDiaChi().split(",");
+                if (parts.length >= 4) {
+                    String chiTiet = parts[0].trim();   // ví dụ: "Tân Thanh"
+                    String xa = parts[1].trim();        // "Xã Minh Tân"
+                    String huyen = parts[2].trim();     // "Huyện Lương Tài"
+                    String tinh = parts[3].trim();      // "Bắc Ninh"
+
+                    // Tìm provinceId
+                    if (provinceId == null) {
+                        for (Map<String, Object> p : ghnService.getProvinces()) {
+                            if (p.get("ProvinceName").toString().equalsIgnoreCase(tinh)) {
+                                provinceId = (Integer) p.get("ProvinceID");
+                                break;
+                            }
+                        }
+                    }
+
+                    // Tìm districtId
+                    if (provinceId != null && districtId == null) {
+                        for (Map<String, Object> d : ghnService.getDistricts(provinceId)) {
+                            if (d.get("DistrictName").toString().equalsIgnoreCase(huyen)) {
+                                districtId = (Integer) d.get("DistrictID");
+                                break;
+                            }
+                        }
+                    }
+
+                    // Tìm wardCode
+                    if (districtId != null && wardCode == null) {
+                        for (Map<String, Object> w : ghnService.getWards(districtId)) {
+                            if (w.get("WardName").toString().equalsIgnoreCase(xa)) {
+                                wardCode = (String) w.get("WardCode");
+                                break;
+                            }
+                        }
+                    }
+
+                    // Gửi lại địa chỉ chi tiết nếu cần
+                    model.addAttribute("diaChiChiTiet", chiTiet);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Lấy giỏ hàng đã chọn
         List<GioHangChiTiet> selectedItems = giohangservice.findByIds(selectedIds);
         BigDecimal tongTien = selectedItems.stream()
                 .map(item -> item.getChiTietSp().getGiaBan()
                         .multiply(BigDecimal.valueOf(item.getSoLuong())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-//        model.addAttribute("danhSachPhieuGiamGia", phieugiamgiarepository.findAll());
-
+        // Danh sách phiếu giảm giá hợp lệ
         LocalDate today = LocalDate.now();
         List<PhieuGiamGia> dsPhieuGiamGia = phieugiamgiarepository.findAll().stream()
                 .filter(phieu -> Boolean.TRUE.equals(phieu.getTrangThai()))
@@ -336,11 +387,10 @@ public class GiohangController {
                 .collect(Collectors.toList());
 
         model.addAttribute("danhSachPhieuGiamGia", dsPhieuGiamGia);
-
         model.addAttribute("selectedItems", selectedItems);
         model.addAttribute("tongTien", tongTien);
-        model.addAttribute("khachHang", kh);
 
+        // Load GHN provinces/districts/wards
         List<Map<String, Object>> provinces = ghnService.getProvinces();
         model.addAttribute("provinces", provinces);
 
@@ -354,20 +404,15 @@ public class GiohangController {
             model.addAttribute("wards", wards);
         }
 
+        // Gửi selected value cho view
+        model.addAttribute("provinceId", provinceId);
+        model.addAttribute("districtId", districtId);
+        model.addAttribute("wardCode", wardCode);
 
-        // Xử lý chọn mã giảm tốt nhất
+        // Tìm phiếu giảm tốt nhất
         PhieuGiamGia phieuTotNhat = timPhieuTotNhat(dsPhieuGiamGia, tongTien);
         model.addAttribute("phieuTotNhat", phieuTotNhat);
 
-//        for (PhieuGiamGia phieu : danhSachPhieuGiamGia) {
-//            BigDecimal discount = phieuGiamGiaService.tinhTienGiam(phieu.getMa(), tongTien); // <-- Gọi đến service bạn đang dùng
-//            if (discount.compareTo(maxDiscount) > 0) {
-//                maxDiscount = discount;
-//                selectedVoucherCode = phieu.getMa();
-//            }
-//        }
-
-//        model.addAttribute("selectedVoucherCode", selectedVoucherCode);
         return "/client/pages/cart/checkout";
     }
 

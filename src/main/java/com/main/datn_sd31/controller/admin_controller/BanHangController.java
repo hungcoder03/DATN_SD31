@@ -756,7 +756,7 @@ public class BanHangController {
         hd.setNgaySua(LocalDateTime.now());
         hd.setNguoiSua(1);
         hd.setNguoiTao(1);
-        hd.setLoaihoadon("Trực tiếp");
+        hd.setLoaihoadon("Offline");
         session.setAttribute("hoaDonTam", hd);
         session.setAttribute("gioTam", gio);
         session.setAttribute("cartKeyTam", cartKey);
@@ -818,7 +818,7 @@ public class BanHangController {
         hd.setGiaGoc(tongTien);
         hd.setGiaGiamGia(giagiam);
         hd.setPhiVanChuyen(phiShip);
-        hd.setLoaihoadon("Trực tiếp");
+        hd.setLoaihoadon("Offline");
         hd.setThanhTien(tongTien.subtract(giagiam).add(phiShip));
         hd.setNgaySua(LocalDateTime.now());
         hd.setNgayThanhToan(LocalDateTime.now());
