@@ -98,7 +98,135 @@
         .dropdown-item {
             transition: all 0.2s ease;
             border-radius: 8px;
-            margin: 2px 8px;
+        }
+
+        /* Modern Chat Navigation Button */
+        .chat-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #dead6f 0%, #997351 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: none;
+            margin-left: 12px;
+        }
+
+        .chat-nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .chat-nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .chat-nav-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #997351 0%, #dead6f 100%);
+        }
+
+        .chat-nav-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .chat-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-icon-wrapper i {
+            font-size: 16px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .chat-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            animation: chatPulse 2s infinite;
+        }
+
+        @keyframes chatPulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .chat-text {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .chat-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 12px;
+            min-width: 20px;
+            text-align: center;
+            animation: badgeBounce 0.6s ease-out;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        }
+
+        @keyframes badgeBounce {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Badge animation when number changes */
+        .chat-badge.updating {
+            animation: badgeUpdate 0.4s ease-in-out;
+        }
+
+        @keyframes badgeUpdate {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
         
         /* CRITICAL FIX: Profile Layout - Đảm bảo luôn nằm trên 1 dòng */
@@ -434,6 +562,16 @@
             <ul class="navbar-nav navbar-nav-right">
                 <li class="nav-item dropdown d-none d-xl-inline-block">
 
+                    <a class="chat-nav-btn" th:href="@{/admin/chat}" title="Chat với khách hàng" id="chatNavBtn">
+                        <div class="chat-icon-wrapper">
+                            <i class="bi bi-chat-dots"></i>
+                            <div class="chat-pulse"></div>
+                        </div>
+                        <span class="chat-text">Chat</span>
+                        <span id="chatNavBadge" class="chat-badge" style="display: none;">0</span>
+                    </a>
+
+
                     <a class="nav-link dropdown-toggle" id="UserDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                         <span class="profile-text" th:if="${@get_nhan_vien.getCurrentNhanVien() != null}">
                             Xin chào, <span th:text="${@get_nhan_vien.getCurrentNhanVien().ten}"></span>!
@@ -452,9 +590,14 @@
                     </a>
 
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
+                        <a class="dropdown-item d-flex align-items-center gap-2 py-3 px-4" th:href="@{/admin/chat}" style="color: #333; font-weight: 500; border-radius: 8px; transition: background 0.2s;" id="chatDropdownBtn">
+                            <i class="bi bi-chat-dots" style="font-size: 1.1rem;"></i>
+                            <span>Chat với khách hàng</span>
+                            <span id="chatDropdownBadge" class="badge bg-danger ms-auto" style="display: none;">0</span>
+                        </a>
                         <a class="dropdown-item d-flex align-items-center gap-2 py-3 px-4" th:href="@{/admin/logout}" style="color: #dead6f; font-weight: 500; border-radius: 8px; transition: background 0.2s;">
                             <i class="fas fa-sign-out-alt" style="font-size: 1.2rem;"></i>
-                            <span>Sign Out</span>
+                            <span>Đăng xuất</span>
                         </a>
                     </div>
                 </li>
@@ -789,5 +932,191 @@ $(document).ready(function() {
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<!-- Chat notification system -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+let chatStompClient = null;
+let unreadCount = 0;
+
+// Khởi tạo WebSocket connection cho chat notifications
+function initChatNotifications() {
+    const socket = new SockJS('/ws');
+    chatStompClient = Stomp.over(socket);
+    chatStompClient.connect({}, function () {
+        console.log('Chat notification WebSocket connected');
+        
+        // Subscribe để nhận thông báo tin nhắn mới
+        chatStompClient.subscribe('/topic/chat.notifications', function(message) {
+            try {
+                const data = JSON.parse(message.body);
+                if (data.type === 'NEW_MESSAGE' && data.senderType === 'CUSTOMER') {
+                    // Chỉ tăng unread count nếu conversation thuộc về nhân viên hiện tại
+                    checkAndIncrementUnreadCount(data.conversationId);
+                } else if (data.type === 'MARK_READ') {
+                    // Reset số đếm khi admin đánh dấu đã đọc
+                    resetUnreadCount();
+                } else if (data.type === 'CONVERSATION_READ') {
+                    // Cập nhật số đếm khi admin đọc một cuộc trò chuyện cụ thể
+                    loadUnreadCount();
+                }
+            } catch (e) {
+                console.error('Error parsing chat notification:', e);
+            }
+        });
+        
+        // Load số tin nhắn chưa đọc ban đầu
+        loadUnreadCount();
+    }, function(error) {
+        console.error('Chat notification WebSocket connection failed:', error);
+        // Retry after 5 seconds
+        setTimeout(initChatNotifications, 5000);
+    });
+}
+
+// Tăng số đếm tin nhắn chưa đọc
+function incrementUnreadCount() {
+    unreadCount++;
+    updateBadgeDisplay();
+}
+
+// Kiểm tra và tăng unread count nếu conversation thuộc về nhân viên hiện tại
+async function checkAndIncrementUnreadCount(conversationId) {
+    try {
+        // Lấy thông tin nhân viên hiện tại từ Thymeleaf
+        const currentEmployeeId = /*[[${@get_nhan_vien.getCurrentNhanVien() != null ? @get_nhan_vien.getCurrentNhanVien().id : null}]]*/ null;
+        if (currentEmployeeId) {
+            // Kiểm tra xem conversation có thuộc về nhân viên này không
+            const response = await fetch('/api/chat/conversations/employee/' + currentEmployeeId);
+            if (response.ok) {
+                const conversations = await response.json();
+                const conversation = conversations.find(c => c.id === conversationId);
+                
+                // Chỉ tăng unread count nếu conversation thuộc về nhân viên này
+                if (conversation && (conversation.assignedEmployeeId === null || conversation.assignedEmployeeId === currentEmployeeId)) {
+                    incrementUnreadCount();
+                }
+            }
+        } else {
+            // Fallback: nếu không lấy được thông tin nhân viên, tăng unread count
+            incrementUnreadCount();
+        }
+    } catch (error) {
+        console.error('Error checking conversation assignment:', error);
+        // Fallback: tăng unread count nếu có lỗi
+        incrementUnreadCount();
+    }
+}
+
+// Reset số đếm khi vào trang chat
+function resetUnreadCount() {
+    unreadCount = 0;
+    updateBadgeDisplay();
+}
+
+// Đánh dấu tất cả tin nhắn đã đọc
+function markAllAsRead() {
+    if (chatStompClient && chatStompClient.connected) {
+        chatStompClient.send('/app/chat.mark-read', {}, JSON.stringify({
+            timestamp: new Date().toISOString()
+        }));
+    }
+}
+
+// Cập nhật hiển thị badge
+function updateBadgeDisplay() {
+    const navBadge = document.getElementById('chatNavBadge');
+    const dropdownBadge = document.getElementById('chatDropdownBadge');
+    
+    if (unreadCount > 0) {
+        if (navBadge) {
+            navBadge.style.display = 'inline';
+            navBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            
+            // Thêm animation khi badge xuất hiện
+            navBadge.classList.add('updating');
+            setTimeout(() => {
+                navBadge.classList.remove('updating');
+            }, 400);
+        }
+        if (dropdownBadge) {
+            dropdownBadge.style.display = 'inline';
+            dropdownBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            
+            // Thêm animation khi badge xuất hiện
+            dropdownBadge.classList.add('updating');
+            setTimeout(() => {
+                dropdownBadge.classList.remove('updating');
+            }, 400);
+        }
+    } else {
+        if (navBadge) navBadge.style.display = 'none';
+        if (dropdownBadge) dropdownBadge.style.display = 'none';
+    }
+}
+
+// Load số tin nhắn chưa đọc từ server
+async function loadUnreadCount() {
+    try {
+        // Lấy thông tin nhân viên hiện tại từ Thymeleaf
+        const currentEmployeeId = /*[[${@get_nhan_vien.getCurrentNhanVien() != null ? @get_nhan_vien.getCurrentNhanVien().id : null}]]*/ null;
+        if (currentEmployeeId) {
+            // Sử dụng endpoint mới để chỉ đếm tin nhắn cho nhân viên này
+            const response = await fetch('/api/chat/unread-count/employee/' + currentEmployeeId);
+            if (response.ok) {
+                const data = await response.json();
+                unreadCount = data.count || 0;
+                updateBadgeDisplay();
+            }
+        } else {
+            // Fallback: nếu không lấy được thông tin nhân viên, sử dụng endpoint cũ
+            const response = await fetch('/api/chat/unread-count');
+            if (response.ok) {
+                const data = await response.json();
+                unreadCount = data.count || 0;
+                updateBadgeDisplay();
+            }
+        }
+    } catch (error) {
+        console.error('Error loading unread count:', error);
+    }
+}
+
+// Khởi tạo khi trang load
+document.addEventListener('DOMContentLoaded', function() {
+    // Chỉ khởi tạo chat notifications nếu không phải trang chat
+    if (!window.location.pathname.includes('/admin/chat')) {
+        initChatNotifications();
+    }
+    
+    // Reset số đếm khi click vào menu chat
+    const chatNavBtn = document.getElementById('chatNavBtn');
+    const chatDropdownBtn = document.getElementById('chatDropdownBtn');
+    
+    if (chatNavBtn) {
+        chatNavBtn.addEventListener('click', function() {
+            // Reset count khi vào trang chat
+            resetUnreadCount();
+        });
+    }
+    
+    if (chatDropdownBtn) {
+        chatDropdownBtn.addEventListener('click', function() {
+            // Reset count khi vào trang chat
+            resetUnreadCount();
+        });
+    }
+});
+
+// Reset count khi rời khỏi trang chat
+window.addEventListener('beforeunload', function() {
+    if (window.location.pathname.includes('/admin/chat')) {
+        resetUnreadCount();
+    }
+});
+    /*]]>*/
+</script>
 </body>
 </html>

@@ -89,7 +89,12 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATTERNS).permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/api/chat/**").permitAll() // Tạm thời cho phép public
                         .anyRequest().authenticated()
+                )
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/ws/**", "/api/chat/**")
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {

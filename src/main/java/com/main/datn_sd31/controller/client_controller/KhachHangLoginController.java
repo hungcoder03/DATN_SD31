@@ -16,7 +16,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.ResponseEntity;
+
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -101,5 +105,37 @@ public class KhachHangLoginController {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
         return "redirect:/";
+    }
+    
+    @GetMapping("/current-user")
+    @ResponseBody
+    public ResponseEntity<?> getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.ok(Map.of("isLoggedIn", false));
+        }
+        
+        // Kiểm tra xem có phải khách hàng không
+        boolean isCustomer = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_KHACHHANG"));
+        
+        if (!isCustomer) {
+            return ResponseEntity.ok(Map.of("isLoggedIn", false));
+        }
+        
+        // Lấy thông tin khách hàng
+        String email = auth.getName();
+        KhachHang khachHang = khachHangService.findByEmail(email);
+        
+        if (khachHang == null) {
+            return ResponseEntity.ok(Map.of("isLoggedIn", false));
+        }
+        
+        return ResponseEntity.ok(Map.of(
+            "isLoggedIn", true,
+            "customerName", khachHang.getTen() != null ? khachHang.getTen() : "Khách hàng",
+            "customerPhone", khachHang.getSoDienThoai() != null ? khachHang.getSoDienThoai() : "",
+            "customerEmail", khachHang.getEmail() != null ? khachHang.getEmail() : ""
+        ));
     }
 }

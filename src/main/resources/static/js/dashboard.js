@@ -6,7 +6,29 @@
 
 (function () {
 	function qs(sel) { return document.querySelector(sel); }
-	function fetchJson(url) { return fetch(url).then(r => r.json()); }
+	function fetchJson(url) {
+		return fetch(url, { credentials: 'same-origin' })
+			.then(async r => {
+				const ct = r.headers.get('content-type') || '';
+				const text = await r.text();
+				if (!r.ok) {
+					throw new Error(`HTTP ${r.status} ${r.statusText}: ${text.substring(0,200)}`);
+				}
+				if (ct.includes('application/json')) {
+					try { return JSON.parse(text); } catch (e) { throw new Error('JSON parse error: ' + e.message + ' | body: ' + text.substring(0,200)); }
+				}
+				// Nếu server trả về HTML (ví dụ redirect login) => điều hướng tới login
+				if (ct.includes('text/html') || text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html')) {
+					// cố gắng phát hiện trang đăng nhập admin
+					if (text.includes('/admin/dang-nhap')) {
+						window.location.href = '/admin/dang-nhap';
+						return Promise.reject(new Error('Redirected to admin login'));
+					}
+					throw new Error('Expected JSON but received HTML.');
+				}
+				throw new Error('Unsupported content-type: ' + ct);
+			});
+	}
 	function fmtMoney(v) { try { return Number(v).toLocaleString('vi-VN') + ' ₫'; } catch(e) { return v; } }
 
 	// Helper màu
@@ -20,8 +42,16 @@
 
 	// Đọc khoảng thời gian hiện tại từ input (đã render server)
 	function getDateRange() {
-		const from = qs('#startDateInput')?.value;
-		const to = qs('#endDateInput')?.value;
+		let from = qs('#startDateInput')?.value;
+		let to = qs('#endDateInput')?.value;
+		if (!from || !to) {
+			const today = new Date();
+			const y = today.getFullYear();
+			const m = String(today.getMonth()+1).padStart(2,'0');
+			const d = String(today.getDate()).padStart(2,'0');
+			from = `${y}-${m}-${d}`;
+			to = `${y}-${m}-${d}`;
+		}
 		return { from, to };
 	}
 

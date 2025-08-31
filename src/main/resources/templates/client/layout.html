@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" lang="en">
-
 <head>
   <title layout:title-pattern="$CONTENT_TITLE - Waggy Pet Shop">Waggy - Free eCommerce Pet Shop HTML Website Template</title>
   <meta charset="utf-8">
@@ -608,6 +607,14 @@
         const dropdowns = document.querySelectorAll('.dropdown-menu.show');
         dropdowns.forEach(dropdown => dropdown.classList.remove('show'));
         
+        // Clear chat widget state
+        if (window.clearChatState) {
+          window.clearChatState();
+        }
+        
+        // Clear localStorage
+        localStorage.removeItem('conversationId');
+        
         // Chuyển đến trang logout
         window.location.href = '/khach-hang/dang-xuat';
       }
@@ -727,6 +734,7 @@
       document.head.appendChild(style);
     });
   </script>
+  <div th:replace="~{client/fragments/chat-widget :: chatWidget}"></div>
 </body>
 
 </html> 

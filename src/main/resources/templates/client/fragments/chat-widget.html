@@ -1,0 +1,1853 @@
+<div th:fragment="chatWidget" id="chat-widget" style="position: fixed; bottom: 16px; right: 16px; z-index: 2147483647;">
+    <style>
+        /* Chat Toggle Button Styles */
+        .chat-toggle-btn {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #dead6f 0%, #997351 100%);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-toggle-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .chat-toggle-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
+
+        .chat-icon {
+            color: white;
+            z-index: 2;
+            transition: transform 0.3s ease;
+        }
+
+        .chat-toggle-btn:hover .chat-icon {
+            transform: scale(1.1);
+        }
+
+        /* Pulse Animation */
+        .chat-pulse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%) scale(0);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        /* Ripple Effect */
+        .chat-ripple {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.6s ease-out;
+        }
+
+        .chat-toggle-btn:active .chat-ripple {
+            transform: translate(-50%, -50%) scale(1.5);
+            opacity: 0;
+        }
+
+        /* Floating Animation */
+        .chat-toggle-btn {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Unread Badge */
+        .chat-toggle-btn::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ff4757;
+            border-radius: 50%;
+            border: 3px solid white;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .chat-toggle-btn.has-unread::after {
+            opacity: 1;
+            transform: scale(1);
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: scale(1);
+            }
+            40% {
+                transform: scale(1.1);
+            }
+            60% {
+                transform: scale(0.9);
+            }
+        }
+
+        /* Glow Effect */
+        .chat-toggle-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .chat-toggle-btn:hover::before {
+            opacity: 1;
+        }
+
+        /* Chat Panel Styles */
+        .card-bordered {
+            border: 1px solid #ebebeb;
+        }
+        
+        .card {
+            border: 0;
+            border-radius: 0px;
+            margin-bottom: 30px;
+            -webkit-box-shadow: 0 2px 3px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.03);
+            -webkit-transition: .5s;
+            transition: .5s;
+        }
+        
+        .padding {
+            padding: 3rem !important
+        }
+        
+        body {
+            background-color: #f9f9fa
+        }
+        
+        .card-header:first-child {
+            border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0;
+        }
+        
+        .card-header {
+            display: -webkit-box;
+            display: flex;
+            -webkit-box-pack: justify;
+            justify-content: space-between;
+            -webkit-box-align: center;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: transparent;
+            border-bottom: 1px solid rgba(77,82,89,0.07);
+        }
+        
+        .card-header .card-title {
+            padding: 0;
+            border: none;
+        }
+        
+        h4.card-title {
+            font-size: 17px;
+        }
+        
+        .card-header>*:last-child {
+            margin-right: 0;
+        }
+        
+        .card-header>* {
+            margin-left: 8px;
+            margin-right: 8px;
+        }
+        
+        .btn-secondary {
+            color: #4d5259 !important;
+            background-color: #e4e7ea;
+            border-color: #e4e7ea;
+            color: #fff;
+        }
+        
+        .btn-xs {
+            font-size: 11px;
+            padding: 2px 8px;
+            line-height: 18px;
+        }
+        .btn-xs:hover{
+            color:#fff !important;
+        }
+        
+        .card-title {
+            font-family: Roboto,sans-serif;
+            font-weight: 300;
+            line-height: 1.5;
+            margin-bottom: 0;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(77,82,89,0.07);
+        }
+        
+        .ps-container {
+            position: relative;
+        }
+        
+        .ps-container {
+            -ms-touch-action: auto;
+            touch-action: auto;
+            overflow: hidden!important;
+            -ms-overflow-style: none;
+        }
+        
+        .media-chat {
+            padding-right: 64px;
+            margin-bottom: 0;
+        }
+        
+        .media {
+            padding: 16px 12px;
+            -webkit-transition: background-color .2s linear;
+            transition: background-color .2s linear;
+        }
+        
+        .media .avatar {
+            flex-shrink: 0;
+        }
+        
+        .avatar {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+            border-radius: 100%;
+            background-color: #f5f6f7;
+            color: #8b95a5;
+            text-transform: uppercase;
+        }
+
+        .avatar-xs {
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            font-size: 12px;
+        }
+        
+        .media-chat .media-body {
+            -webkit-box-flex: initial;
+            flex: initial;
+            display: table;
+        }
+        
+        .media-body {
+            min-width: 0;
+        }
+        
+        .media-chat .media-body p {
+            position: relative;
+            margin: 4px 0;
+            background-color: #f5f6f7;
+            border-radius: 8px;
+            font-weight: 400;
+            color: #374151;
+        }
+        
+        .media>* {
+            margin: 0 8px;
+        }
+        
+        .media-chat .media-body p.meta {
+            background-color: transparent !important;
+            padding: 0;
+            opacity: .8;
+        }
+        
+        .media-meta-day {
+            -webkit-box-pack: justify;
+            justify-content: space-between;
+            -webkit-box-align: center;
+            align-items: center;
+            margin-bottom: 0;
+            color: #8b95a5;
+            opacity: .8;
+            font-weight: 400;
+        }
+        
+        .media {
+            padding: 16px 12px;
+            -webkit-transition: background-color .2s linear;
+            transition: background-color .2s linear;
+        }
+        
+        .media-meta-day::before {
+            margin-right: 16px;
+        }
+        
+        .media-meta-day::before, .media-meta-day::after {
+            content: '';
+            -webkit-box-flex: 1;
+            flex: 1 1;
+            border-top: 1px solid #ebebeb;
+        }
+        
+        .media-meta-day::after {
+            content: '';
+            -webkit-box-flex: 1;
+            flex: 1 1;
+            border-top: 1px solid #ebebeb;
+        }
+        
+        .media-meta-day::after {
+            margin-left: 16px;
+        }
+        
+        .media-chat.media-chat-reverse {
+            padding-right: 12px;
+            padding-left: 64px;
+            -webkit-box-orient: horizontal;
+            -webkit-box-direction: reverse;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+        
+        .media-chat {
+            padding-right: 64px;
+            margin-bottom: 0;
+        }
+        
+        .media {
+            padding: 16px 12px;
+            -webkit-transition: background-color .2s linear;
+            transition: background-color .2s linear;
+        }
+        
+        .media-chat.media-chat-reverse .media-body p {
+            float: right;
+            clear: right;
+            background-color: #48b0f7;
+            color: #fff;
+            margin-left: auto;
+            margin-right: 0;
+            text-align: right;
+            max-width: 80%;
+            display: inline-block;
+        }
+        
+        .media-chat.media-chat-reverse .media-body {
+            text-align: right;
+            margin-left: auto;
+            margin-right: 0;
+        }
+        
+        .media-chat.media-chat-reverse {
+            justify-content: flex-end;
+        }
+        
+        .media-chat .media-body p {
+            position: relative;
+            padding: 6px 8px;
+            margin: 4px 0;
+            background-color: #f5f6f7;
+            border-radius: 3px;
+        }
+        
+        .border-light {
+            border-color: #f1f2f3 !important;
+        }
+        
+        .bt-1 {
+            border-top: 1px solid #ebebeb !important;
+        }
+        
+        .publisher {
+            position: relative;
+            display: -webkit-box;
+            display: flex;
+            -webkit-box-align: center;
+            align-items: center;
+            padding: 12px 20px;
+            background-color: #f9fafb;
+        }
+        
+        .publisher>*:first-child {
+            margin-left: 0;
+        }
+        
+        .publisher>* {
+            margin: 0 8px;
+        }
+        
+        .publisher-input {
+            -webkit-box-flex: 1;
+            flex-grow: 1;
+            border: none;
+            outline: none !important;
+            background-color: transparent;
+        }
+        
+        button, input, optgroup, select, textarea {
+            font-family: Roboto,sans-serif;
+            font-weight: 300;
+        }
+        
+        .publisher-btn {
+            background-color: transparent;
+            border: none;
+            color: #8b95a5;
+            font-size: 16px;
+            cursor: pointer;
+            overflow: -moz-hidden-unscrollable;
+            -webkit-transition: .2s linear;
+            transition: .2s linear;
+        }
+        
+        .file-group {
+            position: relative;
+            overflow: hidden;
+        } 
+        
+        .publisher-btn {
+            background-color: transparent;
+            border: none;
+            color: #cac7c7;
+            font-size: 16px;
+            cursor: pointer;
+            overflow: -moz-hidden-unscrollable;
+            -webkit-transition: .2s linear;
+            transition: .2s linear;
+        } 
+        
+        .file-group input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            z-index: -1; 
+            width: 20px;
+        }
+        
+        .text-info {
+            color: #48b0f7 !important;
+        }
+
+        /* Modern Chat Panel Styles */
+        .modern-chat-panel {
+            display: none !important;
+            width: 420px;
+            height: 520px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            margin-top: 12px;
+            box-shadow: 
+                0 20px 40px rgba(222, 173, 111, 0.15),
+                0 8px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(222, 173, 111, 0.2);
+            flex-direction: column;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modern-chat-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #dead6f, transparent);
+            opacity: 0.6;
+        }
+
+        /* Modern Header */
+        .modern-card-header {
+            background: linear-gradient(135deg, #dead6f 0%, #e6c088 100%);
+            padding: 20px 24px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modern-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .employee-avatar {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            flex-shrink: 0;
+        }
+
+        .employee-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .employee-avatar.default-avatar {
+            background: linear-gradient(135deg, #dead6f, #e6c088);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .employee-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .employee-position {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        .modern-card-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .online-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Modern Chat Content */
+        .modern-chat-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+            scrollbar-width: thin;
+            scrollbar-color: #dead6f #f0f0f0;
+        }
+
+        .modern-chat-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modern-chat-content::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+
+        .modern-chat-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #dead6f, #e6c088);
+            border-radius: 3px;
+        }
+
+        /* Modern Login Form */
+        .modern-login-form {
+            padding: 32px 24px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-top: 1px solid rgba(222, 173, 111, 0.1);
+        }
+
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #dead6f, #e6c088);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 24px rgba(222, 173, 111, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .login-icon i {
+            font-size: 28px;
+            color: #ffffff;
+        }
+
+        .login-text {
+            color: #6b7280;
+            font-size: 15px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .login-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modern-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modern-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .modern-btn:hover::before {
+            left: 100%;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #dead6f, #e6c088);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(222, 173, 111, 0.4);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(222, 173, 111, 0.6);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #6b7280, #9ca3af);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(107, 114, 128, 0.4);
+        }
+
+        .secondary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(107, 114, 128, 0.6);
+        }
+
+        /* Modern Chat Input */
+        .modern-chat-input {
+            display: none;
+            padding: 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-top: 1px solid rgba(222, 173, 111, 0.1);
+            border-radius: 0 0 20px 20px;
+            position: relative;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #ffffff;
+            border-radius: 0 0 20px 20px;
+            padding: 20px 24px;
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(222, 173, 111, 0.2);
+            width: 100%;
+            height: 100%;
+        }
+
+        .input-left, .input-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-center {
+            flex: 1;
+        }
+
+        .modern-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #374151;
+            border-radius: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modern-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .input-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(222, 173, 111, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .input-btn:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .input-btn:hover {
+            color: #dead6f;
+            transform: scale(1.05);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #dead6f, #e6c088);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(222, 173, 111, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(222, 173, 111, 0.5);
+        }
+
+        /* Enhanced Message Styles */
+        .media-chat .media-body p {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border: 1px solid rgba(222, 173, 111, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .media-chat .media-body p:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .media-chat.media-chat-reverse .media-body p {
+            background: linear-gradient(135deg, #dead6f, #e6c088);
+            color: #ffffff;
+            border: 1px solid rgba(222, 173, 111, 0.2);
+            box-shadow: 0 2px 8px rgba(222, 173, 111, 0.2);
+        }
+
+        .media-chat.media-chat-reverse .media-body p:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(222, 173, 111, 0.3);
+        }
+
+        /* Message Content Layout */
+        .message-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .message-text {
+            flex: 1;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Employee message time color */
+        .media-chat .message-time {
+            color: #6b7280;
+        }
+
+        /* Customer message time color */
+        .media-chat-reverse .message-time {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Smooth animations for all elements */
+        * {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Hover effects for interactive elements */
+        .modern-chat-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 24px 48px rgba(222, 173, 111, 0.2),
+                0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Chat panel khi hiển thị */
+        .modern-chat-panel.show {
+            display: flex !important;
+        }
+
+
+    </style>
+    <button id="chat-toggle" class="chat-toggle-btn">
+        <div class="chat-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="currentColor"/>
+            </svg>
+        </div>
+        <div class="chat-pulse"></div>
+        <div class="chat-ripple"></div>
+    </button>
+    <div id="chat-panel" class="modern-chat-panel">
+        <!-- Card Header -->
+        <div class="modern-card-header">
+            <div class="header-content">
+                <div class="header-left">
+                                    <div class="employee-avatar" id="employee-avatar-container">
+                    <div class="default-avatar" id="default-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <img id="employee-avatar" src="" alt="Nhân viên hỗ trợ" style="display: none;">
+                    <div class="status-indicator"></div>
+                </div>
+                    <div class="employee-info">
+                        <h4 class="modern-card-title" id="employee-name">Hỗ trợ khách hàng</h4>
+                        <span class="employee-position" id="employee-position">Đang tìm nhân viên...</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <span class="online-badge">Online</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Content -->
+        <div class="modern-chat-content" id="chat-content">
+            <!-- Messages will be dynamically added here -->
+        </div>
+        
+        <!-- Form đăng nhập để chat -->
+        <div id="login-to-chat" class="modern-login-form">
+            <div class="login-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="login-text">
+                Vui lòng đăng nhập để sử dụng chat hỗ trợ
+            </div>
+            <div class="login-buttons">
+                <a href="/khach-hang/dang-nhap" class="modern-btn primary-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                Đăng nhập
+            </a>
+                <a href="/khach-hang/dang-ky" class="modern-btn secondary-btn">
+                    <i class="fas fa-user-plus"></i>
+                Đăng ký tài khoản
+            </a>
+            </div>
+        </div>
+        
+        <!-- Form chat (chỉ hiển thị khi đã đăng nhập) -->
+        <div id="chat-input" class="modern-chat-input">
+            <div class="input-container">
+                <div class="input-left">
+                    <!-- Input left area -->
+                </div>
+                <div class="input-center">
+                    <input id="chatMessage" type="text" placeholder="Nhập tin nhắn..." class="modern-input">
+                </div>
+                <div class="input-right">
+                    <button class="input-btn send-btn" id="sendChat" title="Gửi tin nhắn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script th:inline="javascript">
+        (function(){
+            var stompClient = null;
+            var conversationId = localStorage.getItem('conversationId');
+            var content = document.getElementById('chat-content');
+            var panel = document.getElementById('chat-panel');
+            var loginToChat = document.getElementById('login-to-chat');
+            var chatInput = document.getElementById('chat-input');
+            
+            // Biến để lưu thông tin khách hàng
+            var isLoggedIn = false;
+            var customerName = '';
+            var customerPhone = '';
+            var customerEmail = '';
+            var guideMessageShown = false; // Biến để theo dõi đã hiển thị tin nhắn hướng dẫn chưa
+            
+            // Biến để quản lý WebSocket subscription
+            var currentSubscription = null;
+            var isConnecting = false;
+            
+            // Biến để lưu thông tin nhân viên
+            var employeeInfo = {
+                id: null,
+                name: 'Hỗ trợ khách hàng',
+                avatar: '/images/default-avatar.png',
+                position: 'Đang tìm nhân viên...'
+            };
+            
+            console.log('Chat widget initialized - conversationId from localStorage:', conversationId);
+            
+            // Function để clear chat state (được gọi khi logout)
+            window.clearChatState = function() {
+                console.log('Clearing chat state...');
+                
+                // Clear conversation ID
+                conversationId = null;
+                localStorage.removeItem('conversationId');
+                
+                // Disconnect WebSocket and clear subscription
+                if (currentSubscription) {
+                    currentSubscription.unsubscribe();
+                    currentSubscription = null;
+                }
+                if (stompClient && stompClient.connected) {
+                    stompClient.disconnect();
+                    stompClient = null;
+                }
+                
+                // Clear chat content
+                content.innerHTML = '';
+                
+                // Reset flags
+                guideMessageShown = false;
+                isLoggedIn = false;
+                customerName = '';
+                customerPhone = '';
+                customerEmail = '';
+                isConnecting = false;
+                
+                // Đóng chat panel
+                panel.classList.remove('show');
+                
+                // Update UI
+                updateUI();
+                
+                console.log('Chat state cleared successfully');
+            };
+            
+            // Function để validate conversationId
+            async function validateConversationId() {
+                if (!conversationId) return false;
+                
+                try {
+                    const response = await fetch('/api/chat/messages/all/' + conversationId);
+                    if (!response.ok) {
+                        console.log('Conversation not found, removing from localStorage');
+                        localStorage.removeItem('conversationId');
+                        conversationId = null;
+                        return false;
+                    }
+                    return true;
+                } catch (error) {
+                    console.log('Error validating conversation, removing from localStorage');
+                    localStorage.removeItem('conversationId');
+                    conversationId = null;
+                    return false;
+                }
+            }
+            
+            // Function để kiểm tra và làm mới conversation nếu cần
+            async function refreshConversationIfNeeded() {
+                if (conversationId && !(await validateConversationId())) {
+                    console.log('Conversation invalid, starting new chat...');
+                    startNewChat();
+                }
+            }
+            
+            // Function để cập nhật thông tin nhân viên
+            function updateEmployeeInfo(info) {
+                console.log('updateEmployeeInfo called with:', info);
+                
+                if (!info) {
+                    console.log('No info provided, returning');
+                    return;
+                }
+                
+                // Cập nhật biến local
+                employeeInfo.id = info.assignedEmployeeId || info.id;
+                employeeInfo.name = info.assignedEmployeeName || info.name || 'Hỗ trợ khách hàng';
+                employeeInfo.avatar = info.assignedEmployeeAvatar || info.avatar || '/images/default-avatar.png';
+                employeeInfo.position = 'Nhân viên hỗ trợ';
+                
+                console.log('Updated employeeInfo:', employeeInfo);
+                
+                // Cập nhật header
+                var nameElement = document.getElementById('employee-name');
+                var positionElement = document.getElementById('employee-position');
+                var avatarElement = document.getElementById('employee-avatar');
+                
+                console.log('Found elements:', {
+                    nameElement: !!nameElement,
+                    positionElement: !!positionElement,
+                    avatarElement: !!avatarElement
+                });
+                
+                if (nameElement) {
+                    nameElement.textContent = employeeInfo.name;
+                    console.log('Updated name element to:', employeeInfo.name);
+                }
+                if (positionElement) {
+                    positionElement.textContent = employeeInfo.position;
+                    console.log('Updated position element to:', employeeInfo.position);
+                }
+                if (avatarElement) {
+                    var defaultAvatar = document.getElementById('default-avatar');
+                    var avatarContainer = document.getElementById('employee-avatar-container');
+                    
+                    if (employeeInfo.avatar && employeeInfo.avatar !== '/images/default-avatar.png') {
+                        // Có avatar thực tế
+                        avatarElement.src = employeeInfo.avatar;
+                        avatarElement.style.display = 'block';
+                        defaultAvatar.style.display = 'none';
+                        console.log('Updated avatar element to:', employeeInfo.avatar);
+                    } else {
+                        // Sử dụng avatar mặc định
+                        avatarElement.style.display = 'none';
+                        defaultAvatar.style.display = 'flex';
+                        console.log('Using default avatar');
+                    }
+                }
+                
+                // Cập nhật tất cả avatar trong tin nhắn nhân viên
+                var avatarElements = document.querySelectorAll('.employee-avatar-msg');
+                console.log('Found', avatarElements.length, 'message avatar elements');
+                avatarElements.forEach(function(avatar) {
+                    if (employeeInfo.avatar && employeeInfo.avatar !== '/images/default-avatar.png') {
+                        // Thêm error handling cho avatar trong tin nhắn
+                        avatar.onerror = function() {
+                            console.log('Message avatar failed to load, using default');
+                            this.style.display = 'none';
+                            const defaultMsgAvatar = this.parentElement.querySelector('.default-avatar');
+                            if (defaultMsgAvatar) {
+                                defaultMsgAvatar.style.display = 'flex';
+                            }
+                        };
+                        avatar.onload = function() {
+                            console.log('Message avatar loaded successfully');
+                            this.style.display = 'block';
+                            const defaultMsgAvatar = this.parentElement.querySelector('.default-avatar');
+                            if (defaultMsgAvatar) {
+                                defaultMsgAvatar.style.display = 'none';
+                            }
+                        };
+                        avatar.src = employeeInfo.avatar;
+                        avatar.alt = employeeInfo.name;
+                        console.log('Setting message avatar to:', employeeInfo.avatar);
+                    } else {
+                        avatar.style.display = 'none';
+                        const defaultMsgAvatar = avatar.parentElement.querySelector('.default-avatar');
+                        if (defaultMsgAvatar) {
+                            defaultMsgAvatar.style.display = 'flex';
+                        }
+                    }
+                });
+                
+                console.log('Employee info update completed');
+            }
+            
+            // Function để load thông tin khách hàng
+            async function loadCustomerInfo() {
+                try {
+                    const response = await fetch('/khach-hang/current-user');
+                    const data = await response.json();
+                    
+                    // Chỉ cập nhật nếu thông tin thay đổi
+                    var newIsLoggedIn = data.isLoggedIn || false;
+                    var newCustomerName = data.customerName || '';
+                    var newCustomerPhone = data.customerPhone || '';
+                    var newCustomerEmail = data.customerEmail || '';
+                    
+                    // Kiểm tra xem có thay đổi không
+                    if (newIsLoggedIn !== isLoggedIn || 
+                        newCustomerName !== customerName || 
+                        newCustomerPhone !== customerPhone || 
+                        newCustomerEmail !== customerEmail) {
+                        
+                        console.log('Customer info changed, updating...');
+                        
+                        // Nếu user logout, clear state
+                        if (isLoggedIn && !newIsLoggedIn) {
+                            console.log('User logged out, clearing chat state...');
+                            window.clearChatState();
+                            return; // Không cần update UI nữa
+                        }
+                        
+                        isLoggedIn = newIsLoggedIn;
+                        customerName = newCustomerName;
+                        customerPhone = newCustomerPhone;
+                        customerEmail = newCustomerEmail;
+                        
+                        // Reset flag khi thông tin thay đổi
+                        guideMessageShown = false;
+                        
+                        // Cập nhật UI
+                        updateUI();
+                    }
+                } catch (error) {
+                    console.error('Error loading customer info:', error);
+                    // Chỉ cập nhật nếu trước đó đã đăng nhập
+                    if (isLoggedIn) {
+                        isLoggedIn = false;
+                        guideMessageShown = false;
+                        updateUI();
+                    }
+                }
+            }
+            
+            // Function để cập nhật UI
+            function updateUI() {
+                console.log('updateUI called - isLoggedIn:', isLoggedIn, 'conversationId:', conversationId);
+                
+                if (isLoggedIn) {
+                    if (conversationId) {
+                        // Đã có conversation, hiển thị chat
+                        console.log('Showing existing conversation');
+                        loginToChat.style.display = 'none';
+                        chatInput.style.display = 'flex';
+                        connectAndSubscribe();
+                    } else {
+                        // Chưa có conversation, hiển thị nút bắt đầu chat
+                        console.log('Showing chat input for new conversation');
+                        loginToChat.style.display = 'none';
+                        chatInput.style.display = 'flex';
+                        
+                        // Chỉ thêm tin nhắn hướng dẫn nếu chưa hiển thị
+                        if (!guideMessageShown && content.children.length === 0) {
+                            var guideMsg = {
+                                content: 'Nhấn nút chat để bắt đầu cuộc trò chuyện với nhân viên hỗ trợ',
+                                senderType: 'EMPLOYEE'
+                            };
+                            appendMsg(guideMsg);
+                            guideMessageShown = true; // Đánh dấu đã hiển thị
+                        }
+                        
+                        // Tự động tạo conversation mới
+                        setTimeout(() => {
+                            if (!conversationId) {
+                                console.log('Auto-starting new chat after UI update');
+                                startNewChat();
+                            }
+                        }, 500);
+                    }
+                } else {
+                    // Chưa đăng nhập, hiển thị form đăng nhập
+                    console.log('Showing login form');
+                    loginToChat.style.display = 'block';
+                    chatInput.style.display = 'none';
+                    
+                    // Xóa conversationId cũ nếu có
+                    if (conversationId) {
+                        localStorage.removeItem('conversationId');
+                        conversationId = null;
+                    }
+                    
+                    // Xóa tất cả tin nhắn khi chưa đăng nhập
+                    content.innerHTML = '';
+                    guideMessageShown = false; // Reset flag
+                }
+            }
+            
+            document.getElementById('chat-toggle').addEventListener('click', function(){
+                console.log('Chat toggle clicked - isLoggedIn:', isLoggedIn, 'conversationId:', conversationId);
+                
+                // Toggle hiển thị chat panel
+                var isVisible = panel.classList.contains('show');
+                if (isVisible) {
+                    panel.classList.remove('show');
+                } else {
+                    panel.classList.add('show');
+                }
+                
+                // Chỉ tạo conversation mới khi panel được mở và user đã đăng nhập
+                if (!isVisible && isLoggedIn && !conversationId) {
+                    console.log('Panel opened, starting new chat for logged in user');
+                    startNewChat();
+                }
+            });
+
+            function connectAndSubscribe() {
+                if (!conversationId) {
+                    console.log('Cannot connect: conversationId is null');
+                    return;
+                }
+                
+                // Prevent multiple simultaneous connections
+                if (isConnecting) {
+                    console.log('Connection already in progress, skipping...');
+                    return;
+                }
+                
+                // Disconnect existing connection if any
+                if (stompClient && stompClient.connected) {
+                    console.log('Disconnecting existing WebSocket connection...');
+                    if (currentSubscription) {
+                        currentSubscription.unsubscribe();
+                        currentSubscription = null;
+                    }
+                    stompClient.disconnect();
+                    stompClient = null;
+                }
+                
+                isConnecting = true;
+                console.log('Connecting to WebSocket for conversation:', conversationId);
+                
+                var socket = new SockJS('/ws');
+                stompClient = Stomp.over(socket);
+                stompClient.connect({}, function () {
+                    console.log('WebSocket connected successfully for conversation:', conversationId);
+                    isConnecting = false;
+                    
+                    // Subscribe to conversation topic
+                    currentSubscription = stompClient.subscribe('/topic/conversation.' + conversationId, function (msg) {
+                        console.log('Received WebSocket message:', msg.body);
+                        try {
+                        var data = JSON.parse(msg.body);
+                            console.log('Parsed message data:', data);
+                            
+                            // Kiểm tra nếu là thông báo cập nhật nhân viên
+                            if (data.type === 'EMPLOYEE_ASSIGNED') {
+                                console.log('Employee assigned notification received:', data);
+                                
+                                // Cập nhật thông tin nhân viên
+                                updateEmployeeInfo({
+                                    assignedEmployeeId: data.employeeId,
+                                    assignedEmployeeName: data.employeeName,
+                                    assignedEmployeeAvatar: data.employeeAvatar
+                                });
+                                
+                                // Hiển thị thông báo nhân viên đã tham gia
+                                var notificationMsg = {
+                                    content: 'Chào bạn, nhân viên ' + data.employeeName + ' đã tham gia cuộc trò chuyện. Cần tư vấn gì cứ nhắn cho chúng tớ nhé!',
+                                    senderType: 'EMPLOYEE'
+                                };
+                                appendMsg(notificationMsg);
+                                
+                                return;
+                            }
+                            
+                            // Kiểm tra nếu là thông báo lỗi conversation không tồn tại
+                            if (data.content && data.content.includes('Lỗi: Cuộc trò chuyện không tồn tại')) {
+                                console.log('Conversation not found error received, clearing state and restarting...');
+                                
+                                // Clear conversation state
+                                localStorage.removeItem('conversationId');
+                                conversationId = null;
+                                
+                                // Clear chat content
+                                content.innerHTML = '';
+                                
+                                // Hiển thị thông báo lỗi
+                                var errorMsg = {
+                                    content: 'Cuộc trò chuyện đã bị mất. Đang tạo cuộc trò chuyện mới...',
+                                    senderType: 'EMPLOYEE'
+                                };
+                                appendMsg(errorMsg);
+                                
+                                // Tự động tạo conversation mới
+                                setTimeout(() => {
+                                    startNewChat();
+                                }, 2000);
+                                
+                                return;
+                            }
+                            
+                        appendMsg(data);
+                        } catch (error) {
+                            console.error('Error parsing message:', error, 'Raw message:', msg.body);
+                        }
+                    });
+                }, function(error) {
+                    console.error('WebSocket connection failed:', error);
+                    isConnecting = false;
+                });
+            }
+
+            function appendMsg(m){
+                var mediaDiv = document.createElement('div');
+                var isEmployee = m.senderType === 'EMPLOYEE';
+                
+                // Sử dụng thời gian từ server nếu có, nếu không thì dùng thời gian hiện tại
+                var messageTime = m.createdAt ? 
+                    new Date(m.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) : 
+                    new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+                
+                if (isEmployee) {
+                    mediaDiv.className = 'media media-chat';
+                    mediaDiv.innerHTML = `
+                        <img class="avatar employee-avatar-msg" id="employee-avatar-msg-${Date.now()}" src="${employeeInfo.avatar || '/images/default-avatar.png'}" alt="${employeeInfo.name || 'Nhân viên hỗ trợ'}">
+                        <div class="media-body">
+                            <p class="message-content">
+                                <span class="message-text">${m.content}</span>
+                                <span class="message-time">${messageTime}</span>
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    mediaDiv.className = 'media media-chat media-chat-reverse';
+                    mediaDiv.innerHTML = `
+                        <div class="media-body">
+                            <p class="message-content">
+                                <span class="message-text">${m.content}</span>
+                                <span class="message-time">${messageTime}</span>
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                content.appendChild(mediaDiv);
+                content.scrollTop = content.scrollHeight;
+            }
+
+            function startNewChat() {
+                console.log('startNewChat called - isLoggedIn:', isLoggedIn);
+                
+                if (!isLoggedIn) {
+                    console.log('Customer not logged in');
+                    return;
+                }
+                
+                // Reset flag khi bắt đầu chat mới
+                guideMessageShown = false;
+                
+                // Sử dụng thông tin từ session
+                var customerData = {
+                    name: customerName || 'Khách hàng',
+                    contact: customerPhone || customerEmail || 'Không có thông tin liên hệ'
+                };
+                
+                console.log('Starting chat with customer data:', customerData);
+                
+                fetch('/api/chat/start', {
+                    method: 'POST', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }, 
+                    body: JSON.stringify(customerData)
+                })
+                .then(function(r) { 
+                    console.log('Response status:', r.status);
+                    console.log('Response headers:', r.headers);
+                    
+                    if (!r.ok) {
+                        return r.text().then(function(text) {
+                            console.log('Error response body:', text);
+                            throw new Error('HTTP ' + r.status + ': ' + text);
+                        });
+                    }
+                    return r.json(); 
+                })
+                .then(function(data) {
+                    console.log('Chat started successfully:', data);
+                    console.log('Employee data check:', {
+                        hasName: !!data.assignedEmployeeName,
+                        hasAvatar: !!data.assignedEmployeeAvatar,
+                        name: data.assignedEmployeeName,
+                        avatar: data.assignedEmployeeAvatar
+                    });
+                    
+                    conversationId = data.conversationId;
+                    localStorage.setItem('conversationId', conversationId);
+                    
+                    // Cập nhật thông tin nhân viên
+                    if (data.assignedEmployeeName || data.assignedEmployeeAvatar) {
+                        console.log('Calling updateEmployeeInfo with:', data);
+                        updateEmployeeInfo(data);
+                    } else {
+                        console.log('No employee info found in response, using default');
+                        // Sử dụng thông tin mặc định
+                        updateEmployeeInfo({
+                            assignedEmployeeName: 'Hỗ trợ khách hàng',
+                            assignedEmployeeAvatar: '/images/default-avatar.png'
+                        });
+                    }
+                    
+                    console.log('Conversation ID set to:', conversationId);
+                    
+                    // Cập nhật UI
+                    loginToChat.style.display = 'none';
+                    chatInput.style.display = 'flex';
+                    
+                    if (data.isExisting) {
+                        // BƯỚC MỚI: Conversation cũ, load tin nhắn cũ
+                        console.log('Loading existing conversation messages...');
+                        loadExistingMessages(conversationId);
+                    } else {
+                        // Conversation mới, gửi tin nhắn chào mừng qua WebSocket để lưu vào DB
+                        console.log('Sending welcome message via WebSocket for new conversation');
+                        
+                        // Kết nối WebSocket trước để có thể gửi tin nhắn
+                        connectAndSubscribe();
+                        
+                        // Đợi WebSocket kết nối xong rồi gửi tin nhắn chào mừng
+                        setTimeout(() => {
+                            if (stompClient && stompClient.connected) {
+                                var welcomeMsg = {
+                                    content: 'Xin chào sen! 🐶 D&G Fashion rất hân hạnh được đồng hành cùng bạn và Boss. Cần tư vấn gì cứ nhắn cho chúng tớ nhé!',
+                                    senderType: 'EMPLOYEE'
+                                };
+                                
+                                // Gửi tin nhắn chào mừng qua WebSocket để lưu vào DB
+                                stompClient.send('/app/chat/' + conversationId, {}, JSON.stringify({
+                                    senderType: 'EMPLOYEE',
+                                    senderId: data.assignedEmployeeId || null,
+                                    content: welcomeMsg.content
+                                }));
+                                
+                                console.log('Welcome message sent via WebSocket');
+                            } else {
+                                console.log('WebSocket not connected, cannot send welcome message');
+                            }
+                        }, 1000); // Đợi 1 giây để WebSocket kết nối
+                        
+                        return; // Không cần kết nối WebSocket ở dưới nữa
+                    }
+                    
+                    // Kết nối WebSocket sau khi có conversationId (chỉ cho conversation cũ)
+                    console.log('Connecting WebSocket after chat start...');
+                    connectAndSubscribe();
+                })
+                .catch(function(error) {
+                    console.error('Error starting chat:', error);
+                    alert('Có lỗi xảy ra khi bắt đầu chat: ' + error.message);
+                });
+            }
+
+            var sendBtn = document.getElementById('sendChat');
+            if (sendBtn) {
+                sendBtn.addEventListener('click', async function(e){
+                    e.preventDefault();
+                    console.log('Send button clicked');
+                    var text = document.getElementById('chatMessage').value.trim();
+                    console.log('Message text:', text, 'conversationId:', conversationId);
+                    
+                    if(!text) {
+                        console.log('Cannot send message - text is empty');
+                        return;
+                    }
+                    
+                    // Kiểm tra và làm mới conversation nếu cần
+                    if (conversationId) {
+                        await refreshConversationIfNeeded();
+                    }
+                    
+                    if(!conversationId) {
+                        console.log('No valid conversation, starting new chat...');
+                        startNewChat();
+                        // Đợi một chút để conversation được tạo
+                        setTimeout(() => {
+                            if (conversationId) {
+                                sendMessageInternal(text);
+                            } else {
+                                alert('Không thể tạo cuộc trò chuyện. Vui lòng thử lại.');
+                            }
+                        }, 1000);
+                        return;
+                    }
+                    
+                    if (!stompClient || !stompClient.connected) {
+                        console.log('WebSocket not connected, reconnecting...');
+                        connectAndSubscribe();
+                        setTimeout(() => {
+                            if (stompClient && stompClient.connected) {
+                                sendMessageInternal(text);
+                            } else {
+                                alert('Không thể kết nối chat. Vui lòng thử lại.');
+                            }
+                        }, 1000);
+                        return;
+                    }
+                    
+                    sendMessageInternal(text);
+                });
+            }
+            
+            // Thêm event listeners cho các button mới
+            var attachmentBtn = document.querySelector('.attachment-btn');
+            if (attachmentBtn) {
+                attachmentBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Attachment button clicked');
+                    // TODO: Implement file attachment functionality
+                    alert('Tính năng đính kèm file sẽ được phát triển sau');
+                });
+            }
+            
+
+            
+            function sendMessageInternal(text) {
+                    // KHÔNG hiển thị tin nhắn local nữa - chỉ gửi qua WebSocket
+                    console.log('Sending message via WebSocket:', {
+                        senderType: 'CUSTOMER', 
+                        senderId: null, 
+                        content: text
+                    });
+                    
+                    // Gửi tin nhắn qua WebSocket
+                    stompClient.send('/app/chat/' + conversationId, {}, JSON.stringify({
+                        senderType: 'CUSTOMER', 
+                        senderId: null, 
+                        content: text
+                    }));
+                    
+                    // Xóa nội dung input
+                    document.getElementById('chatMessage').value = '';
+            }
+
+            // Xử lý Enter key
+            var chatMessageInput = document.getElementById('chatMessage');
+            if (chatMessageInput) {
+                chatMessageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        document.getElementById('sendChat').click();
+                    }
+                });
+            }
+
+            // Load thông tin khách hàng khi khởi tạo
+            async function initializeChat() {
+                console.log('Initializing chat...');
+                
+                // Trước tiên load thông tin khách hàng
+                await loadCustomerInfo();
+                
+                // Nếu đã đăng nhập, kiểm tra conversation
+                if (isLoggedIn) {
+                    // Thử tìm conversation hiện tại từ localStorage
+                if (conversationId) {
+                        console.log('Found conversationId in localStorage:', conversationId);
+                    const isValid = await validateConversationId();
+                    console.log('Conversation validation result:', isValid);
+                        if (!isValid) {
+                            console.log('Invalid conversation, removing from localStorage');
+                            conversationId = null;
+                            localStorage.removeItem('conversationId');
+                        }
+                    }
+                    
+                    // Nếu không có conversation hợp lệ, tìm conversation hiện tại từ server
+                    if (!conversationId) {
+                        console.log('No valid conversation in localStorage, checking server...');
+                        await findExistingConversation();
+                    }
+                    
+                    // Nếu vẫn không có, tạo mới
+                    if (!conversationId) {
+                        console.log('No existing conversation found, creating new one...');
+                        startNewChat();
+                    } else {
+                        console.log('Using existing conversation:', conversationId);
+                        // Load tin nhắn cũ và kết nối WebSocket
+                        await loadExistingMessages(conversationId);
+                        connectAndSubscribe();
+                    }
+                }
+            }
+            
+            // Function để tìm conversation hiện tại từ server
+            async function findExistingConversation() {
+                try {
+                    console.log('Finding existing conversation from server...');
+                    const response = await fetch('/api/chat/find-existing', {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.conversationId) {
+                            console.log('Found existing conversation:', data.conversationId);
+                            conversationId = data.conversationId;
+                            localStorage.setItem('conversationId', conversationId);
+                            
+                            // Cập nhật thông tin nhân viên
+                            if (data.assignedEmployeeName || data.assignedEmployeeAvatar) {
+                                updateEmployeeInfo(data);
+                            }
+                            
+                            return true;
+                        }
+                    }
+                    console.log('No existing conversation found on server');
+                    return false;
+                } catch (error) {
+                    console.error('Error finding existing conversation:', error);
+                    return false;
+                }
+            }
+            
+            // BƯỚC MỚI: Thêm function để load tin nhắn cũ
+            async function loadExistingMessages(convId) {
+                try {
+                    console.log('Loading existing messages for conversation:', convId);
+                    
+                    const response = await fetch('/api/chat/messages/all/' + convId);
+                    if (!response.ok) {
+                        throw new Error('Failed to load messages: ' + response.status);
+                    }
+                    
+                    const messages = await response.json();
+                    console.log('Loaded', messages.length, 'existing messages');
+                    
+                    // Load thông tin nhân viên
+                    try {
+                        const employeeResponse = await fetch('/api/chat/employee-info/' + convId);
+                        if (employeeResponse.ok) {
+                            const employeeData = await employeeResponse.json();
+                            console.log('Loaded employee info:', employeeData);
+                            updateEmployeeInfo(employeeData);
+                        } else {
+                            console.log('Failed to load employee info, using default');
+                            updateEmployeeInfo({
+                                assignedEmployeeName: 'Hỗ trợ khách hàng',
+                                assignedEmployeeAvatar: null
+                            });
+                        }
+                    } catch (employeeError) {
+                        console.error('Error loading employee info:', employeeError);
+                        updateEmployeeInfo({
+                            assignedEmployeeName: 'Hỗ trợ khách hàng',
+                            assignedEmployeeAvatar: null
+                        });
+                    }
+                    
+                    // Xóa tin nhắn hướng dẫn nếu có
+                    content.innerHTML = '';
+                    
+                    // Hiển thị tất cả tin nhắn cũ
+                    messages.forEach(msg => {
+                        appendMsg(msg);
+                    });
+                    
+                    // Scroll xuống cuối để hiển thị tin nhắn mới nhất
+                    content.scrollTop = content.scrollHeight;
+
+                } catch (error) {
+                    console.error('Error loading existing messages:', error);
+                    
+                    // Hiển thị tin nhắn lỗi
+                    var errorMsg = {
+                        content: 'Không thể tải tin nhắn cũ. Vui lòng thử lại.',
+                        senderType: 'EMPLOYEE'
+                    };
+                    appendMsg(errorMsg);
+                }
+            }
+            
+            // Khởi tạo chat
+            console.log('=== CHAT INITIALIZATION DEBUG ===');
+            console.log('Starting chat initialization...');
+            initializeChat();
+            console.log('Chat initialization completed');
+            console.log('==================================');
+            
+            // Kiểm tra trạng thái đăng nhập định kỳ (mỗi 30 giây thay vì 5 giây)
+            setInterval(function() {
+                // Chỉ kiểm tra nếu đang ở trạng thái đã đăng nhập
+                if (isLoggedIn) {
+                    loadCustomerInfo();
+                }
+            }, 30000); // 30 giây
+            
+            // Kiểm tra conversation ID định kỳ (mỗi 60 giây)
+            setInterval(async function() {
+                if (isLoggedIn && conversationId) {
+                    await refreshConversationIfNeeded();
+                }
+            }, 60000); // 60 giây
+            
+            // Thêm event listener để detect logout từ các tab khác
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'conversationId' && e.newValue === null) {
+                    console.log('conversationId cleared from another tab, clearing chat state...');
+                    window.clearChatState();
+                }
+            });
+
+            // Function để cập nhật unread badge
+            function updateUnreadBadge() {
+                const toggleBtn = document.getElementById('chat-toggle');
+                if (toggleBtn) {
+                    // Kiểm tra xem có tin nhắn chưa đọc không
+                    const hasUnread = document.querySelectorAll('.message.received .unread-indicator').length > 0;
+                    if (hasUnread) {
+                        toggleBtn.classList.add('has-unread');
+                    } else {
+                        toggleBtn.classList.remove('has-unread');
+                    }
+                }
+            }
+
+            // Function để tạo ripple effect
+            function createRipple(event) {
+                const button = event.currentTarget;
+                const ripple = button.querySelector('.chat-ripple');
+                
+                if (ripple) {
+                    ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+                    ripple.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        ripple.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                        ripple.style.opacity = '0';
+                    }, 10);
+                }
+            }
+
+            // Thêm event listener cho ripple effect
+            const toggleBtn = document.getElementById('chat-toggle');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', createRipple);
+            }
+
+            // Cập nhật unread badge khi có tin nhắn mới
+            const originalAppendMsg = appendMsg;
+            appendMsg = function(msg) {
+                originalAppendMsg(msg);
+                updateUnreadBadge();
+            };
+
+            // Cập nhật unread badge khi khởi tạo
+            setTimeout(updateUnreadBadge, 1000);
+            
+        })();
+    </script>
+</div> 
