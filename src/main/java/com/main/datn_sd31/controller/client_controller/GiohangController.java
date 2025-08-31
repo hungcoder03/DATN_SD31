@@ -372,6 +372,7 @@ public class GiohangController {
 
         // Lấy giỏ hàng đã chọn
         List<GioHangChiTiet> selectedItems = giohangservice.findByIds(selectedIds);
+
         BigDecimal tongTien = selectedItems.stream()
                 .map(item -> item.getChiTietSp().getGiaBan()
                         .multiply(BigDecimal.valueOf(item.getSoLuong())))
@@ -393,28 +394,71 @@ public class GiohangController {
         // Load GHN provinces/districts/wards
         List<Map<String, Object>> provinces = ghnService.getProvinces();
         model.addAttribute("provinces", provinces);
+        // Địa chỉ mặc định
+        String diaChi = kh.getDiaChi(); // VD: "132 Lê Đại Hành, Xã Nam Dương, Thị xã Chũ, Bắc Giang"
+        String diaChiChiTiet = null;
 
-        if (provinceId != null) {
-            List<Map<String, Object>> districts = ghnService.getDistricts(provinceId);
-            model.addAttribute("districts", districts);
-        }
+        if (diaChi != null && diaChi.split(",").length >= 4) {
+            String[] parts = diaChi.split(",\\s*");
+            diaChiChiTiet = parts[0];
+            String xa = parts[1];
+            String huyen = parts[2];
+            String tinh = parts[3];
 
-        if (districtId != null) {
-            List<Map<String, Object>> wards = ghnService.getWards(districtId);
-            model.addAttribute("wards", wards);
-        }
+            // Tìm ID từ tên
+            List<Map<String, Object>> allProvinces = ghnService.getProvinces();
+            Map<String, Object> matchedProvince = allProvinces.stream()
+                    .filter(p -> tinh.equalsIgnoreCase((String) p.get("ProvinceName")))
+                    .findFirst().orElse(null);
+
+            if (matchedProvince != null) {
+                provinceId = (Integer) matchedProvince.get("ProvinceID");
+                List<Map<String, Object>> districts = ghnService.getDistricts(provinceId);
+                model.addAttribute("districts", districts);
+
+                Map<String, Object> matchedDistrict = districts.stream()
+                        .filter(d -> huyen.equalsIgnoreCase((String) d.get("DistrictName")))
+                        .findFirst().orElse(null);
+
+                if (matchedDistrict != null) {
+                    districtId = (Integer) matchedDistrict.get("DistrictID");
+                    List<Map<String, Object>> wards = ghnService.getWards(districtId);
+                    model.addAttribute("wards", wards);
+
+                    Map<String, Object> matchedWard = wards.stream()
+                            .filter(w -> xa.equalsIgnoreCase((String) w.get("WardName")))
+                            .findFirst().orElse(null);
+
+                    if (matchedWard != null) {
+                        wardCode = (String) matchedWard.get("WardCode");
+                    }
+                }
+            }
 
         // Gửi selected value cho view
         model.addAttribute("provinceId", provinceId);
         model.addAttribute("districtId", districtId);
         model.addAttribute("wardCode", wardCode);
+            model.addAttribute("diaChiChiTiet", diaChiChiTiet);
+        }
 
         // Tìm phiếu giảm tốt nhất
+        // Luôn gán lại sau khi tìm xong
+        model.addAttribute("provinceId", provinceId);
+        model.addAttribute("districtId", districtId);
+        model.addAttribute("wardCode", wardCode);
+
+        // Luôn load danh sách tỉnh
+        List<Map<String, Object>> provinces = ghnService.getProvinces();
+        model.addAttribute("provinces", provinces);
+
+        // Mã giảm giá tự chọn tốt nhất
         PhieuGiamGia phieuTotNhat = timPhieuTotNhat(dsPhieuGiamGia, tongTien);
         model.addAttribute("phieuTotNhat", phieuTotNhat);
 
         return "/client/pages/cart/checkout";
     }
+
 
     @PostMapping("/thanh-toan/xac-nhan")
     @Transactional
