@@ -320,12 +320,11 @@ public class GiohangController {
 
         KhachHang kh = getCurrentKhachHang();
         List<GioHangChiTiet> selectedItems = giohangservice.findByIds(selectedIds);
+
         BigDecimal tongTien = selectedItems.stream()
                 .map(item -> item.getChiTietSp().getGiaBan()
                         .multiply(BigDecimal.valueOf(item.getSoLuong())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-//        model.addAttribute("danhSachPhieuGiamGia", phieugiamgiarepository.findAll());
 
         LocalDate today = LocalDate.now();
         List<PhieuGiamGia> dsPhieuGiamGia = phieugiamgiarepository.findAll().stream()
@@ -336,40 +335,70 @@ public class GiohangController {
                 .collect(Collectors.toList());
 
         model.addAttribute("danhSachPhieuGiamGia", dsPhieuGiamGia);
-
         model.addAttribute("selectedItems", selectedItems);
         model.addAttribute("tongTien", tongTien);
         model.addAttribute("khachHang", kh);
 
+        // Địa chỉ mặc định
+        String diaChi = kh.getDiaChi(); // VD: "132 Lê Đại Hành, Xã Nam Dương, Thị xã Chũ, Bắc Giang"
+        String diaChiChiTiet = null;
+
+        if (diaChi != null && diaChi.split(",").length >= 4) {
+            String[] parts = diaChi.split(",\\s*");
+            diaChiChiTiet = parts[0];
+            String xa = parts[1];
+            String huyen = parts[2];
+            String tinh = parts[3];
+
+            // Tìm ID từ tên
+            List<Map<String, Object>> allProvinces = ghnService.getProvinces();
+            Map<String, Object> matchedProvince = allProvinces.stream()
+                    .filter(p -> tinh.equalsIgnoreCase((String) p.get("ProvinceName")))
+                    .findFirst().orElse(null);
+
+            if (matchedProvince != null) {
+                provinceId = (Integer) matchedProvince.get("ProvinceID");
+                List<Map<String, Object>> districts = ghnService.getDistricts(provinceId);
+                model.addAttribute("districts", districts);
+
+                Map<String, Object> matchedDistrict = districts.stream()
+                        .filter(d -> huyen.equalsIgnoreCase((String) d.get("DistrictName")))
+                        .findFirst().orElse(null);
+
+                if (matchedDistrict != null) {
+                    districtId = (Integer) matchedDistrict.get("DistrictID");
+                    List<Map<String, Object>> wards = ghnService.getWards(districtId);
+                    model.addAttribute("wards", wards);
+
+                    Map<String, Object> matchedWard = wards.stream()
+                            .filter(w -> xa.equalsIgnoreCase((String) w.get("WardName")))
+                            .findFirst().orElse(null);
+
+                    if (matchedWard != null) {
+                        wardCode = (String) matchedWard.get("WardCode");
+                    }
+                }
+            }
+
+            model.addAttribute("diaChiChiTiet", diaChiChiTiet);
+        }
+
+        // Luôn gán lại sau khi tìm xong
+        model.addAttribute("provinceId", provinceId);
+        model.addAttribute("districtId", districtId);
+        model.addAttribute("wardCode", wardCode);
+
+        // Luôn load danh sách tỉnh
         List<Map<String, Object>> provinces = ghnService.getProvinces();
         model.addAttribute("provinces", provinces);
 
-        if (provinceId != null) {
-            List<Map<String, Object>> districts = ghnService.getDistricts(provinceId);
-            model.addAttribute("districts", districts);
-        }
-
-        if (districtId != null) {
-            List<Map<String, Object>> wards = ghnService.getWards(districtId);
-            model.addAttribute("wards", wards);
-        }
-
-
-        // Xử lý chọn mã giảm tốt nhất
+        // Mã giảm giá tự chọn tốt nhất
         PhieuGiamGia phieuTotNhat = timPhieuTotNhat(dsPhieuGiamGia, tongTien);
         model.addAttribute("phieuTotNhat", phieuTotNhat);
 
-//        for (PhieuGiamGia phieu : danhSachPhieuGiamGia) {
-//            BigDecimal discount = phieuGiamGiaService.tinhTienGiam(phieu.getMa(), tongTien); // <-- Gọi đến service bạn đang dùng
-//            if (discount.compareTo(maxDiscount) > 0) {
-//                maxDiscount = discount;
-//                selectedVoucherCode = phieu.getMa();
-//            }
-//        }
-
-//        model.addAttribute("selectedVoucherCode", selectedVoucherCode);
         return "/client/pages/cart/checkout";
     }
+
 
     @PostMapping("/thanh-toan/xac-nhan")
     @Transactional

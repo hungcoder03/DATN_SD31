@@ -153,49 +153,66 @@
                         <!-- Address Section -->
                         <h4 class="mt-4 mb-3">📍 Địa Chỉ Giao Hàng</h4>
                         <div class="row g-3">
+                            <!-- Province -->
                             <div class="col-md-4">
                                 <div class="form-floating">
                                     <select name="provinceId" id="provinceSelect" class="form-select" required>
                                         <option value="">-- Chọn Tỉnh / Thành phố --</option>
                                         <option th:each="province : ${provinces}"
-                                            th:value="${province.get('ProvinceID')}"
-                                            th:text="${province.get('ProvinceName')}"></option>
+                                                th:value="${province['ProvinceID']}"
+                                                th:text="${province['ProvinceName']}"
+                                                th:selected="${province['ProvinceID']} == ${provinceId}"></option>
                                     </select>
-                                    <label>Tỉnh / Thành phố <span class="text-danger">*</span></label>
+                                    <label for="provinceSelect">Tỉnh / Thành phố <span class="text-danger">*</span></label>
                                 </div>
                                 <div class="invalid-feedback" id="provinceSelect-error"></div>
                             </div>
+
+                            <!-- District -->
                             <div class="col-md-4">
                                 <div class="form-floating">
                                     <select name="districtId" id="districtSelect" class="form-select" required>
                                         <option value="">-- Chọn Quận / Huyện --</option>
-                                        <option th:each="district : ${districts}" th:value="${district['DistrictID']}"
-                                            th:text="${district['DistrictName']}"></option>
+                                        <option th:each="district : ${districts}"
+                                                th:value="${district['DistrictID']}"
+                                                th:text="${district['DistrictName']}"
+                                                th:selected="${district['DistrictID']} == ${districtId}"></option>
                                     </select>
-                                    <label>Quận / Huyện <span class="text-danger">*</span></label>
+                                    <label for="districtSelect">Quận / Huyện <span class="text-danger">*</span></label>
                                 </div>
                                 <div class="invalid-feedback" id="districtSelect-error"></div>
                             </div>
+
+                            <!-- Ward -->
                             <div class="col-md-4">
                                 <div class="form-floating">
                                     <select name="wardId" id="wardSelect" class="form-select" required>
                                         <option value="">-- Chọn Phường / Xã --</option>
-                                        <option th:each="ward : ${wards}" th:value="${ward.get('WardCode')}"
-                                            th:text="${ward.get('WardName')}"></option>
+                                        <option th:each="ward : ${wards}"
+                                                th:value="${ward['WardCode']}"
+                                                th:text="${ward['WardName']}"
+                                                th:selected="${ward['WardCode']} == ${wardCode}"></option>
                                     </select>
-                                    <label>Phường / Xã <span class="text-danger">*</span></label>
+                                    <label for="wardSelect">Phường / Xã <span class="text-danger">*</span></label>
                                 </div>
                                 <div class="invalid-feedback" id="wardSelect-error"></div>
                             </div>
+
+                            <!-- Address detail -->
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="diaChi" name="diaChi"
-                                        placeholder="Địa chỉ chi tiết" required>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="diaChi"
+                                           name="diaChi"
+                                           placeholder="Địa chỉ chi tiết"
+                                           th:value="${diaChiChiTiet}" required>
                                     <label for="diaChi">Địa chỉ chi tiết <span class="text-danger">*</span></label>
                                 </div>
                                 <div class="invalid-feedback" id="diaChi-error"></div>
                             </div>
                         </div>
+
 
                         <!-- Payment Method Section -->
                         <h4 class="mt-4 mb-3">💳 Phương Thức Thanh Toán</h4>
