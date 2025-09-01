@@ -599,6 +599,7 @@ public class GiohangController {
 
             HoaDonChiTiet hdct = new HoaDonChiTiet();
             hdct.setHoaDon(hoaDon);
+            hdct.setNgayTao(LocalDateTime.now());
             hdct.setChiTietSanPham(ctsp);
             hdct.setSoLuong(soLuong);
             hdct.setGiaGoc(ctsp.getGiaGoc());

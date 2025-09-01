@@ -256,7 +256,7 @@
 
 			// Order channels (Trực tiếp vs Online)
 			// Customer segments by order channel
-			const ch = await fetchJson(`/admin/thong-ke/api/customer-channels?startDate=${from}&endDate=${to}`);
+			const ch = await fetchJson(`/admin/thong-ke/api/order-channels?startDate=${from}&endDate=${to}`);
 			initPaymentMethodChart(ch.labels || ['KH Trực tiếp','KH Online'], ch.values || [0,0]);
 
 			const ov = await fetchJson(`/admin/thong-ke/api/orders-vs-revenue?startDate=${from}&endDate=${to}&granularity=day`);

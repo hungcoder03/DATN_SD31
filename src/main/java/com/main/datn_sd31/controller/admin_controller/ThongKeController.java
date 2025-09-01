@@ -19,6 +19,10 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.main.datn_sd31.repository.HoaDonRepository;
 
 @Controller
@@ -227,7 +231,7 @@ public class ThongKeController {
             java.math.BigDecimal cost = java.math.BigDecimal.ZERO;
             if (list != null) {
                 for (com.main.datn_sd31.entity.HoaDon hd : list) {
-                    if (hd.getThanhTien() != null) rev = rev.add(hd.getThanhTien());
+                    if (hd.getThanhTien() != null) rev = rev.add(hd.getThanhTien().subtract(hd.getPhiVanChuyen()));
                     if (hd.getHoaDonChiTiets() != null) {
                         for (com.main.datn_sd31.entity.HoaDonChiTiet ct : hd.getHoaDonChiTiets()) {
                             java.math.BigDecimal giaNhap = java.math.BigDecimal.ZERO;
@@ -320,36 +324,38 @@ public class ThongKeController {
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         LocalDateTime from = startDate.atStartOfDay();
-        LocalDateTime to = endDate.atTime(23,59,59);
+        LocalDateTime to = endDate.atTime(23, 59, 59);
+
         var list = hoaDonRepository.findHoaDonByNgayAndTrangThai(from, to, 3);
         int trucTiep = 0;
         int online = 0;
+
+        // Debug: in ra giá trị thực tế
         for (var hd : list) {
             String loai = hd.getLoaihoadon();
-            String phuongThuc = hd.getPhuongThuc();
-            String bucket = null;
+
             if (loai != null) {
-                String lower = loai.trim().toLowerCase();
-                if (lower.contains("online") || lower.contains("web") || lower.contains("website")) bucket = "online";
-                if (lower.contains("truc") || lower.contains("tiep") || lower.contains("tai quay") || lower.contains("taiquay") || lower.contains("quay") || lower.contains("ban hang")) bucket = "offline";
+                String normalized = loai.trim().toLowerCase();
+
+                switch (normalized) {
+                    case "online" -> online++;
+                    case "offline" -> trucTiep++;
+                    default -> {
+                        trucTiep++;
+                    }
+                }
+            } else {
+                trucTiep++;
             }
-            if (bucket == null && phuongThuc != null) {
-                String p = phuongThuc.trim().toLowerCase();
-                // nếu thanh toán tiền mặt thường là bán trực tiếp
-                if (p.contains("tien") && p.contains("mat")) bucket = "offline";
-                if (p.contains("chuyen") || p.contains("ngan hang") || p.contains("vnpay") || p.contains("momo")) bucket = "online";
-            }
-            if (bucket == null) {
-                // fallback: coi đơn không xác định là trực tiếp để không mất dữ liệu (có thể chỉnh sửa nếu cần)
-                bucket = "offline";
-            }
-            if ("offline".equals(bucket)) trucTiep++; else online++;
         }
-        java.util.Map<String, Object> body = new java.util.HashMap<>();
-        body.put("labels", java.util.Arrays.asList("Trực tiếp", "Online"));
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("labels", Arrays.asList("Trực tiếp", "Online"));
         body.put("values", new int[]{trucTiep, online});
+        body.put("debug", Map.of("totalRecords", list.size(), "trucTiep", trucTiep, "online", online));
         return ResponseEntity.ok(body);
     }
+
 
     @GetMapping("/api/customer-channels")
     @ResponseBody

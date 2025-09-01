@@ -109,13 +109,13 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
 
     @Query("""
     SELECT hd FROM HoaDon hd
-    WHERE (hd.ngaySua >= :startOfDay
-      AND hd.ngaySua < :startOfNextDay)
+    WHERE (hd.ngaySua >= :startDate
+      AND hd.ngaySua < :endDate)
       AND hd.trangThai = :trangThai
     """)
     List<HoaDon> findHoaDonByNgayAndTrangThai(
-            @Param("startOfDay") LocalDateTime startOfDay,
-            @Param("startOfNextDay") LocalDateTime startOfNextDay,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
             @Param("trangThai") Integer trangThai
     );
 

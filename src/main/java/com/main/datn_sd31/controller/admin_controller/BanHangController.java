@@ -499,7 +499,7 @@ public class BanHangController {
         model.addAttribute("ten",ketQua.getTenCt());
         model.addAttribute("mausac",ketQua.getMauSac().getTen());
         model.addAttribute("cartKey", cartKey);
-        return "admin/banhang"; // trang bán hàng hiển thị luôn kết quả tìm
+        return "admin/pages/banhang/banhang"; // trang bán hàng hiển thị luôn kết quả tìm
     }
 
     @GetMapping("/tim-kiem-theo-ma-vach")
