@@ -188,7 +188,7 @@ public class dotGiamGiaController {
 
         List<Map<String, Object>> content = new ArrayList<>();
         for (ChiTietSanPham ct : pageData.getContent()) {
-            BigDecimal base = Optional.ofNullable(ct.getGiaBan()).orElse(Optional.ofNullable(ct.getGiaGoc()).orElse(BigDecimal.ZERO));
+            BigDecimal base = Optional.ofNullable(ct.getGiaGoc()).orElse(Optional.ofNullable(ct.getGiaGoc()).orElse(BigDecimal.ZERO));
             BigDecimal discounted = calcDiscountedPrice(base, dot);
             Map<String, Object> item = new HashMap<>();
             item.put("id", ct.getId());
