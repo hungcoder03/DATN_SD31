@@ -47,7 +47,7 @@ public final class SecurityConstants {
         "/uploads/**", "/css/**", "/js/**", "/images/**",
         "/vendors/**", "/webjars/**", "/static/**", "/favicon.ico",
         "/san-pham/**", "/client-static/**", "/bootstrap-5.3.7-dist/**",
-        "/api/auth/**", "/ws/**"
+        "/api/auth/**", "/api/ai-chat/**", "/ws/**"
     };
     
     public static final String[] ADMIN_PERMIT_ALL = {
@@ -67,7 +67,8 @@ public final class SecurityConstants {
         "/admin/danh-muc/**",        // Danh mục
         "/admin/loai-thu/**",        // Loại thú
         "/admin/mau-sac/**",         // Màu sắc
-        "/admin/size/**"             // Size
+        "/admin/size/**",            // Size
+        "/admin/ai-training/**"      // AI Training Data
     };
     
     // Admin URLs cho cả Quản lý và Nhân viên
