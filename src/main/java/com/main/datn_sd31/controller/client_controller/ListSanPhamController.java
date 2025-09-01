@@ -239,7 +239,15 @@ public class ListSanPhamController {
                 .filter(Objects::nonNull)
                 .min(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
-        
+
+            DotGiamGia loaiDotGiamGia = chiTiets.stream()
+                    .map(ChiTietSanPham::getDotGiamGia)
+                    .filter(Objects::nonNull)
+                    .findFirst()   // trả về Optional<String>
+                    .orElse(null); // nếu không có thì null
+
+
+        model.addAttribute("loaiDotGiamGia", loaiDotGiamGia.getLoai());
         model.addAttribute("giaBanMin", giaBanMin);
         model.addAttribute("giaGocMin", giaGocMin);
 
