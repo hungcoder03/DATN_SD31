@@ -37,7 +37,7 @@ public class SendMailService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlContent, true);
-        helper.setFrom("noreply@yourstore.com");
+        helper.setFrom("noreply@dcfashions.com");
 
         mailSender.send(message);
     }
