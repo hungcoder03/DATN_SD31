@@ -27,6 +27,7 @@ public class AITrainingDataController {
             model.addAttribute("trainingData", trainingData);
             model.addAttribute("categories", categories);
             model.addAttribute("newTrainingData", new AITrainingData());
+            model.addAttribute("isEdit", false);
             
             return "admin/pages/ai-training";
         } catch (Exception e) {
@@ -68,12 +69,30 @@ public class AITrainingDataController {
     }
 
     @GetMapping("/edit/{id}")
-    @ResponseBody
-    public AITrainingData getTrainingData(@PathVariable Long id) {
-        // Trả về JSON để edit form
-        return geminiAIService.getAllTrainingData().stream()
-            .filter(td -> td.getId().equals(id))
-            .findFirst()
-            .orElse(null);
+    public String editTrainingDataPage(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            AITrainingData trainingData = geminiAIService.getAllTrainingData().stream()
+                .filter(td -> td.getId().equals(id))
+                .findFirst()
+                .orElse(null);
+            
+            if (trainingData == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy dữ liệu training!");
+                return "redirect:/admin/ai-training";
+            }
+            
+            List<AITrainingData> allTrainingData = geminiAIService.getAllTrainingData();
+            List<String> categories = geminiAIService.getAllCategories();
+            
+            model.addAttribute("trainingData", allTrainingData);
+            model.addAttribute("categories", categories);
+            model.addAttribute("newTrainingData", trainingData); // Đặt dữ liệu cần edit vào form
+            model.addAttribute("isEdit", true);
+            
+            return "admin/pages/ai-training";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi tải dữ liệu: " + e.getMessage());
+            return "redirect:/admin/ai-training";
+        }
     }
 } 

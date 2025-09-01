@@ -1316,6 +1316,75 @@
             }
         }
 
+        /* Close Button Styles */
+        .chat-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-close-btn:active {
+            transform: scale(0.95);
+        }
+
+        .chat-close-btn i {
+            font-size: 14px;
+        }
+
+        /* AI Chat Close Button */
+        .ai-chat-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-chat-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .ai-chat-close-btn:active {
+            transform: scale(0.95);
+        }
+
+        .ai-chat-close-btn i {
+            font-size: 14px;
+        }
 
     </style>
     <!-- Chat Selection Popup -->
@@ -1361,6 +1430,9 @@
     <div id="chat-panel" class="modern-chat-panel">
         <!-- Card Header -->
         <div class="modern-card-header">
+            <button class="chat-close-btn" id="close-human-chat" title="Đóng chat">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="header-content">
                 <div class="header-left">
                                     <div class="employee-avatar" id="employee-avatar-container">
@@ -1376,7 +1448,6 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <span class="online-badge">Online</span>
                 </div>
             </div>
         </div>
@@ -1428,6 +1499,9 @@
     <div id="ai-chat-panel" class="ai-chat-panel">
         <!-- AI Header -->
         <div class="ai-chat-header">
+            <button class="ai-chat-close-btn" id="close-ai-chat" title="Đóng chat">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="ai-header-content">
                 <div class="ai-avatar">
                     <i class="fas fa-robot"></i>
@@ -1435,8 +1509,7 @@
                 <div class="ai-info">
                     <h4>D&G AI Assistant</h4>
                     <p class="ai-status">Trợ lý thông minh</p>
-                </div>
-                <div class="ai-online-badge">Online</div>
+                </div>   
             </div>
         </div>
 
@@ -1775,21 +1848,65 @@
             var aiConversationHistory = [];
             var isAIChatActive = false;
 
+            // Close button elements
+            var closeHumanChatBtn = document.getElementById('close-human-chat');
+            var closeAIChatBtn = document.getElementById('close-ai-chat');
+
+            // Close Human Chat Panel
+            if (closeHumanChatBtn) {
+                closeHumanChatBtn.addEventListener('click', function(){
+                    console.log('Closing human chat panel');
+                    panel.classList.remove('show');
+                    isAIChatActive = false;
+                    
+                    // Hiển thị lại nút chat toggle
+                    var chatToggle = document.getElementById('chat-toggle');
+                    chatToggle.style.display = 'flex';
+                });
+            }
+
+            // Close AI Chat Panel
+            if (closeAIChatBtn) {
+                closeAIChatBtn.addEventListener('click', function(){
+                    console.log('Closing AI chat panel');
+                    aiChatPanel.classList.remove('show');
+                    isAIChatActive = false;
+                    
+                    // Hiển thị lại nút chat toggle
+                    var chatToggle = document.getElementById('chat-toggle');
+                    chatToggle.style.display = 'flex';
+                });
+            }
+
             // Show chat selection popup when chat toggle is clicked
             document.getElementById('chat-toggle').addEventListener('click', function(){
-                console.log('Chat toggle clicked - showing selection popup');
+                console.log('Chat toggle clicked - hiding toggle and showing selection popup');
+                
+                // Ẩn nút chat toggle
+                var chatToggle = document.getElementById('chat-toggle');
+                chatToggle.style.display = 'none';
+                
+                // Hiển thị popup chọn loại chat
                 chatSelectionPopup.style.display = 'flex';
             });
 
             // Close popup when close button is clicked
             popupClose.addEventListener('click', function(){
                 chatSelectionPopup.style.display = 'none';
+                
+                // Hiển thị lại nút chat toggle
+                var chatToggle = document.getElementById('chat-toggle');
+                chatToggle.style.display = 'flex';
             });
                 
             // Close popup when clicking outside
             chatSelectionPopup.addEventListener('click', function(e){
                 if (e.target === chatSelectionPopup) {
                     chatSelectionPopup.style.display = 'none';
+                    
+                    // Hiển thị lại nút chat toggle
+                    var chatToggle = document.getElementById('chat-toggle');
+                    chatToggle.style.display = 'flex';
                 }
             });
 
@@ -1802,7 +1919,9 @@
                 isAIChatActive = true;
                 
                 // Hide human chat panel if it's open
-                    panel.classList.remove('show');
+                panel.classList.remove('show');
+                
+                // Không hiển thị lại nút toggle khi đã chọn AI chat
             });
 
             // Human Chat button clicked
@@ -1825,6 +1944,8 @@
                 // Hide AI chat panel
                 aiChatPanel.classList.remove('show');
                 isAIChatActive = false;
+                
+                // Không hiển thị lại nút toggle khi đã chọn Human chat
             });
 
             function connectAndSubscribe() {
