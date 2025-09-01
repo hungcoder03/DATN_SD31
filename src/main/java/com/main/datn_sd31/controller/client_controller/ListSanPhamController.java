@@ -240,16 +240,18 @@ public class ListSanPhamController {
                 .min(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
 
-            DotGiamGia loaiDotGiamGia = chiTiets.stream()
-                    .map(ChiTietSanPham::getDotGiamGia)
-                    .filter(Objects::nonNull)
-                    .findFirst()   // trả về Optional<String>
-                    .orElse(null); // nếu không có thì null
-
-
-        model.addAttribute("loaiDotGiamGia", loaiDotGiamGia.getLoai());
         model.addAttribute("giaBanMin", giaBanMin);
         model.addAttribute("giaGocMin", giaGocMin);
+
+        String loaiDotGiamGia = chiTiets.stream()
+                .map(ChiTietSanPham::getDotGiamGia)
+                .filter(Objects::nonNull)
+                .map(DotGiamGia::getLoai) // lấy trực tiếp getLoai
+                .filter(Objects::nonNull) // loại bỏ null
+                .findFirst()
+                .orElse(null); // nếu không có thì null
+
+        model.addAttribute("loaiDotGiamGia", loaiDotGiamGia);
 
         // Size duy nhất
         List<Size> dsSize = chiTiets.stream()

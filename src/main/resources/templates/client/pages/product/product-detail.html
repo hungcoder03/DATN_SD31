@@ -207,15 +207,15 @@
                                         </span>
 
                                         <!-- Discount Badge -->
-                                        <div class="discount-badge" th:if="${!loaiDotGiamGia.equals('tien_mat')}">
+                                        <div class="discount-badge" th:if="${loaiDotGiamGia != null && !loaiDotGiamGia.equals('tien_mat')}">
                                             <span class="discount-text" id="discountPercent">
                                                 -<span th:text="${#numbers.formatDecimal((giaGocMin - giaBanMin) / giaGocMin * 100, 0, 'COMMA', 0, 'POINT')}">0</span>%
                                             </span>
                                         </div>
-                                        <div class="discount-badge money-discount" th:if="${loaiDotGiamGia.equals('tien_mat')}">
-                                        <span class="discount-text" id="discountMoney">
-                                            -<span th:text="${#numbers.formatDecimal(giaGocMin - giaBanMin, 0, 'COMMA', 0, 'POINT')}">0</span>₫
-                                        </span>
+                                        <div class="discount-badge money-discount" th:if="${loaiDotGiamGia != null && loaiDotGiamGia.equals('tien_mat')}">
+                                            <span class="discount-text" id="discountMoney">
+                                                -<span th:text="${#numbers.formatDecimal(giaGocMin - giaBanMin, 0, 'COMMA', 0, 'POINT')}">0</span>₫
+                                            </span>
                                         </div>
                                     </div>
                                     <!-- Alternative: Money Discount Badge (uncomment if needed) -->
