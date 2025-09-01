@@ -79,9 +79,6 @@ public class ChatRestController {
             }
             
         } catch (Exception e) {
-            System.err.println("=== ERROR IN findExistingConversation ===");
-            System.err.println("Error message: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", "Có lỗi xảy ra khi tìm conversation: " + e.getMessage()));
         }
     }
@@ -198,14 +195,6 @@ public class ChatRestController {
             }
             
             NhanVien employee = currentEmployee.get();
-            
-            // Log thông tin nhân viên để debug
-            System.out.println("=== GET EMPLOYEE INFO DEBUG ===");
-            System.out.println("Conversation ID: " + conversationId);
-            System.out.println("Employee ID: " + employee.getId());
-            System.out.println("Employee name: " + employee.getTen());
-            System.out.println("Employee avatar: " + employee.getAnh());
-            System.out.println("================================");
             
             // Xử lý đường dẫn avatar
             String avatarPath = employee.getAnh();
