@@ -4,6 +4,7 @@ import com.main.datn_sd31.entity.*;
 import com.main.datn_sd31.repository.*;
 import com.main.datn_sd31.service.ChiTietSanPhamService;
 import com.main.datn_sd31.service.PhieuGiamGiaService;
+import com.main.datn_sd31.service.SendMailService;
 import com.main.datn_sd31.service.impl.GHNService;
 import com.main.datn_sd31.service.impl.Giohangservice;
 import com.main.datn_sd31.service.impl.Sanphamservice;
@@ -46,11 +47,9 @@ public class GiohangController {
     private final NhanVienRepository nhanvienrepository;
     private final HoaDonChiTietRepository hoadonCTreposiroty;
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
-
     private final ChiTietSanPhamService chiTietSanPhamService;
-
-    @Autowired
-    private GHNService ghnService;
+    private final GHNService ghnService;
+    private final SendMailService sendMailService;
 
     private KhachHang getCurrentKhachHang() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -442,16 +441,6 @@ public class GiohangController {
             model.addAttribute("diaChiChiTiet", diaChiChiTiet);
         }
 
-        // Tìm phiếu giảm tốt nhất
-        // Luôn gán lại sau khi tìm xong
-        model.addAttribute("provinceId", provinceId);
-        model.addAttribute("districtId", districtId);
-        model.addAttribute("wardCode", wardCode);
-
-        // Luôn load danh sách tỉnh
-        List<Map<String, Object>> provinces = ghnService.getProvinces();
-        model.addAttribute("provinces", provinces);
-
         // Mã giảm giá tự chọn tốt nhất
         PhieuGiamGia phieuTotNhat = timPhieuTotNhat(dsPhieuGiamGia, tongTien);
         model.addAttribute("phieuTotNhat", phieuTotNhat);
@@ -459,6 +448,8 @@ public class GiohangController {
         return "/client/pages/cart/checkout";
     }
 
+
+    // Thay thế phần gửi email trong Controller của bạn
 
     @PostMapping("/thanh-toan/xac-nhan")
     @Transactional
@@ -475,11 +466,26 @@ public class GiohangController {
         String tenHuyen = formData.get("tenHuyen");
         String tenTinh = formData.get("tenTinh");
 
-        // Check địa chỉ rỗng hoặc thiếu
+        // Thêm validation cho ID để đảm bảo có select đúng
+        String provinceId = formData.get("provinceId");
+        String districtId = formData.get("districtId");
+        String wardId = formData.get("wardId");
+
+        // Debug log
+        System.out.println("Form data: " + formData);
+        System.out.println("dia chi chi tiet: " + diaChiChiTiet);
+        System.out.println("xa: " + tenXa);
+        System.out.println("huyen: " + tenHuyen);
+        System.out.println("tinh: " + tenTinh);
+
+        // Check validation - kiểm tra cả text name và ID
         if (diaChiChiTiet == null || diaChiChiTiet.isBlank()
                 || tenXa == null || tenXa.isBlank()
                 || tenHuyen == null || tenHuyen.isBlank()
-                || tenTinh == null || tenTinh.isBlank()) {
+                || tenTinh == null || tenTinh.isBlank()
+                || provinceId == null || provinceId.isBlank()
+                || districtId == null || districtId.isBlank()
+                || wardId == null || wardId.isBlank()) {
 
             ThongBaoUtils.addError(redirectAttributes, "Vui lòng nhập đầy đủ địa chỉ giao hàng.");
             String joinedIds = selectedItemIds.stream()
@@ -499,6 +505,7 @@ public class GiohangController {
 
         // ✅ KIỂM TRA NGAY Ở ĐÂY
         if (!chiTietSanPhamService.kiemTraTonKho(gioHangChiTiets)) {
+            System.out.println("Loi 2");
             ThongBaoUtils.addError(redirectAttributes, "Sản phẩm đã vượt quá tồn kho.");
             String joinedIds = selectedItemIds.stream()
                     .map(String::valueOf)
@@ -540,11 +547,9 @@ public class GiohangController {
         hoaDon.setNhanVien(nv);
         hoaDon.setNguoiTao(1);
         hoaDon.setNguoiSua(1);
-//        System.out.println("pgg: " + formData);
 
         if (formData.containsKey("phieuGiamGia") && !formData.get("phieuGiamGia").isBlank()) {
             PhieuGiamGia phieu = phieugiamgiarepository.findByMa(formData.get("phieuGiamGia"));
-//            System.out.println("Tim thay 1.1: " + phieu);
             hoaDon.setPhieuGiamGia(phieu);
         }
         hoaDon.setTrangThai(1);
@@ -570,9 +575,20 @@ public class GiohangController {
 
             return "redirect:/thanh-toan-vnpay?maHoaDon=" + hoaDon.getMa() + "&ids=" + ids;
         }
+
+        // 🎯 GỬI EMAIL HTML ĐẸP
+        try {
+            sendMailService.sendOrderConfirmationMail(hoaDon.getEmail(), hoaDon, gioHangChiTiets);
+            System.out.println("✅ Gửi email xác nhận thành công tới: " + hoaDon.getEmail());
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi email: " + e.getMessage());
+            // Email thất bại nhưng đơn hàng vẫn thành công, không cần redirect
+        }
+
         model.addAttribute("maHoaDon", hoaDon.getMa());
         model.addAttribute("tienThanhToanThanhCong", thanhTien);
         model.addAttribute("ngayThanhToan", LocalDateTime.now());
+
         return "client/pages/cart/success";
     }
 

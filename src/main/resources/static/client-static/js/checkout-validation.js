@@ -12,7 +12,7 @@ class CheckoutValidator {
             { id: 'provinceSelect', rules: { required: true } },
             { id: 'districtSelect', rules: { required: true } },
             { id: 'wardSelect', rules: { required: true } },
-            { id: 'diaChi', rules: { required: true, minLength: 10 } }
+            { id: 'diaChi', rules: { required: false} }
         ];
         
         this.currentDiscount = 0;

@@ -328,6 +328,92 @@
 <!-- External JavaScript Files -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:src="@{/client-static/js/checkout-validation.js}"></script>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const provinceSelect = document.getElementById('provinceSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const wardSelect = document.getElementById('wardSelect');
+
+        const tenTinhHidden = document.getElementById('tenTinhHidden');
+        const tenHuyenHidden = document.getElementById('tenHuyenHidden');
+        const tenXaHidden = document.getElementById('tenXaHidden');
+
+        // Cập nhật tên tỉnh khi chọn
+        provinceSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            tenTinhHidden.value = selectedOption.text !== '-- Chọn Tỉnh / Thành phố --' ? selectedOption.text : '';
+
+            // Reset district và ward
+            districtSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+            tenHuyenHidden.value = '';
+            tenXaHidden.value = '';
+
+            // Load districts nếu có tỉnh được chọn
+            if (this.value) {
+                loadDistricts(this.value);
+            }
+        });
+
+        // Cập nhật tên huyện khi chọn
+        districtSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            tenHuyenHidden.value = selectedOption.text !== '-- Chọn Quận / Huyện --' ? selectedOption.text : '';
+
+            // Reset ward
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+            tenXaHidden.value = '';
+
+            // Load wards nếu có huyện được chọn
+            if (this.value) {
+                loadWards(this.value);
+            }
+        });
+
+        // Cập nhật tên xã khi chọn
+        wardSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            tenXaHidden.value = selectedOption.text !== '-- Chọn Phường / Xã --' ? selectedOption.text : '';
+        });
+
+        function loadDistricts(provinceId) {
+            fetch(`/gio-hang/thanh-toan/location?provinceId=${provinceId}`)
+                .then(response => response.json())
+                .then(data => {
+                    districtSelect.innerHTML = '<option value="">-- Chọn Quận / Huyện --</option>';
+                    data.forEach(district => {
+                        districtSelect.innerHTML += `<option value="${district.DistrictID}">${district.DistrictName}</option>`;
+                    });
+                })
+                .catch(error => console.error('Error loading districts:', error));
+        }
+
+        function loadWards(districtId) {
+            fetch(`/gio-hang/thanh-toan/location?districtId=${districtId}`)
+                .then(response => response.json())
+                .then(data => {
+                    wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
+                    data.forEach(ward => {
+                        wardSelect.innerHTML += `<option value="${ward.WardCode}">${ward.WardName}</option>`;
+                    });
+                })
+                .catch(error => console.error('Error loading wards:', error));
+        }
+
+        // Khởi tạo giá trị ban đầu nếu có
+        if (provinceSelect.value && provinceSelect.selectedIndex > 0) {
+            tenTinhHidden.value = provinceSelect.options[provinceSelect.selectedIndex].text;
+        }
+        if (districtSelect.value && districtSelect.selectedIndex > 0) {
+            tenHuyenHidden.value = districtSelect.options[districtSelect.selectedIndex].text;
+        }
+        if (wardSelect.value && wardSelect.selectedIndex > 0) {
+            tenXaHidden.value = wardSelect.options[wardSelect.selectedIndex].text;
+        }
+    });
+</script>
 </body>
 
 </html>
