@@ -219,8 +219,8 @@ public class SendMailService {
         text.append("📞 Chúng tôi sẽ liên hệ với bạn trong vòng 24h để xác nhận đơn hàng.\n");
         text.append("Cảm ơn bạn đã tin tưởng và mua sắm tại cửa hàng! 💖\n\n");
         text.append("==========================================\n");
-        text.append("📧 Email: support@yourstore.com\n");
-        text.append("📱 Hotline: 1900-xxxx");
+        text.append("📧 Email: support@dcfashions.com\n");
+        text.append("📱 Hotline: 1900-8386");
 
         return text.toString();
     }
@@ -242,7 +242,7 @@ public class SendMailService {
                             "Mã đơn hàng của bạn là: %s\n\n" +
                             "Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận đơn hàng.\n\n" +
                             "Trân trọng,\n" +
-                            "Your Store Team", customerName, orderCode);
+                            "D&C Fahions", customerName, orderCode);
             sendSimpleMail(customerEmail, "Cảm ơn bạn đã đặt hàng - " + orderCode, textContent);
         }
     }
@@ -263,8 +263,8 @@ public class SendMailService {
                 "<p>Cảm ơn bạn đã tin tưởng và mua sắm tại cửa hàng!</p>" +
                 "<hr style='margin: 30px 0; border: none; height: 1px; background: #e0e0e0;'>" +
                 "<p style='font-size: 14px; color: #666; text-align: center; margin: 0;'>" +
-                "Email: support@yourstore.com | Hotline: 1900-xxxx<br>" +
-                "Website: www.yourstore.com" +
+                "Email: support@dcfashions.com | Hotline: 1900-8386<br>" +
+                "Website: www.dcfashions.com" +
                 "</p>" +
                 "</div>" +
                 "</body></html>";
