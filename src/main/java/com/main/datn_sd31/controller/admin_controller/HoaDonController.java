@@ -33,23 +33,22 @@ import java.util.Map;
 public class HoaDonController {
 
     private final GetNhanVien getNhanVien;
-
     private final HoaDonService hoaDonService;
-
     private final HoaDonChiTietService hoaDonChiTietService;
-
     private final LichSuHoaDonService lichSuHoaDonService;
 
-    @GetMapping("")
+    @GetMapping({"", "/search", "/filter"})
     public String hoaDon(
             Model model,
             @RequestParam(name = "trang-thai", required = false) TrangThaiLichSuHoaDon trangThai,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(value = "size", defaultValue = "10") int size
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "loaiHoaDon", required = false) String loaiHoaDon
     ) {
-        //Giá tri mac định
+        // Giá trị mặc định cho ngày tháng
         if (startDate == null) {
             startDate = LocalDate.of(2025, 1, 1);
         }
@@ -57,108 +56,59 @@ public class HoaDonController {
             endDate = LocalDate.now();
         }
 
-        Pagination<HoaDonDTO> hoaDonList = (trangThai == null)
-                ? hoaDonService.getAll(page, size, startDate, endDate)
-                : hoaDonService.getAllHoaDonByStatus(trangThai, page, size);
+        Pagination<HoaDonDTO> hoaDonList;
+
+        // Logic xử lý theo từng trường hợp
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // Trường hợp tìm kiếm theo keyword
+            hoaDonList = hoaDonService.searchByKeyword(keyword, page, size);
+            model.addAttribute("keyword", keyword);
+        } else if (loaiHoaDon != null && !loaiHoaDon.trim().isEmpty()) {
+            // Trường hợp filter theo loại hóa đơn
+            hoaDonList = hoaDonService.searchByLoaiHoaDon(loaiHoaDon, page, size);
+            model.addAttribute("loaiHoaDon", loaiHoaDon);
+        } else if (trangThai != null) {
+            // Trường hợp filter theo trạng thái
+            hoaDonList = hoaDonService.getAllHoaDonByStatus(trangThai, page, size);
+        } else {
+            // Trường hợp mặc định - lấy tất cả theo ngày tháng
+            hoaDonList = hoaDonService.getAll(page, size, startDate, endDate);
+        }
+
+        // Thêm dữ liệu vào model
         model.addAttribute("hoaDonList", hoaDonList.getContent());
         model.addAttribute("pageInfo", hoaDonList);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
-
-        Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
-
-        for (HoaDonDTO hd : hoaDonList.getContent()) {
-            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
-        }
-
-        model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
         model.addAttribute("selectedStatus", trangThai);
 
-        return "admin/pages/hoa-don/hoa-don";
-    }
-
-    @GetMapping("/search")
-    public String searchHoaDon(
-            Model model,
-            @RequestParam(value = "keyword", required = false) String keyword,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
-    ) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return "redirect:/admin/hoa-don";
-        }
-
-        Pagination<HoaDonDTO> hoaDonList = hoaDonService.searchByKeyword(keyword, page, size);
-
-        model.addAttribute("hoaDonList", hoaDonList.getContent());
-        model.addAttribute("pageInfo", hoaDonList);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
-
+        // Tạo map trạng thái hợp lệ cho từng hóa đơn
         Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
         for (HoaDonDTO hd : hoaDonList.getContent()) {
-            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
+            trangThaiHopLeMap.put(hd.getMa(),
+                    lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
         }
         model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
 
         return "admin/pages/hoa-don/hoa-don";
     }
-
-    @GetMapping("/filter")
-    public String searchHoaDonByLoaiHoaDon(
-            Model model,
-            @RequestParam(value = "loaiHoaDon", required = false, defaultValue = "") String loaiHoaDon,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size
-    ) {
-        if (loaiHoaDon == null || loaiHoaDon.trim().isEmpty()) {
-            return "redirect:/admin/hoa-don";
-        }
-
-        Pagination<HoaDonDTO> hoaDonList = hoaDonService.searchByLoaiHoaDon(loaiHoaDon, page, size);
-
-        model.addAttribute("hoaDonList", hoaDonList.getContent());
-        model.addAttribute("pageInfo", hoaDonList);
-        model.addAttribute("loaiHoaDon", loaiHoaDon);
-        model.addAttribute("trangThaiCount", hoaDonService.getTrangThaiCount(hoaDonList.getContent()));
-
-        Map<String, List<TrangThaiLichSuHoaDon>> trangThaiHopLeMap = new HashMap<>();
-        for (HoaDonDTO hd : hoaDonList.getContent()) {
-            trangThaiHopLeMap.put(hd.getMa(), lichSuHoaDonService.getTrangThaiTiepTheoHopLe(hd.getTrangThaiLichSuHoaDon(), hd));
-        }
-        model.addAttribute("trangThaiHopLeMap", trangThaiHopLeMap);
-
-        return "admin/pages/hoa-don/hoa-don";
-    }
-
-//    @GetMapping("/detail")
-//    public String getHoaDonDetail(
-//            @RequestParam("ma") String ma,
-//            Model model
-//    ) {
-//        model.addAttribute("hoaDonDetail", hoaDonService.getHoaDonByMa(ma));
-//        model.addAttribute("hdctList", hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(ma));
-//        return "/admin/pages/hoa-don/hoa-don-detail-modal";
-//    }
 
     @PostMapping("/cap-nhat-trang-thai")
     public String capNhatTrangThai(
             @RequestParam("maHoaDon") String maHoaDon,
             @RequestParam(value = "trangThaiMoi", required = false) Integer trangThaiMoi,
-//            @RequestParam(value = "lyDoGiaoKhongThanhCong", required = false) Integer lyDoGiaoKhongThanhCong,
             @RequestParam(value = "ghiChu", required = false) String ghiChu,
             RedirectAttributes redirectAttributes
     ) {
         var ketQua = lichSuHoaDonService.xuLyCapNhatTrangThai(
                 maHoaDon,
                 trangThaiMoi,
-//                lyDoGiaoKhongThanhCong,
                 ghiChu,
                 getNhanVien.getCurrentNhanVien()
         );
 
-        //Sử dụng thông báo
+        // Sử dụng thông báo
         if (ketQua.thanhCong()) {
             ThongBaoUtils.addSuccess(redirectAttributes, ketQua.message());
         } else {
@@ -166,8 +116,6 @@ public class HoaDonController {
         }
 
         redirectAttributes.addAttribute("maHoaDon", maHoaDon);
-
         return "redirect:/admin/hoa-don";
     }
-
 }
