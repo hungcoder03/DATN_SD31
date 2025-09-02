@@ -1,0 +1,50 @@
+        <div class="d-flex d-lg-none align-items-end mt-3">
+          <ul class="d-flex justify-content-end list-unstyled m-0">
+            <!-- Language Switcher - Mobile -->
+            <li class="dropdown">
+              <a href="#" class="mx-3" id="mobileLanguageDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="fas fa-globe fs-4"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileLanguageDropdown">
+                <li th:each="ngonNgu : ${danhSachNgonNgu}">
+                  <a class="dropdown-item" th:href="@{/doi-ngon-ngu(ngonNgu=${ngonNgu.maNgonNgu})}">
+                    <img th:src="${ngonNgu.duongDanCo}" width="20" height="15" class="me-2" 
+                         th:alt="${ngonNgu.tenNgonNgu}">
+                    <span th:text="${ngonNgu.tenBanDia}">Tiếng Việt</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            
+            <!-- Mobile User Dropdown -->
+            <li class="dropdown">
+              <a href="#" class="mx-3" id="mobileUserDropdown" role="button">
+                <iconify-icon icon="healthicons:person" class="fs-4"></iconify-icon>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileUserDropdown" id="mobileUserDropdownMenu">
+                <!-- Content will be loaded dynamically -->
+              </ul>
+            </li>
+            
+            <li>
+              <a href="wishlist.html" class="mx-3">
+                <iconify-icon icon="mdi:heart" class="fs-4"></iconify-icon>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
+                aria-controls="offcanvasCart">
+                <iconify-icon icon="mdi:cart" class="fs-4 position-relative"></iconify-icon>
+                <span th:replace="~{client/fragments/mini-cart-fragment :: mobile-cart-count}"></span>
+              </a>
+            </li>
+
+            <li>
+              <a href="#" class="mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSearch"
+                aria-controls="offcanvasSearch">
+                <iconify-icon icon="tabler:search" class="fs-4"></iconify-icon>
+                </span>
+              </a>
+            </li>
+          </ul>

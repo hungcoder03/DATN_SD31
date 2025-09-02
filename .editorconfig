@@ -1,0 +1,10 @@
+root = true
+
+[*]
+charset = utf-8
+
+# Optional: keep existing line endings behavior managed by .gitattributes
+# end_of_line left unchanged
+
+# Indentation left to existing project style
+# indent_style and indent_size not enforced here

@@ -4,8 +4,8 @@
       layout:decorate="~{client/layout}">
 
 <head>
-    <title th:text="${sanPham.ten} + ' - Waggy Pet Shop'">Chi tiết sản phẩm</title>
-    <meta name="description" th:content="${sanPham.moTa}">
+    <title th:text="${tenSanPhamDaDich != null ? tenSanPhamDaDich : sanPham.ten} + ' - Waggy Pet Shop'">Chi tiết sản phẩm</title>
+    <meta name="description" th:content="${moTaSanPhamDaDich != null ? moTaSanPhamDaDich : sanPham.moTa}">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <th:block layout:fragment="css">
@@ -75,12 +75,12 @@
             <div class="container">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a th:href="@{/home}">Trang chủ</a>
+                        <a th:href="@{/home}" th:text="#{nav.home}">Trang chủ</a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a th:href="@{/san-pham/danh-sach}">Sản phẩm</a>
+                        <a th:href="@{/san-pham/danh-sach}" th:text="#{nav.products}">Sản phẩm</a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page" th:text="${sanPham.ten}">
+                    <li class="breadcrumb-item active" aria-current="page" th:text="${tenSanPhamDaDich != null ? tenSanPhamDaDich : sanPham.ten}">
                         Tên sản phẩm
                     </li>
                 </ol>
@@ -100,7 +100,7 @@
                                    data-lightbox="product-gallery"
                                    class="main-image-link">
                                     <img th:src="@{${hinhanh != null ? hinhanh.url : '/client-static/images/item1.jpg'}}"
-                                         th:alt="${sanPham.ten}"
+                                         th:alt="${tenSanPhamDaDich != null ? tenSanPhamDaDich : sanPham.ten}"
                                          class="main-image"
                                          id="mainImage"
                                          onerror="this.src='/client-static/images/item1.jpg'">
@@ -114,7 +114,7 @@
                                      th:classappend="${iterStat.first} ? 'active' : ''"
                                      th:data-image="@{${img.url}}"
                                      th:data-lightbox-url="@{${img.url}}">
-                                    <img th:src="@{${img.url}}" th:alt="${sanPham.ten}"
+                                    <img th:src="@{${img.url}}" th:alt="${tenSanPhamDaDich != null ? tenSanPhamDaDich : sanPham.ten}"
                                          onerror="this.src='/client-static/images/item1.jpg'">
                                 </div>
                             </div>
@@ -139,7 +139,7 @@
 
                             <!-- Product Title và Wishlist Button -->
                             <div class="product-header d-flex justify-content-between align-items-center">
-                                <h1 class="product-title" th:text="${sanPham.ten}">Tên sản phẩm</h1>
+                                <h1 class="product-title" th:text="${tenSanPhamDaDich != null ? tenSanPhamDaDich : sanPham.ten}">Tên sản phẩm</h1>
                                 <button id="wishlistBtn"
                                         th:data-id="${sanPham.id}"
                                         th:classappend="${#lists.contains(yeuThichList, sanPham.id)} ? ' text-red-500' : ' text-gray-400'"
@@ -182,10 +182,10 @@
                                     <!-- Hiển thị khác nhau tùy vào có đánh giá hay không -->
                                     <span th:if="${totalCount > 0}">
                                         <span th:text="${avgRatingStr}">0.0</span>/5
-                                        (<span th:text="${totalCount}">0</span> đánh giá)
+                                        (<span th:text="${totalCount}">0</span> <span th:text="#{product.reviews_count}">đánh giá</span>)
                                     </span>
                                     <span th:unless="${totalCount > 0}">
-                                        Chưa có đánh giá
+                                        <span th:text="#{product.no_ratings}">Chưa có đánh giá</span>
                                     </span>
                                 </span>
                             </div>
@@ -225,15 +225,15 @@
 
                             <!-- Product Description -->
                             <div class="product-description" th:if="${sanPham.moTa != null}">
-                                <h4>Mô tả</h4>
-                                <p th:text="${sanPham.moTa}">Mô tả sản phẩm</p>
+                                <h4 th:text="#{product.description}">Mô tả</h4>
+                                <p th:text="${moTaSanPhamDaDich != null ? moTaSanPhamDaDich : sanPham.moTa}">Mô tả sản phẩm</p>
                             </div>
 
                             <!-- Product Variants Selection -->
                             <div class="product-variants">
                                 <!-- Size Selection -->
                                 <div class="variant-group" th:if="${sizeCount > 0}">
-                                    <label class="variant-label">Kích thước:</label>
+                                    <label class="variant-label" th:text="#{product.size}">Kích thước:</label>
                                     <div class="variant-options">
                                         <div th:each="size : ${dsSize}" class="variant-option" data-variant-type="size">
                                             <input type="radio"
@@ -253,8 +253,8 @@
                                 <!-- Color Selection -->
                                 <div class="variant-group" th:if="${mauSacCount > 0}">
                                     <div class="color-selection-header">
-                                        <label class="variant-label">Màu sắc:</label>
-                                        <span class="selected-color-name" id="selectedColorName">Chọn màu</span>
+                                        <label class="variant-label" th:text="#{product.color}">Màu sắc:</label>
+                                        <span class="selected-color-name" id="selectedColorName" th:text="#{product.select_color}">Chọn màu</span>
                                     </div>
                                     <div class="variant-options">
                                         <div th:each="mauSac : ${dsMauSac}" class="variant-option" data-variant-type="color">
@@ -273,7 +273,7 @@
                                     </div>
                                 </div>
                                     <div class="stock-info">
-                                        <span class="stock-text">Còn lại: </span>
+                                        <span class="stock-text" th:text="#{product.stock_remaining}">Còn lại: </span>
                                         <span class="stock-amount" id="stockAmount">--</span>
                                     </div>
 
@@ -285,20 +285,23 @@
                             <!-- Product Attributes -->
                             <div class="product-attributes">
                                 <div class="attribute-item" th:if="${sanPham.chatLieu != null}">
-                                    <span class="attribute-label">Chất liệu:</span>
-                                    <span class="attribute-value" th:text="${sanPham.chatLieu.ten}">Chất liệu</span>
+                                    <span class="attribute-label" th:text="#{product.material}">Chất liệu:</span>
+                                    <span class="attribute-value" 
+                                          th:text="${tenChatLieuDaDich[sanPham.chatLieu.id] != null ? tenChatLieuDaDich[sanPham.chatLieu.id] : sanPham.chatLieu.ten}">Chất liệu</span>
                                 </div>
                                 <div class="attribute-item" th:if="${sanPham.xuatXu != null}">
-                                    <span class="attribute-label">Xuất xứ:</span>
-                                    <span class="attribute-value" th:text="${sanPham.xuatXu.ten}">Xuất xứ</span>
+                                    <span class="attribute-label" th:text="#{product.origin}">Xuất xứ:</span>
+                                    <span class="attribute-value" 
+                                          th:text="${tenXuatXuDaDich[sanPham.xuatXu.id] != null ? tenXuatXuDaDich[sanPham.xuatXu.id] : sanPham.xuatXu.ten}">Xuất xứ</span>
                                 </div>
                                 <div class="attribute-item" th:if="${sanPham.thuongHieu != null}">
-                                    <span class="attribute-label">Thương hiệu:</span>
+                                    <span class="attribute-label" th:text="#{product.brand}">Thương hiệu:</span>
                                     <span class="attribute-value" th:text="${sanPham.thuongHieu.ten}">Thương hiệu</span>
                                 </div>
                                 <div class="attribute-item" th:if="${sanPham.kieuDang != null}">
-                                    <span class="attribute-label">Kiểu dáng:</span>
-                                    <span class="attribute-value" th:text="${sanPham.kieuDang.ten}">Kiểu dáng</span>
+                                    <span class="attribute-label" th:text="#{product.style}">Kiểu dáng:</span>
+                                    <span class="attribute-value" 
+                                          th:text="${tenKieuDangDaDich[sanPham.kieuDang.id] != null ? tenKieuDangDaDich[sanPham.kieuDang.id] : sanPham.kieuDang.ten}">Kiểu dáng</span>
                                 </div>
                             </div>
 
@@ -311,8 +314,8 @@
                                             <iconify-icon icon="material-symbols:call" class="icon"></iconify-icon>
                                         </div>
                                         <div class="policy-content">
-                                            <div class="policy-title">Hotline 1900.27.27.37</div>
-                                            <div class="policy-desc">hỗ trợ từ 8h30 - 22h</div>
+                                            <div class="policy-title" th:text="#{product.hotline}">Hotline 1900.27.27.37</div>
+                                            <div class="policy-desc" th:text="#{product.support_hours}">hỗ trợ từ 8h30 - 22h</div>
                                         </div>
                                     </div>
 
@@ -322,8 +325,8 @@
                                             <iconify-icon icon="material-symbols:schedule" class="icon"></iconify-icon>
                                         </div>
                                         <div class="policy-content">
-                                            <div class="policy-title">03 ngày đổi trả</div>
-                                            <div class="policy-desc">sản phẩm chưa qua sử dụng và còn nguyên nhãn mác</div>
+                                            <div class="policy-title" th:text="#{product.return_policy}">03 ngày đổi trả</div>
+                                            <div class="policy-desc" th:text="#{product.return_conditions}">sản phẩm chưa qua sử dụng và còn nguyên nhãn mác</div>
                                         </div>
                                     </div>
 
@@ -333,8 +336,8 @@
                                             <iconify-icon icon="material-symbols:swap-horiz" class="icon"></iconify-icon>
                                         </div>
                                         <div class="policy-content">
-                                            <div class="policy-title">Đổi trả cực dễ</div>
-                                            <div class="policy-desc">chỉ cần số điện thoại</div>
+                                            <div class="policy-title" th:text="#{product.easy_return}">Đổi trả cực dễ</div>
+                                            <div class="policy-desc" th:text="#{product.return_phone_only}">chỉ cần số điện thoại</div>
                                         </div>
                                     </div>
 
@@ -344,8 +347,8 @@
                                             <iconify-icon icon="material-symbols:location-on" class="icon"></iconify-icon>
                                         </div>
                                         <div class="policy-content">
-                                            <div class="policy-title">Đến tận nơi nhận hàng trả</div>
-                                            <div class="policy-desc">hoàn tiền trong 24h</div>
+                                            <div class="policy-title" th:text="#{product.home_service}">Đến tận nơi nhận hàng trả</div>
+                                            <div class="policy-desc" th:text="#{product.refund_24h}">hoàn tiền trong 24h</div>
                                         </div>
                                     </div>
                                 </div>
@@ -361,7 +364,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-12">
-                        <h3 class="section-title">Đánh giá sản phẩm</h3>
+                        <h3 class="section-title" th:text="#{product.reviews}">Đánh giá sản phẩm</h3>
 
                         <!-- Rating Summary -->
                         <div class="rating-summary">
@@ -382,14 +385,14 @@
                                             <span th:each="i : ${#numbers.sequence(1, emptyStars)}" class="star">★</span>
                                         </th:block>
                                     </div>
-                                    <div class="total-reviews" th:text="${totalCount + ' đánh giá'}">0 đánh giá</div>
+                                    <div class="total-reviews" th:text="${totalCount + ' ' + #{product.reviews_count}}">0 đánh giá</div>
                                 </div>
                             </div>
 
                             <!-- Rating Breakdown -->
                             <div class="rating-breakdown">
                                 <div th:each="star : ${#numbers.sequence(5, 1)}" class="rating-bar">
-                                    <span class="star-label" th:text="${star} + ' sao'">5 sao</span>
+                                    <span class="star-label" th:text="${star} + ' ' + #{product.stars}">5 sao</span>
                                     <div class="rating-progress">
                                         <div class="progress-bar"
                                              th:style="'width: ' + ${countByStar.get(star) != null ? (countByStar.get(star) * 100 / totalCount) : 0} + '%'">
@@ -409,7 +412,7 @@
                                             <iconify-icon icon="healthicons:person" class="avatar-icon"></iconify-icon>
                                         </div>
                                         <div class="reviewer-details">
-                                            <div class="reviewer-name" th:text="${review.khachHang.ten != null ? review.khachHang.ten : 'Khách hàng'}">
+                                            <div class="reviewer-name" th:text="${review.khachHang.ten != null ? review.khachHang.ten : #{product.customer}}">
                                                 Khách hàng
                                             </div>
                                             <div class="review-date" th:text="${#temporals.format(review.thoiGian, 'dd/MM/yyyy')}">
@@ -438,7 +441,7 @@
                             <nav aria-label="Reviews pagination">
                                 <ul class="pagination justify-content-center">
                                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${currentPage - 1})}">Trước</a>
+                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${currentPage - 1})}" th:text="#{pagination.previous}">Trước</a>
                                     </li>
                                     <li th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
                                         class="page-item"
@@ -447,7 +450,7 @@
                                            th:text="${pageNum + 1}">1</a>
                                     </li>
                                     <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${currentPage + 1})}">Sau</a>
+                                        <a class="page-link" th:href="@{/san-pham/chi-tiet/{id}(id=${sanPham.id}, page=${currentPage + 1})}" th:text="#{pagination.next}">Sau</a>
                                     </li>
                                 </ul>
                             </nav>
@@ -462,9 +465,9 @@
             <div class="container">
                 <div class="row">
                     <div class="col-12">
-                        <h3 class="section-title">Đánh giá sản phẩm</h3>
+                        <h3 class="section-title" th:text="#{product.reviews}">Đánh giá sản phẩm</h3>
                         <div class="no-reviews-message">
-                            <p>Sản phẩm này chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
+                            <p th:text="#{product.no_reviews_message}">Sản phẩm này chưa có đánh giá nào. Hãy là người đầu tiên đánh giá!</p>
                         </div>
                     </div>
                 </div>
@@ -483,7 +486,7 @@
                                  onerror="this.src='/client-static/images/item1.jpg'">
                         </div>
                         <div class="fixed-product-details">
-                            <div class="fixed-product-name" th:text="${sanPham.ten}">Tên sản phẩm</div>
+                            <div class="fixed-product-name" th:text="${tenSanPhamDaDich != null ? tenSanPhamDaDich : sanPham.ten}">Tên sản phẩm</div>
                             <div class="fixed-product-category" th:text="${sanPham.danhMuc != null ? sanPham.danhMuc.ten : 'Sản phẩm'}">Danh mục</div>
                         </div>
                     </div>
@@ -491,7 +494,7 @@
                     <!-- Quantity and Add to Cart -->
                     <div class="fixed-cart-controls">
                         <div class="fixed-quantity-group">
-                            <label class="fixed-qty-label">Qty:</label>
+                            <label class="fixed-qty-label" th:text="#{product.quantity}">Qty:</label>
                             <div class="fixed-quantity-controls">
                                 <button type="button" class="fixed-qty-btn" id="fixedDecreaseBtn">-</button>
                                 <input type="number" id="fixedQuantity" value="1" min="1" max="99" class="fixed-qty-input" style="width: 100px;">
@@ -504,7 +507,7 @@
                             <input type="hidden" id="fixedSelectedQuantity" name="soLuong" value="1">
 
                             <button type="submit" class="fixed-add-to-card-btn" id="fixedAddToCartBtn" disabled>
-                                ADD TO CARD
+                                <span th:text="#{product.add_to_cart}">ADD TO CARD</span>
                             </button>
                         </form>
                     </div>
@@ -668,7 +671,7 @@
             // Pass product data to JavaScript
             window.productData = {
                 id: /*[[${sanPham.id}]]*/ 0,
-                name: /*[[${sanPham.ten}]]*/ '',
+                name: /*[[${tenSanPhamDaDich != null ? tenSanPhamDaDich : sanPham.ten}]]*/ '',
                 variants: /*[[${dsChiTietSanPham}]]*/ [],
                 originalPrice: /*[[${giaGocMin}]]*/ 0,
                 currentPrice: /*[[${giaBanMin}]]*/ 0
@@ -683,4 +686,4 @@
 
 </body>
 
-</html> 
+</html>

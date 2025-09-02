@@ -91,8 +91,8 @@
                         <div class="tw-sticky tw-top-28 tw-overflow-y-auto lg:tw-max-h-[calc(100vh-100px)] lg:tw-w-[294px] lg:tw-pr-5">
                             <!-- Header -->
                             <div class="tw-flex tw-items-center tw-justify-between">
-                                <h2 class="tw-text-base tw-font-medium tw-leading-6 tw-text-neutral-900">Bộ lọc</h2>
-                                <p class="tw-text-base tw-leading-4 tw-text-neutral-500" id="filterResultCount">8 kết quả</p>
+                                <h2 class="tw-text-base tw-font-medium tw-leading-6 tw-text-neutral-900" th:text="#{product.filter}">Bộ lọc</h2>
+                                <p class="tw-text-base tw-leading-4 tw-text-neutral-500" id="filterResultCount" th:text="'8 ' + #{product.filter_results}">8 kết quả</p>
                             </div>
                             <div class="tw-relative tw-h-[1px] tw-w-full tw-bg-neutral-900/20 tw-my-3 tw-mb-0"></div>
 
@@ -183,7 +183,8 @@
                                             <div th:each="loaiThu : ${loaiThus}" class="tw-flex tw-items-center tw-space-x-2">
                                                 <button type="button" role="radio" class="tw-aspect-square tw-rounded-full tw-border tw-border-neutral-500 tw-text-primary tw-h-5 tw-w-5" th:data-loai-thu-id="${loaiThu.id}">
                                                 </button>
-                                                <label class="tw-text-neutral-500 tw-text-base tw-cursor-pointer" th:text="${loaiThu.ten}"></label>
+                                                <label class="tw-text-neutral-500 tw-text-base tw-cursor-pointer" 
+                                                       th:text="${tenLoaiThuDaDich[loaiThu.id] != null ? tenLoaiThuDaDich[loaiThu.id] : loaiThu.ten}"></label>
                                             </div>
                                         </div>
                                     </div>
@@ -212,7 +213,8 @@
                                                 <div th:each="danhMuc : ${danhMucs}" class="tw-flex tw-items-center tw-space-x-2">
                                                     <button type="button" role="checkbox" class="tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-rounded tw-border tw-border-neutral-500 tw-h-5 tw-w-5" th:data-danh-muc-id="${danhMuc.id}">
                                                     </button>
-                                                    <label class="tw-text-neutral-500 tw-text-base tw-cursor-pointer" th:text="${danhMuc.ten}"></label>
+                                                    <label class="tw-text-neutral-500 tw-text-base tw-cursor-pointer" 
+                                                           th:text="${tenDanhMucDaDich[danhMuc.id] != null ? tenDanhMucDaDich[danhMuc.id] : danhMuc.ten}"></label>
                                                 </div>
                                             </div>
                                         </div>
@@ -299,7 +301,7 @@
                                 <svg class="tw-w-5 tw-h-5 tw-mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                Bộ lọc đang áp dụng:
+                                <span th:text="#{product.filter_applied}">Bộ lọc đang áp dụng:</span>
                             </h5>
                             <div id="filterTags" class="tw-flex tw-flex-wrap tw-gap-2">
                                 <!-- Filter tags will be dynamically added here -->
@@ -308,17 +310,17 @@
 
                         <!-- Sort Options -->
                         <div class="tw-mb-6 tw-flex tw-items-center tw-justify-between tw-bg-white tw-rounded-lg tw-shadow-sm tw-border tw-border-gray-200 tw-p-4">
-                            <span class="tw-text-gray-600">Sắp xếp theo</span>
+                            <span class="tw-text-gray-600" th:text="#{common.sort}">Sắp xếp theo</span>
                             <select class="tw-border tw-border-gray-300 tw-rounded-lg tw-px-4 tw-py-2 tw-text-sm tw-focus:ring-2 tw-focus:ring-blue-500 tw-focus:border-blue-500">
-                                <option>Bán chạy</option>
-                                <option>Giá tăng dần</option>
-                                <option>Giá giảm dần</option>
-                                <option>Mới nhất</option>
+                                <option th:text="#{product.bestselling}">Bán chạy</option>
+                                <option th:text="#{product.price_asc}">Giá tăng dần</option>
+                                <option th:text="#{product.price_desc}">Giá giảm dần</option>
+                                <option th:text="#{product.latest}">Mới nhất</option>
                             </select>
                         </div>
 
                         <!-- Search Input (hidden but needed for JavaScript) -->
-                        <input type="text" id="searchInput" class="tw-hidden" placeholder="Tìm kiếm sản phẩm...">
+                        <input type="text" id="searchInput" class="tw-hidden" th:placeholder="#{common.search} + ' sản phẩm...'">
 
                         <!-- Price Range Slider (hidden but needed for JavaScript) -->
                         <div class="tw-hidden">
@@ -378,7 +380,7 @@
                                     </div>
                                     
                                     <!-- Product Name -->
-                                    <h3 class="tw-text-sm tw-font-semibold tw-text-gray-900 tw-line-clamp-2 tw-leading-tight tw-mb-3" th:text="${sp.ten}"></h3>
+                                    <h3 class="tw-text-sm tw-font-semibold tw-text-gray-900 tw-line-clamp-2 tw-leading-tight tw-mb-3" th:text="${tenSanPhamDaDich != null and tenSanPhamDaDich.containsKey(sp.id) ? tenSanPhamDaDich.get(sp.id) : sp.ten}"></h3>
                                     
                                     <!-- Price Section -->
                                     <div class="tw-mb-3">
@@ -406,7 +408,7 @@
                                                     </svg>
                                                 </span>
                                             </div>
-                                            <span class="tw-text-xs tw-text-gray-500 tw-font-medium" th:text="${#lists.size(sp.danhGias)} + ' đánh giá'"></span>
+                                            <span class="tw-text-xs tw-text-gray-500 tw-font-medium" th:text="${#lists.size(sp.danhGias)} + ' ' + #{product.review_count}"></span>
                                         </div>
                                         
                                         <!-- Stock Status with icon -->
@@ -417,14 +419,14 @@
                                             <svg th:unless="${qty > 0}" class="tw-w-3 tw-h-3 tw-text-red-500" fill="currentColor" viewBox="0 0 24 24">
                                                 <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
-                                            <span class="tw-text-xs tw-font-semibold" th:classappend="${qty > 0} ? ' tw-text-green-600' : ' tw-text-red-600'" th:text="${qty > 0} ? 'Còn hàng' : 'Hết hàng'"></span>
+                                            <span class="tw-text-xs tw-font-semibold" th:classappend="${qty > 0} ? ' tw-text-green-600' : ' tw-text-red-600'" th:text="${qty > 0} ? #{product.in_stock} : #{product.out_of_stock}"></span>
                                         </div>
                                     </div>
                                     
                                     <!-- View Details Button -->
                                     <div class="tw-bg-gray-50 tw-rounded-xl tw-p-3 tw-text-center tw-transition-all tw-duration-300 group-hover:tw-bg-gray-100">
                                         <span class="tw-text-sm tw-font-semibold tw-text-gray-700 tw-flex tw-items-center tw-justify-center tw-gap-2">
-                                            <span>Xem chi tiết</span>
+                                            <span th:text="#{common.view_details}">Xem chi tiết</span>
                                             <svg class="tw-w-4 tw-h-4 tw-transition-transform tw-duration-300 group-hover:tw-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                             </svg>
@@ -438,8 +440,8 @@
                             <svg class="tw-mx-auto tw-h-16 tw-w-16 tw-text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                             </svg>
-                            <h3 class="tw-mt-4 tw-text-lg tw-font-medium tw-text-gray-900">Không tìm thấy sản phẩm</h3>
-                            <p class="tw-mt-2 tw-text-gray-600">Hãy thử điều chỉnh bộ lọc của bạn</p>
+                            <h3 class="tw-mt-4 tw-text-lg tw-font-medium tw-text-gray-900" th:text="#{common.no_results}">Không tìm thấy sản phẩm</h3>
+                            <p class="tw-mt-2 tw-text-gray-600" th:text="#{product.filter_adjust}">Hãy thử điều chỉnh bộ lọc của bạn</p>
                         </div>
                     </div>
                 </div>

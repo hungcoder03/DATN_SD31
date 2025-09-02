@@ -1,0 +1,18 @@
+<div th:fragment="language-switcher" class="language-switcher">
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" 
+                data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-globe"></i>
+            <span th:text="#{common.language}">Ngôn ngữ</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li th:each="ngonNgu : ${danhSachNgonNgu}">
+                <a class="dropdown-item" th:href="@{/doi-ngon-ngu(ngonNgu=${ngonNgu.maNgonNgu})}">
+                    <img th:src="${ngonNgu.duongDanCo}" width="20" height="15" class="me-2" 
+                         th:alt="${ngonNgu.tenNgonNgu}">
+                    <span th:text="${ngonNgu.tenBanDia}">Tiếng Việt</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

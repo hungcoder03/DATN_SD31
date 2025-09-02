@@ -208,7 +208,7 @@
                                                             th:data-loai-thu-id="${loaiThu.id}">
                                                     </button>
                                                     <label class="tw-text-neutral-500 tw-text-base tw-cursor-pointer"
-                                                           th:text="${loaiThu.ten}"></label>
+                                                           th:text="${tenLoaiThuDaDich[loaiThu.id] != null ? tenLoaiThuDaDich[loaiThu.id] : loaiThu.ten}"></label>
                                                 </div>
                                             </div>
                                         </div>
@@ -248,7 +248,7 @@
                                                             th:data-danh-muc-id="${danhMuc.id}">
                                                     </button>
                                                     <label class="tw-text-neutral-500 tw-text-base tw-cursor-pointer"
-                                                           th:text="${danhMuc.ten}"></label>
+                                                           th:text="${tenDanhMucDaDich[danhMuc.id] != null ? tenDanhMucDaDich[danhMuc.id] : danhMuc.ten}"></label>
                                                 </div>
                                             </div>
                                         </div>
@@ -453,7 +453,7 @@
 
                                 <!-- Product Name -->
                                 <h3 class="tw-text-sm tw-font-semibold tw-text-gray-900 tw-line-clamp-2 tw-leading-tight tw-mb-3"
-                                    th:text="${sp.ten}"></h3>
+                                    th:text="${tenSanPhamDaDich != null and tenSanPhamDaDich.containsKey(sp.id) ? tenSanPhamDaDich.get(sp.id) : sp.ten}"></h3>
 
                                 <!-- Price Section -->
                                 <div class="tw-mb-3">

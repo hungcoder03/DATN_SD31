@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -26,10 +27,17 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.main.datn_sd31.service.DichVuBanDichService;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/san-pham")
 public class ListSanPhamController {
+    private static final Logger log = LoggerFactory.getLogger(ListSanPhamController.class);
+    
     private final Sanphamservice sanPhamService;
     private final NhanVienRepository nhanvienRepo;
     private final ChatLieuRepository chatLieuRepo;
@@ -53,6 +61,13 @@ public class ListSanPhamController {
     private final KhachHangServiceImpl khachHangServiceImpl;
     private final SpYeuThichRepository spYeuThichRepository;
 
+    private final DichVuBanDichService dichVuBanDichService;
+
+    @PostConstruct
+    public void init() {
+        log.info("ListSanPhamController bean initialized and mapped to /san-pham");
+    }
+
     @GetMapping("/danh-sach")
     public String hienThiDanhSachSanPham(
             @RequestParam(value="q", required=false) String q,
@@ -67,7 +82,8 @@ public class ListSanPhamController {
         @RequestParam(value="sortBy", required=false) String sortBy,
         @RequestParam(value="sortDir", required=false) String sortDir,
 
-            Model model
+            Model model,
+            java.util.Locale locale
     ) {
         if (getKhachHang.getCurrentKhachHang() != null) {
             Integer currentId = getKhachHang.getCurrentKhachHang().getId();
@@ -77,6 +93,18 @@ public class ListSanPhamController {
         List<SanPham> danhSachSanPham = sanPhamService.searchAdvanced(
             q, danhMucId, loaiThuId, sizeId, mauSacId, kieuDangId, thuongHieuId, xuatXuId, priceRange, sortBy, sortDir
         );
+
+        // Dịch tên sản phẩm theo locale hiện tại (fallback AI nếu thiếu)
+        String targetLang = locale != null ? locale.getLanguage() : "vi";
+        String sourceLang = "vi"; // giả sử dữ liệu gốc đang là tiếng Việt
+        Map<Integer, String> tenSanPhamDaDich = new HashMap<>();
+        for (SanPham sp : danhSachSanPham) {
+            String key = "product.name." + sp.getId();
+            String translated = dichVuBanDichService.layBanDichOrTranslate(key, targetLang, sp.getTen(), sourceLang);
+            tenSanPhamDaDich.put(sp.getId(), translated);
+        }
+        model.addAttribute("tenSanPhamDaDich", tenSanPhamDaDich);
+
         model.addAttribute("danhSachSanPham", danhSachSanPham);
 
         // panel filter data
@@ -92,6 +120,7 @@ public class ListSanPhamController {
         model.addAttribute("thuongHieus", thuongHieuRepo.findAll());
         model.addAttribute("kieuDangs", kieuDangRepo.findAll());      // <-- thêm dòng này
         model.addAttribute("xuatXus", xuatXuRepo.findAll());      // <-- thêm dòng này
+        model.addAttribute("chatLieus", chatLieuRepo.findAll());      // <-- thêm dòng này
 
 
 
@@ -146,6 +175,7 @@ public class ListSanPhamController {
         model.addAttribute("giaGocMinVariantMap", giaGocCuaBienTheReNhatMap);
         model.addAttribute("giaBanMinMap", giaBanMinMap);
         model.addAttribute("tenDotGiamGiaMap", tenDotGiamGiaMap);
+        model.addAttribute("dotGiamGiaMap", dotGiamGiaMap);
 
         // FIX 1: Trong method hienThiDanhSachSanPham - Sửa logic avgRatingMap
         Map<Integer, Double> avgRatingMap = danhSachSanPham.stream()
@@ -196,7 +226,8 @@ public class ListSanPhamController {
             @RequestParam(value="star", required=false) Integer star,
             Principal principal,
             Model model,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            java.util.Locale locale
     ) {
         try {
             
@@ -207,7 +238,20 @@ public class ListSanPhamController {
             }
         
         model.addAttribute("sanPham", sanPham);
-        
+
+        // DỊCH DYNAMIC: tên và mô tả sản phẩm theo locale hiện tại
+        try {
+            String targetLang = locale != null ? locale.getLanguage() : "vi";
+            String sourceLang = "vi";
+            String translatedName = dichVuBanDichService.layBanDichOrTranslate("product.name." + sanPham.getId(), targetLang, sanPham.getTen(), sourceLang);
+            String translatedDesc = sanPham.getMoTa() != null ? dichVuBanDichService.layBanDichOrTranslate("product.desc." + sanPham.getId(), targetLang, sanPham.getMoTa(), sourceLang) : null;
+            model.addAttribute("tenSanPhamDaDich", translatedName);
+            model.addAttribute("moTaSanPhamDaDich", translatedDesc);
+        } catch (Exception e) {
+            // không phá vỡ luồng nếu dịch thất bại
+            log.debug("Không thể dịch tên/mô tả sản phẩm: {}", e.getMessage());
+        }
+
         // Kiểm tra trạng thái sản phẩm
         if (!sanPham.getTrangThai()) {
             return "redirect:/san-pham/danh-sach";
@@ -420,11 +464,22 @@ public class ListSanPhamController {
     @GetMapping("/search")
     public String searchSanPham(
             @RequestParam("q") String q,
-            Model model) {
+            Model model, java.util.Locale locale) {
 
         // Sử dụng service để đảm bảo chỉ lấy sản phẩm đang hoạt động
         List<SanPham> list = sanPhamService.searchAdvanced(q.trim(), null, null, null, null, null, null, null, null, null, null);
-        
+
+        // Dịch tên sản phẩm theo locale hiện tại (fallback AI nếu thiếu)
+        String targetLang = locale != null ? locale.getLanguage() : "vi";
+        String sourceLang = "vi"; // giả sử dữ liệu gốc đang là tiếng Việt
+        Map<Integer, String> tenSanPhamDaDich = new HashMap<>();
+        for (SanPham sp : list) {
+            String key = "product.name." + sp.getId();
+            String translated = dichVuBanDichService.layBanDichOrTranslate(key, targetLang, sp.getTen(), sourceLang);
+            tenSanPhamDaDich.put(sp.getId(), translated);
+        }
+        model.addAttribute("tenSanPhamDaDich", tenSanPhamDaDich);
+
         // Tính toán giá và dotGiamGia cho mỗi sản phẩm
         // Chỉ lấy chi tiết của sản phẩm đang hoạt động
         List<ChiTietSanPham> chiTiets = chitietsanphamRepo.findAll().stream()
@@ -462,7 +517,6 @@ public class ListSanPhamController {
 
 
 
-
     @GetMapping("/danh-sach/filter")
     public String filterProducts(
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
@@ -477,9 +531,10 @@ public class ListSanPhamController {
             @RequestParam(value="xuatXuId", required=false) Integer xuatXuId,
             @RequestParam(value="sortBy", required=false) String sortBy,
             @RequestParam(value="sortDir", required=false) String sortDir,
-            Model model
+            Model model, java.util.Locale locale
     ) {
-        // Parse danhMucId từ string (có thể là multiple values)
+        // Sử dụng service để đảm bảo chỉ lấy sản phẩm đang hoạt động
+         // Parse danhMucId từ string (có thể là multiple values)
         Integer danhMucId = null;
         if (danhMucIdStr != null && !danhMucIdStr.isEmpty()) {
             String[] danhMucIds = danhMucIdStr.split(",");
@@ -510,7 +565,23 @@ public class ListSanPhamController {
             q, danhMucId, loaiThuId, sizeId, mauSacId, kieuDangId, thuongHieuId, xuatXuId, priceRange, sortBy, sortDir
         );
 
-        model.addAttribute("danhSachSanPham", danhSachSanPham);
+        // Dịch tên sản phẩm cho fragment trả về (nếu cần) — tương tự như danh sách chính
+        try {
+            String targetLang = locale != null ? locale.getLanguage() : "vi";
+            String sourceLang = "vi";
+            Map<Integer, String> tenSanPhamDaDich = new HashMap<>();
+            for (SanPham sp : danhSachSanPham) {
+                String key = "product.name." + sp.getId();
+                String translated = dichVuBanDichService.layBanDichOrTranslate(key, targetLang, sp.getTen(), sourceLang);
+                tenSanPhamDaDich.put(sp.getId(), translated);
+            }
+            model.addAttribute("tenSanPhamDaDich", tenSanPhamDaDich);
+        } catch (Exception ex) {
+            log.debug("Không thể dịch tên sản phẩm cho filter fragment: {}", ex.getMessage());
+        }
+        
+
+         model.addAttribute("danhSachSanPham", danhSachSanPham);
 
         // Thêm data cần thiết cho template
         if (getKhachHang.getCurrentKhachHang() != null) {
@@ -670,5 +741,11 @@ public class ListSanPhamController {
         if (input == null) return "";
         String temp = Normalizer.normalize(input, Normalizer.Form.NFD);
         return temp.replaceAll("\\p{M}+", "").toLowerCase(Locale.ROOT).trim();
+    }
+
+    @GetMapping("/test")
+    @ResponseBody
+    public String testMapping() {
+        return "ok";
     }
 }
