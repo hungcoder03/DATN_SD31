@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 
 
+
 import static com.main.datn_sd31.config.SecurityConstants.*;
 
 @Configuration
@@ -30,6 +31,8 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
+
+
 
     @Bean
     @Order(1)
@@ -87,14 +90,16 @@ public class SecurityConfig {
     @Order(3)
     public SecurityFilterChain publicSecurity(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.and())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATTERNS).permitAll()
                         .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/api/chat/**").permitAll() // Tạm thời cho phép public
+                        .requestMatchers("/api/chat/**").permitAll() // Chat API
+                        .requestMatchers("/api/ai-chat/**").permitAll() // AI Chat API
                         .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/ws/**", "/api/chat/**")
+                        .ignoringRequestMatchers("/ws/**", "/api/chat/**", "/api/ai-chat/**")
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {

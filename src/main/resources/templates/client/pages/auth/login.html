@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{client/layout}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{client/layout}" lang="vi">
 
 <head>
     <title>Đăng nhập - Waggy Pet Shop</title>
@@ -7,48 +7,454 @@
 
 <body>
     <div layout:fragment="content">
-        <div class="container py-5">
-            <div class="row justify-content-center">
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow">
-                        <div class="card-body p-5">
-                            <h2 class="text-center mb-4">Đăng Nhập</h2>
+        <style>
+            :root {
+                --dark-blue: #243946;
+                --rotate-head: 0deg;
+            }
+            * { box-sizing: border-box; }
+            
+            /* Fix layout conflicts */
+            .login-container {
+                position: relative;
+                width: 100%;
+                min-height: 100vh;
+                background-color: #e0e0e0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+                z-index: 1;
+            }
+            
+            .center {
+                position: relative;
+                display: inline-block;
+                width: 275px;
+                height: 490px;
+                border-radius: 3px;
+                overflow: hidden;
+                background-image: linear-gradient(to top right, #f9a743, #f9db5f);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }
+            
+            @media screen and (max-height: 500px) {
+                .center { transform: scale(0.8); }
+            }
+            
+            .ear {
+                position: absolute;
+                top: -110px;
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                background-color: var(--dark-blue);
+            }
+            .ear--left { left: -135px; }
+            .ear--right { right: -135px; }
+            .face {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 200px;
+                height: 150px;
+                margin: 80px auto 10px;
+                transform: rotate(var(--rotate-head));
+                transition: transform 0.2s;
+                transform-origin: center 20px;
+            }
+            .eyes { display: flex; }
+            .eye {
+                display: inline-block;
+                width: 25px;
+                height: 25px;
+                border-radius: 50%;
+                background-color: var(--dark-blue);
+                position: relative;
+            }
+            .eye--left { margin-right: 40px; }
+            .eye--right { margin-left: 40px; }
+            .glow {
+                position: absolute;
+                top: 3px;
+                right: -12px;
+                width: 12px;
+                height: 6px;
+                border-radius: 50%;
+                background-color: white;
+                transform: rotate(38deg);
+            }
+            .nose {
+                position: relative;
+                top: 30px;
+                transform: scale(1.1);
+            }
+            .nose .glow {
+                position: absolute;
+                top: 3px;
+                left: 32%;
+                width: 15px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: #476375;
+            }
+            .mouth { position: relative; margin-top: 45px; }
+            svg.smile {
+                position: absolute;
+                left: -28px;
+                top: -19px;
+                transform: scaleX(1.1);
+                stroke: var(--dark-blue);
+            }
+            .mouth-hole {
+                position: absolute;
+                top: 0;
+                left: -50%;
+                width: 60px;
+                height: 15px;
+                border-radius: 50% / 100% 100% 0% 0;
+                transform: rotate(180deg);
+                background-color: var(--dark-blue);
+                z-index: -1;
+            }
+            .tongue {
+                position: relative;
+                top: 5px;
+                width: 30px;
+                height: 20px;
+                background-color: #ffd7dd;
+                transform-origin: top;
+                transform: rotateX(60deg);
+            }
+            .tongue.breath {
+                animation: breath 0.3s infinite linear;
+            }
+            @keyframes breath {
+                0%, 100% { transform: rotateX(0deg); }
+                50% { transform: rotateX(60deg); }
+            }
+            .tongue-top {
+                position: absolute;
+                bottom: -15px;
+                width: 30px;
+                height: 30px;
+                border-radius: 15px;
+                background-color: #ffd7dd;
+            }
+            .line {
+                position: absolute;
+                top: 0;
+                width: 30px;
+                height: 5px;
+                background-color: #fcb7bf;
+            }
+            .median {
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 4px;
+                height: 25px;
+                border-radius: 5px;
+                background-color: #fcb7bf;
+            }
+            .hands { position: relative; }
+            .hand {
+                position: absolute;
+                top: -6px;
+                display: flex;
+                transition: transform 0.5s ease-in-out;
+                z-index: 1;
+            }
+            .hand--left { left: 50px; }
+            .hand--left.hide { transform: translate(2px, -155px) rotate(-160deg); }
+            .hand--left.peek { transform: translate(0px, -120px) rotate(-160deg); }
+            .hand--right { left: 170px; }
+            .hand--right.hide { transform: translate(-6px, -155px) rotate(160deg); }
+            .hand--right.peek { transform: translate(-4px, -120px) rotate(160deg); }
+            .finger { position: relative; z-index: 0; }
+            .bone {
+                width: 20px;
+                height: 20px;
+                border: 2px solid var(--dark-blue);
+                border-bottom: none;
+                border-top: none;
+                background-color: #fac555;
+            }
+            .nail {
+                position: absolute;
+                left: 0;
+                top: 10px;
+                width: 20px;
+                height: 18px;
+                border-radius: 50%;
+                border: 2px solid var(--dark-blue);
+                background-color: #fac555;
+                z-index: -1;
+            }
+            .finger:nth-child(1), .finger:nth-child(3) {
+                left: 4px;
+                z-index: 1;
+            }
+            .finger:nth-child(3) { left: -4px; }
+            .finger:nth-child(2) { top: -5px; z-index: 2; }
+            .finger:nth-child(1) .nail, .finger:nth-child(3) .nail { top: 0px; }
+            .login {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+            }
+            .login label {
+                position: relative;
+                padding: 0 20px;
+            }
+            .login .fa {
+                position: absolute;
+                top: 40%;
+                left: 35px;
+                color: #bbb;
+                z-index: 2;
+            }
+            .login input, .login .login-button {
+                width: 100%;
+                height: 35px;
+                border: none;
+                border-radius: 30px;
+            }
+            .login input {
+                padding: 0 20px 0 40px;
+                margin: 5px 0;
+                box-shadow: none;
+                outline: none;
+                font-size: 12px;
+            }
+            .login input::placeholder { 
+                color: #ccc; 
+                font-size: 11px;
+            }
+            .login input.password { padding: 0 90px 0 40px; }
+            .password-button {
+                position: absolute;
+                top: 9px;
+                right: 25px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 80px;
+                height: 27px;
+                border-radius: 30px;
+                border: none;
+                outline: none;
+                background-color: var(--dark-blue);
+                color: white;
+                cursor: pointer;
+                font-size: 10px;
+            }
+            .password-button:active { transform: scale(0.95); }
+            .login-button {
+                width: calc(100% - 40px);
+                margin: 0px;
+                outline: none;
+                background-color: var(--dark-blue);
+                color: white;
+                transition: transform 0.1s;
+                cursor: pointer;
+                font-size: 12px;
+            }
+            .login-button:active { transform: scale(0.95); }
+            .social-buttons {
+                display: flex;
+                justify-content: center;
+                margin-top: 25px;
+            }
+            .social {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 35px;
+                height: 35px;
+                margin: 0 10px;
+                border-radius: 50%;
+                background-color: var(--dark-blue);
+                color: white;
+                font-size: 18px;
+                cursor: pointer;
+            }
+            .social:active { transform: scale(0.95); }
+            .footer { 
+                text-align: center; 
+                margin-top: 15px; 
+                font-size: 11px;
+            }
+            .footer a {
+                color: var(--dark-blue) !important;
+                text-decoration: none;
+            }
+            
+            /* Thông báo lỗi và thành công */
+            .alert {
+                position: absolute;
+                top: 10px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 10px 20px;
+                border-radius: 20px;
+                font-size: 11px;
+                z-index: 10;
+                max-width: 200px;
+                text-align: center;
+            }
+            .alert-danger {
+                background-color: #ff6b6b;
+                color: white;
+            }
+            .alert-success {
+                background-color: #51cf66;
+                color: white;
+            }
+        </style>
 
-                            <form th:action="@{/khach-hang/dang-nhap}" method="post">
-                                <div class="mb-3">
-                                    <label class="form-label">Email:</label>
-                                    <input type="email" name="username" class="form-control" required />
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Mật khẩu:</label>
-                                    <input type="password" name="password" class="form-control" required />
-                                </div>
-
-                                <button type="submit" class="btn btn-primary w-100 mb-3">Đăng nhập</button>
-                                
-                                <div class="text-center">
-                                    <span class="text-muted">Chưa có tài khoản? </span>
-                                    <a href="/khach-hang/dang-ky" class="text-primary text-decoration-none">Đăng ký ngay</a>
-                                </div>
-                            </form>
-
-                            <div th:if="${param.error}" class="alert alert-danger mt-3">
-                                <p class="mb-0">❌ Sai email hoặc mật khẩu!</p>
+        <div class="login-container">
+            <div class="center">
+                <div class="ear ear--left"></div>
+                <div class="ear ear--right"></div>
+                <div class="face">
+                    <div class="eyes">
+                        <div class="eye eye--left"><div class="glow"></div></div>
+                        <div class="eye eye--right"><div class="glow"></div></div>
                             </div>
-                            <div th:if="${param.logout}" class="alert alert-success mt-3">
-                                <p class="mb-0">✅ Đã đăng xuất thành công.</p>
+                    <div class="nose">
+                        <svg width="38.161" height="22.03">
+                            <path d="M2.017 10.987Q-.563 7.513.157 4.754C.877 1.994 2.976.135 6.164.093 16.4-.04 22.293-.022 32.048.093c3.501.042 5.48 2.081 6.02 4.661q.54 2.579-2.051 6.233-8.612 10.979-16.664 11.043-8.053.063-17.336-11.043z" fill="#243946"/>
+                        </svg>
+                        <div class="glow"></div>
                             </div>
-                            
-                            <!-- Thông báo thành công từ đăng ký -->
-                            <div th:if="${success}" class="alert alert-success mt-3">
-                                <p class="mb-0">✅ <span th:text="${success}"></span></p>
-                            </div>
+                    <div class="mouth">
+                        <svg class="smile" viewBox="-2 -2 84 23" width="84" height="23">
+                            <path d="M0 0c3.76 9.279 9.69 18.98 26.712 19.238 17.022.258 10.72.258 28 0S75.959 9.182 79.987.161" fill="none" stroke-width="3" stroke-linecap="square" stroke-miterlimit="3"/>
+                        </svg>
+                        <div class="mouth-hole"></div>
+                        <div class="tongue breath">
+                            <div class="tongue-top"></div>
+                            <div class="line"></div>
+                            <div class="median"></div>
                         </div>
                     </div>
                 </div>
+                <div class="hands">
+                    <div class="hand hand--left">
+                        <div class="finger"><div class="bone"></div><div class="nail"></div></div>
+                        <div class="finger"><div class="bone"></div><div class="nail"></div></div>
+                        <div class="finger"><div class="bone"></div><div class="nail"></div></div>
+                    </div>
+                    <div class="hand hand--right">
+                        <div class="finger"><div class="bone"></div><div class="nail"></div></div>
+                        <div class="finger"><div class="bone"></div><div class="nail"></div></div>
+                        <div class="finger"><div class="bone"></div><div class="nail"></div></div>
+                    </div>
+                </div>
+                
+                <!-- Thông báo lỗi và thành công -->
+                <div th:if="${param.error}" class="alert alert-danger">
+                    ❌ Sai email hoặc mật khẩu!
+                </div>
+                <div th:if="${param.logout}" class="alert alert-success">
+                    ✅ Đã đăng xuất thành công.
+                </div>
+                <div th:if="${success}" class="alert alert-success">
+                    ✅ <span th:text="${success}"></span>
+                </div>
+                
+                <form class="login" th:action="@{/khach-hang/dang-nhap}" method="post" autocomplete="on">
+                    <label>
+                        <span class="fa fa-envelope"></span>
+                        <input class="username" name="username" type="email" autocomplete="on" placeholder="Email" required>
+                    </label>
+                    <label>
+                        <span class="fa fa-lock"></span>
+                        <input class="password" name="password" type="password" autocomplete="off" placeholder="Mật khẩu" required>
+                        <button type="button" class="password-button">Hiện mật khẩu</button>
+                    </label>
+                    <button type="submit" class="login-button">Đăng nhập</button>
+                </form>
+                
+            
+                
+                <div class="footer">
+                    <span class="text-muted">Chưa có tài khoản? </span>
+                    <a href="/khach-hang/dang-ky">Đăng ký ngay</a>
+                </div>
             </div>
         </div>
+
+        <script>
+            // Sử dụng GSAP cho các hiệu ứng chuyển động
+            const usernameInput = document.querySelector('.username');
+            const passwordInput = document.querySelector('.password');
+            const showPasswordButton = document.querySelector('.password-button');
+            const face = document.querySelector('.face');
+            const hands = document.querySelectorAll('.hand');
+            const tongue = document.querySelector('.tongue');
+
+            passwordInput.addEventListener('focus', () => {
+                hands.forEach(hand => {
+                    hand.classList.add('hide');
+                    gsap.to(hand, {y: -120, rotation: hand.classList.contains('hand--left') ? -160 : 160, duration: 0.5});
+                });
+                tongue.classList.remove('breath');
+            });
+
+            passwordInput.addEventListener('blur', () => {
+                hands.forEach(hand => {
+                    hand.classList.remove('hide');
+                    hand.classList.remove('peek');
+                    gsap.to(hand, {y: 0, rotation: 0, duration: 0.5});
+                });
+                tongue.classList.add('breath');
+            });
+
+            usernameInput.addEventListener('focus', () => {
+                let length = Math.min(usernameInput.value.length - 16, 19);
+                hands.forEach(hand => {
+                    hand.classList.remove('hide');
+                    hand.classList.remove('peek');
+                    gsap.to(hand, {y: 0, rotation: 0, duration: 0.5});
+                });
+                gsap.to(face, {rotate: -length, duration: 0.2});
+                face.style.setProperty('--rotate-head', `${-length}deg`);
+            });
+
+            usernameInput.addEventListener('blur', () => {
+                gsap.to(face, {rotate: 0, duration: 0.2});
+                face.style.setProperty('--rotate-head', '0deg');
+            });
+
+            usernameInput.addEventListener('input', (event) => {
+                let length = Math.min(event.target.value.length - 16, 19);
+                gsap.to(face, {rotate: -length, duration: 0.2});
+                face.style.setProperty('--rotate-head', `${-length}deg`);
+            });
+
+            showPasswordButton.addEventListener('click', () => {
+                if (passwordInput.type === 'text') {
+                    passwordInput.type = 'password';
+                    showPasswordButton.textContent = 'Hiện mật khẩu';
+                    hands.forEach(hand => {
+                        hand.classList.remove('peek');
+                        hand.classList.add('hide');
+                        gsap.to(hand, {y: -155, rotation: hand.classList.contains('hand--left') ? -160 : 160, duration: 0.5});
+                    });
+                } else {
+                    passwordInput.type = 'text';
+                    showPasswordButton.textContent = 'Ẩn mật khẩu';
+                    hands.forEach(hand => {
+                        hand.classList.remove('hide');
+                        hand.classList.add('peek');
+                        gsap.to(hand, {y: -120, rotation: hand.classList.contains('hand--left') ? -160 : 160, duration: 0.5});
+                    });
+                }
+            });
+        </script>
     </div>
 </body>
 
