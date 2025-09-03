@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -672,12 +673,16 @@ public class BanHangController {
 
 
 
+    /**
+     * Cập nhật method thanh toán để xử lý session theo cartKey với địa chỉ chi tiết
+     */
     @PostMapping("/thanh-toan")
     public String thanhToan(@RequestParam("cartKey") String cartKey,
                             @RequestParam(value = "soDienThoai", required = false) String sdt,
                             @RequestParam(value = "soDienThoaivc", required = false) String sdtvc,
                             @RequestParam(value = "ten", required = false) String ten,
                             @RequestParam(value = "ghichu", required = false) String ghichu,
+                            @RequestParam(value = "diaChiChiTiet", required = false) String diaChiChiTiet, // THÊM FIELD MỚI
                             @RequestParam(value = "giagiam", required = false) BigDecimal giagiam,
                             @RequestParam(value = "magiam", required = false) String magiam,
                             @RequestParam("phuongThucThanhToan") String phuongThuc,
@@ -697,7 +702,11 @@ public class BanHangController {
         BigDecimal tongTien = gio.stream()
                 .map(ct -> ct.getChiTietSanPham().getGiaBan().multiply(BigDecimal.valueOf(ct.getSoLuong())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal phiShip = Optional.ofNullable((BigDecimal) session.getAttribute("phiVanChuyen")).orElse(BigDecimal.ZERO);
+
+        // Lấy phí ship từ session theo cartKey
+        BigDecimal phiShip = Optional.ofNullable((BigDecimal) session.getAttribute("phiVanChuyen_" + cartKey))
+                .orElse(BigDecimal.ZERO);
+
         giagiam = giagiam != null ? giagiam : BigDecimal.ZERO;
         BigDecimal thanhTien = tongTien.subtract(giagiam).add(phiShip);
 
@@ -708,6 +717,7 @@ public class BanHangController {
         hd.setNgayThanhToan(LocalDateTime.now());
         hd.setTenNguoiNhan("Trực tiếp");
         hd.setPhieuGiamGia(phieugiamgiarepository.findByMa(magiam));
+
         KhachHang kh = khachHangRepository.findSoDienThoai(sdt);
         if (kh != null) {
             hd.setKhachHang(kh);
@@ -716,6 +726,7 @@ public class BanHangController {
                     .orElse(null);
             hd.setKhachHang(khachLe);
         }
+
         NhanVien nv = getNhanVien.getCurrentNhanVien();
         if (nv == null) {
             ThongBaoUtils.addError(redirect, "Không tìm thấy nhân viên đang đăng nhập.");
@@ -723,17 +734,30 @@ public class BanHangController {
         }
         hd.setNhanVien(nv);
         hd.setPhuongThuc(phuongThuc.equals("chuyen_khoan") ? "Chuyển khoản" : "Tiền mặt");
-        System.out.println("=== DỮ LIỆU NHẬN ĐƯỢC ===");
-        System.out.println("dc: " + diaChiTinh);
-        System.out.println("dc: " + diaChiHuyen);
-        System.out.println("dc: " + diaChiXa);
-        System.out.println("==========================");
 
+        // CẬP NHẬT: Ghép địa chỉ chi tiết với địa chỉ hành chính
+        String diachi = "";
+        if (!BigDecimal.ZERO.equals(phiShip)) {
+            // Có vận chuyển - ghép địa chỉ chi tiết + địa chỉ hành chính
+            StringBuilder diaChiBuilder = new StringBuilder();
+            if (diaChiChiTiet != null && !diaChiChiTiet.trim().isEmpty()) {
+                diaChiBuilder.append(diaChiChiTiet.trim());
+            }
+            if (diaChiXa != null && !diaChiXa.trim().isEmpty()) {
+                if (diaChiBuilder.length() > 0) diaChiBuilder.append(", ");
+                diaChiBuilder.append(diaChiXa);
+            }
+            if (diaChiHuyen != null && !diaChiHuyen.trim().isEmpty()) {
+                if (diaChiBuilder.length() > 0) diaChiBuilder.append(", ");
+                diaChiBuilder.append(diaChiHuyen);
+            }
+            if (diaChiTinh != null && !diaChiTinh.trim().isEmpty()) {
+                if (diaChiBuilder.length() > 0) diaChiBuilder.append(", ");
+                diaChiBuilder.append(diaChiTinh);
+            }
+            diachi = diaChiBuilder.toString();
+        }
 
-        String diachi= diaChiTinh + "-" + diaChiHuyen + "-" + diaChiXa;
-
-//        System.out.println(phiShip);
-//        System.out.println(BigDecimal.ZERO.equals(phiShip));
         if (!BigDecimal.ZERO.equals(phiShip)) {
             hd.setDiaChi(diachi);
             hd.setTenNguoiNhan(ten);
@@ -742,10 +766,7 @@ public class BanHangController {
             if (ghichu != null && !ghichu.trim().isEmpty()) {
                 ghiChuFull += "\n" + ghichu;
             }
-            System.out.println(ghiChuFull);
-
             hd.setGhiChu(ghiChuFull);
-            System.out.println(hd.getGhiChu());
         }
 
         hd.setGiaGoc(tongTien);
@@ -757,16 +778,21 @@ public class BanHangController {
         hd.setNguoiSua(1);
         hd.setNguoiTao(1);
         hd.setLoaihoadon("Offline");
+
         session.setAttribute("hoaDonTam", hd);
         session.setAttribute("gioTam", gio);
         session.setAttribute("cartKeyTam", cartKey);
 
-        return hoanTatThanhToan(cartKey, gio, sdt,sdtvc, ten,ghichu, giagiam,magiam, tongTien, phiShip, phuongThuc,diachi,redirect, session);
+        return hoanTatThanhToan(cartKey, gio, sdt, sdtvc, ten, ghichu, diaChiChiTiet, giagiam, magiam, tongTien, phiShip, phuongThuc, diachi, redirect, session);
     }
 
+    /**
+     * Cập nhật method hoanTatThanhToan để xử lý địa chỉ chi tiết
+     */
     private String hoanTatThanhToan(String cartKey, List<HoaDonChiTiet> gio,
-                                    String sdt,String sdtvc,String ten,String ghichu, BigDecimal giagiam,String magiam, BigDecimal tongTien,
-                                    BigDecimal phiShip, String phuongThuc,String diachi,
+                                    String sdt, String sdtvc, String ten, String ghichu, String diaChiChiTiet, // THÊM PARAM
+                                    BigDecimal giagiam, String magiam, BigDecimal tongTien,
+                                    BigDecimal phiShip, String phuongThuc, String diachi,
                                     RedirectAttributes redirectAttributes,
                                     HttpSession session) {
 
@@ -776,21 +802,19 @@ public class BanHangController {
         hd.setNgayThanhToan(LocalDateTime.now());
 
         NhanVien nv = getNhanVien.getCurrentNhanVien();
-        if (nv == null) nv = nhanVienRepository.findById(1).orElse(null); // fallback nếu cần
+        if (nv == null) nv = nhanVienRepository.findById(1).orElse(null);
         hd.setNhanVien(nv);
 
-        hd.setDiaChi(diachi);
         KhachHang kh = khachHangRepository.findSoDienThoai(sdt);
-        //        System.out.println(!BigDecimal.ZERO.equals(phiShip));
+
         if (!BigDecimal.ZERO.equals(phiShip)) {
-            hd.setDiaChi(diachi);
+            hd.setDiaChi(diachi); // Đã được ghép đầy đủ ở method trên
             hd.setTenNguoiNhan(ten);
 
             String ghiChuFull = "Số điện thoại người nhận:" + sdtvc;
             if (ghichu != null && !ghichu.trim().isEmpty()) {
                 ghiChuFull += "\n" + ghichu;
             }
-
             hd.setGhiChu(ghiChuFull);
         } else {
             hd.setTenNguoiNhan("Khách lẻ");
@@ -803,18 +827,21 @@ public class BanHangController {
                     .orElse(null);
             hd.setKhachHang(khachLe);
         }
-        if(sdtvc !=null){
+
+        if (sdtvc != null) {
             hd.setSoDienThoai(sdtvc);
-        }else{
+        } else {
             hd.setSoDienThoai("Khách lẻ");
         }
+
         hd.setPhuongThuc(phuongThuc);
-//        System.out.println(phuongThuc.equals("tien_mat") && !BigDecimal.ZERO.equals(phiShip));
+
         if (phuongThuc.equals("tien_mat") && !BigDecimal.ZERO.equals(phiShip)) {
             hd.setTrangThai(2);
         } else {
             hd.setTrangThai(3);
         }
+
         hd.setGiaGoc(tongTien);
         hd.setGiaGiamGia(giagiam);
         hd.setPhiVanChuyen(phiShip);
@@ -823,11 +850,11 @@ public class BanHangController {
         hd.setNgaySua(LocalDateTime.now());
         hd.setNgayThanhToan(LocalDateTime.now());
         hd.setNguoiTao(getNhanVien.getCurrentNhanVien().getId());
-        // 👉 Lưu mã giảm giá nếu có
         hd.setPhieuGiamGia(phieugiamgiarepository.findByMa(magiam));
 
         hoaDonRepository.save(hd);
 
+        // Phần còn lại giữ nguyên...
         for (HoaDonChiTiet ct : gio) {
             ChiTietSanPham sp = chiTietSanPhamRepository.findWithDetailsById(ct.getChiTietSanPham().getId());
             ct.setChiTietSanPham(sp);
@@ -840,16 +867,15 @@ public class BanHangController {
             chiTietSanPhamRepository.save(sp);
         }
 
-        // ✅ Lưu lịch sử hóa đơn
-        // Lấy từ session
+        // Lưu lịch sử hóa đơn
         LichSuHoaDon lichSu1 = new LichSuHoaDon();
         LichSuHoaDon lichSu2 = new LichSuHoaDon();
         LichSuHoaDon lichSu3 = new LichSuHoaDon();
+
         lichSu1.setHoaDon(hd);
         lichSu1.setNgayTao(LocalDateTime.now());
         lichSu1.setNgaySua(LocalDateTime.now());
         lichSu1.setNguoiTao(nv.getId());
-//        lichSu1.setNguoiSua(nv.getId());
         lichSu1.setGhiChu("Tạo hóa đơn: Chờ xác nhận");
         lichSu1.setTrangThai(1);
 
@@ -857,7 +883,6 @@ public class BanHangController {
         lichSu2.setNgayTao(LocalDateTime.now());
         lichSu2.setNgaySua(LocalDateTime.now());
         lichSu2.setNguoiTao(nv.getId());
-//        lichSu2.setNguoiSua(nv.getId());
         lichSu2.setGhiChu("Thay đổi trạng thái: Xác nhận");
         lichSu2.setTrangThai(2);
 
@@ -869,10 +894,8 @@ public class BanHangController {
             lichSu3.setNgayTao(LocalDateTime.now());
             lichSu3.setNgaySua(LocalDateTime.now());
             lichSu3.setNguoiTao(nv.getId());
-//            lichSu3.setNguoiSua(nv.getId());
             lichSu3.setGhiChu("Thanh toán" + (phuongThuc.equals("chuyen_khoan") ? " bằng chuyển khoản" : " bằng tiền mặt"));
             lichSu3.setTrangThai(5);
-
             lichSuHoaDonRepository.save(lichSu3);
         }
 
@@ -880,8 +903,6 @@ public class BanHangController {
             PhieuGiamGia phieu = phieugiamgiarepository.findByMa(magiam);
             if (phieu != null) {
                 hd.setPhieuGiamGia(phieu);
-
-                // ✅ Trừ số lượng phiếu
                 if (phieu.getSoLuongTon() != null && phieu.getSoLuongTon() > 0) {
                     phieu.setSoLuongTon(phieu.getSoLuongTon() - 1);
                     phieugiamgiarepository.save(phieu);
@@ -889,19 +910,29 @@ public class BanHangController {
             }
         }
 
-        // ✅ Dọn session
+        // Dọn session theo cartKey cụ thể
         Map<String, List<HoaDonChiTiet>> carts = (Map<String, List<HoaDonChiTiet>>) session.getAttribute("tatCaGio");
         if (carts != null) carts.remove(cartKey);
+
+        // Xóa các session liên quan đến cart này
+        session.removeAttribute("phiVanChuyen_" + cartKey);
+        session.removeAttribute("giamGia_" + cartKey);
+        session.removeAttribute("maGiamGia_" + cartKey);
+        session.removeAttribute("diaChiTinh_" + cartKey);
+        session.removeAttribute("diaChiHuyen_" + cartKey);
+        session.removeAttribute("diaChiXa_" + cartKey);
+        session.removeAttribute("diaChiChiTiet_" + cartKey); // THÊM DÒNG MỚI
+
+        // Xóa session chung (backward compatibility)
         session.removeAttribute("phiVanChuyen");
         session.removeAttribute("giamGia");
         session.removeAttribute("maGiamGia");
+        session.removeAttribute("diaChiChiTiet"); // THÊM DÒNG MỚI
         session.removeAttribute("hoaDonTam");
         session.removeAttribute("gioTam");
 
         ThongBaoUtils.addSuccess(redirectAttributes, "Thanh toán thành công");
-
         return "redirect:/admin/ban-hang";
-//        return "redirect:/admin/ban-hang/" + hd.getMa() + "/pdf";
     }
 
     @GetMapping("/dia-chi/tinh")
@@ -981,6 +1012,193 @@ public class BanHangController {
         session.setAttribute("diaChiXa", xa);
 
         return ResponseEntity.ok(Map.of("phiShip", fee));
+    }
+
+    // Thêm các method này vào BanHangController.java
+
+    /**
+     * API xóa session địa chỉ và phí vận chuyển khi bỏ tích checkbox
+     */
+    @PostMapping("/xoa-dia-chi-session")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> xoaDiaChiSession(@RequestBody Map<String, String> payload,
+                                                                HttpSession session) {
+        String cartKey = payload.get("cartKey");
+
+        // Xóa các session liên quan đến địa chỉ và phí ship của cart cụ thể
+        session.removeAttribute("phiVanChuyen_" + cartKey);
+        session.removeAttribute("diaChiTinh_" + cartKey);
+        session.removeAttribute("diaChiHuyen_" + cartKey);
+        session.removeAttribute("diaChiXa_" + cartKey);
+
+        // Xóa cả session chung (backward compatibility)
+        session.removeAttribute("phiVanChuyen");
+        session.removeAttribute("diaChiTinh");
+        session.removeAttribute("diaChiHuyen");
+        session.removeAttribute("diaChiXa");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Đã xóa thông tin địa chỉ và phí vận chuyển");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * API lấy danh sách khách hàng cho dropdown
+     */
+    @GetMapping("/danh-sach-khach-hang")
+    @ResponseBody
+    public List<Map<String, Object>> getDanhSachKhachHang() {
+        List<KhachHang> dsKhachHang = khachHangRepository.findAll().stream()
+                .filter(kh -> kh.getTrangThai() != null && kh.getTrangThai())
+                .filter(kh -> !kh.getSoDienThoai().equals("000000000")) // Loại bỏ khách lẻ
+                .collect(Collectors.toList());
+
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (KhachHang kh : dsKhachHang) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", kh.getId());
+            map.put("ma", kh.getMa());
+            map.put("ten", kh.getTen());
+            map.put("soDienThoai", kh.getSoDienThoai());
+            map.put("email", kh.getEmail());
+            map.put("diaChi", kh.getDiaChi());
+            result.add(map);
+        }
+
+        return result;
+    }
+
+    /**
+     * API lấy thông tin chi tiết khách hàng bao gồm parse địa chỉ cho auto fill
+     */
+    @GetMapping("/khach-hang-chi-tiet/{id}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getKhachHangChiTiet(@PathVariable Integer id) {
+        try {
+            KhachHang khachHang = khachHangRepository.findById(id).orElse(null);
+            if (khachHang == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("id", khachHang.getId());
+            result.put("ma", khachHang.getMa());
+            result.put("ten", khachHang.getTen());
+            result.put("soDienThoai", khachHang.getSoDienThoai());
+            result.put("email", khachHang.getEmail());
+            result.put("diaChi", khachHang.getDiaChi());
+
+            // Parse địa chỉ nếu có
+            if (khachHang.getDiaChi() != null && !khachHang.getDiaChi().isEmpty()) {
+                Map<String, Object> parsedAddress = parseAndMatchAddress(khachHang.getDiaChi());
+                result.putAll(parsedAddress);
+            }
+
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Lỗi khi lấy thông tin khách hàng"));
+        }
+    }
+
+    /**
+     * CẬP NHẬT: Parse địa chỉ và tìm ID tương ứng từ GHN API với địa chỉ chi tiết
+     */
+    private Map<String, Object> parseAndMatchAddress(String diaChi) {
+        Map<String, Object> addressInfo = new HashMap<>();
+
+        try {
+            // Parse địa chỉ: "132 Lê Đại Hành, Xã Nam Dương, Thị xã Chũ, Bắc Giang"
+            String[] parts = diaChi.split(",\\s*");
+            if (parts.length >= 4) {
+                String diaChiChiTiet = parts[0].trim(); // ĐỊA CHỈ CHI TIẾT LÀ PHẦN ĐẦU
+                String tenXa = parts[1].trim();
+                String tenHuyen = parts[2].trim();
+                String tenTinh = parts[3].trim();
+
+                addressInfo.put("diaChiChiTiet", diaChiChiTiet); // THÊM FIELD MỚI
+                addressInfo.put("tenXa", tenXa);
+                addressInfo.put("tenHuyen", tenHuyen);
+                addressInfo.put("tenTinh", tenTinh);
+
+                // Tìm provinceId từ tên tỉnh
+                List<Map<String, Object>> provinces = ghnService.getProvinces();
+                Map<String, Object> matchedProvince = provinces.stream()
+                        .filter(p -> tenTinh.equalsIgnoreCase((String) p.get("ProvinceName")))
+                        .findFirst().orElse(null);
+
+                if (matchedProvince != null) {
+                    Integer provinceId = (Integer) matchedProvince.get("ProvinceID");
+                    addressInfo.put("provinceId", provinceId);
+                    addressInfo.put("provinceName", matchedProvince.get("ProvinceName"));
+
+                    // Tìm districtId từ tên huyện
+                    List<Map<String, Object>> districts = ghnService.getDistricts(provinceId);
+                    Map<String, Object> matchedDistrict = districts.stream()
+                            .filter(d -> tenHuyen.equalsIgnoreCase((String) d.get("DistrictName")))
+                            .findFirst().orElse(null);
+
+                    if (matchedDistrict != null) {
+                        Integer districtId = (Integer) matchedDistrict.get("DistrictID");
+                        addressInfo.put("districtId", districtId);
+                        addressInfo.put("districtName", matchedDistrict.get("DistrictName"));
+                        addressInfo.put("districts", districts); // Gửi luôn danh sách districts
+
+                        // Tìm wardCode từ tên xã
+                        List<Map<String, Object>> wards = ghnService.getWards(districtId);
+                        Map<String, Object> matchedWard = wards.stream()
+                                .filter(w -> tenXa.equalsIgnoreCase((String) w.get("WardName")))
+                                .findFirst().orElse(null);
+
+                        if (matchedWard != null) {
+                            String wardCode = (String) matchedWard.get("WardCode");
+                            addressInfo.put("wardCode", wardCode);
+                            addressInfo.put("wardName", matchedWard.get("WardName"));
+                            addressInfo.put("wards", wards); // Gửi luôn danh sách wards
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            addressInfo.put("parseError", "Không thể parse địa chỉ: " + e.getMessage());
+        }
+
+        return addressInfo;
+    }
+
+    /**
+     * API lấy danh sách huyện theo tỉnh (hỗ trợ auto fill)
+     */
+    @GetMapping("/dia-chi/huyen-theo-tinh/{provinceId}")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getHuyenTheoTinh(@PathVariable Integer provinceId) {
+        try {
+            List<Map<String, Object>> districts = ghnService.getDistricts(provinceId);
+            return ResponseEntity.ok(districts);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
+        }
+    }
+
+    /**
+     * API lấy danh sách xã theo huyện (hỗ trợ auto fill)
+     */
+    @GetMapping("/dia-chi/xa-theo-huyen/{districtId}")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getXaTheoHuyen(@PathVariable Integer districtId) {
+        try {
+            List<Map<String, Object>> wards = ghnService.getWards(districtId);
+            return ResponseEntity.ok(wards);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
+        }
     }
 
 //    @GetMapping("/{maHoaDon}/pdf")
