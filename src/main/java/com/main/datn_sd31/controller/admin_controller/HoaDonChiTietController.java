@@ -82,21 +82,6 @@ public class HoaDonChiTietController {
         return "admin/pages/hoa-don/hoa-don-detail";
     }
 
-//    @PostMapping("/cap-nhat-ghi-chu")
-//    public String capNhatGhiChu(
-//            @RequestParam("maHoaDon") String maHoaDon,
-//            @RequestParam(value = "ghiChuHoaDon", required = false) String ghiChuHoaDon,
-//            RedirectAttributes redirectAttributes
-//    ) {
-//        if (ghiChuHoaDon == null) {
-//            return "redirect:/admin/hoa-don/detail";
-//        }
-//        hoaDonService.capNhatGhiChuHoaDon(maHoaDon, ghiChuHoaDon);
-//        redirectAttributes.addFlashAttribute("success", "Cập nhật ghi chú thành công.");
-//        redirectAttributes.addAttribute("maHoaDon", maHoaDon);
-//        return "redirect:/admin/hoa-don/detail";
-//    }
-
     @PostMapping("/cap-nhat-trang-thai")
     public String capNhatTrangThai(
             @RequestParam("maHoaDon") String maHoaDon,
@@ -186,24 +171,5 @@ public class HoaDonChiTietController {
 
         document.close();
     }
-
-//    @PostMapping("/api/cap-nhat-so-luong")
-//    @ResponseBody
-//    public ResponseEntity<Map<String, String>> apiCapNhatSoLuong(@RequestBody Map<String, Object> payload) {
-//        Integer id = Integer.valueOf(payload.get("id").toString());
-//        Integer soLuong = Integer.valueOf(payload.get("soLuong").toString());
-//
-//        HoaDonChiTietDTO hdct = hoaDonChiTietService.capNhatSoLuong(id, soLuong);
-//        BigDecimal tongTien = hdct.getGiaSauGiam().multiply(BigDecimal.valueOf(soLuong));
-//
-//        String tongTienFormatted = ThymleafHelper.formatCurrency(tongTien); // bạn đã có hàm này rồi
-//
-//        Map<String, String> response = new HashMap<>();
-//        response.put("tongTienFormatted", tongTienFormatted);
-//
-//        return ResponseEntity.ok(response);
-//    }
-
-
 
 }

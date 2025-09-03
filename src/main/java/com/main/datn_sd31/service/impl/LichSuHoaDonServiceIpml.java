@@ -577,6 +577,317 @@ public class LichSuHoaDonServiceIpml implements LichSuHoaDonService {
         return new KetQuaCapNhatTrangThai(true, "Cập nhật trạng thái thành công");
     }
 
+    // Hoàn thiện method cho Admin
+//    @Override
+//    public KetQuaCapNhatTrangThai xuLyCapNhatTrangThai(String maHoaDon, Integer trangThaiMoi, String ghiChu, NhanVien nhanVien) {
+//        try {
+//            HoaDonDTO hoaDonDTO = hoaDonService.getHoaDonByMa(maHoaDon);
+//            TrangThaiLichSuHoaDon trangThaiHienTai = hoaDonDTO.getTrangThaiLichSuHoaDon();
+//
+//            // Kiểm tra tham số đầu vào
+//            if (trangThaiMoi == null) {
+//                return new KetQuaCapNhatTrangThai(false, "Vui lòng chọn trạng thái mới");
+//            }
+//
+//            TrangThaiLichSuHoaDon trangThaiMoiEnum = TrangThaiLichSuHoaDon.fromValue(trangThaiMoi);
+//            if (trangThaiMoiEnum == null) {
+//                return new KetQuaCapNhatTrangThai(false, "Trạng thái không hợp lệ");
+//            }
+//
+//            if (trangThaiMoiEnum == trangThaiHienTai) {
+//                return new KetQuaCapNhatTrangThai(false, "Trạng thái mới không được trùng với trạng thái hiện tại");
+//            }
+//
+//            // Kiểm tra quy tắc chuyển đổi trạng thái
+//            String message = null;
+//            boolean hopLe = switch (trangThaiHienTai) {
+//                case CHO_XAC_NHAN -> {
+//                    if (hoaDonDTO.getTrangThaiHoaDonInteger() == 1) {
+//                        message = "Hóa đơn đang chờ thanh toán, không thể chuyển về trạng thái này";
+//                        yield false;
+//                    }
+//                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN ||
+//                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+//                }
+//                case XAC_NHAN -> {
+//                    if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH
+//                            && "Chưa thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
+//                        message = "Không thể hoàn thành khi chưa thanh toán";
+//                        yield false;
+//                    }
+//                    if (hoaDonDTO.getPhiVanChuyen().equals(BigDecimal.ZERO)) {
+//                        // Đơn hàng tại cửa hàng (không có phí vận chuyển)
+//                        yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH ||
+//                                trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+//                    }
+//                    // Đơn hàng online
+//                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.CHO_GIAO_HANG ||
+//                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+//                }
+//                case CHO_GIAO_HANG ->
+//                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_GIAO ||
+//                                trangThaiMoiEnum == TrangThaiLichSuHoaDon.GIAO_KHONG_THANH_CONG;
+//
+//                case DA_GIAO -> {
+//                    if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH &&
+//                            !"Đã thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
+//                        message = "Không thể hoàn thành vì hóa đơn chưa được thanh toán";
+//                        yield false;
+//                    }
+//                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH ||
+//                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.YEU_CAU_HOAN_HANG;
+//                }
+//                case GIAO_KHONG_THANH_CONG -> {
+//                    message = "Đơn giao không thành công, chỉ có thể hủy hoặc xác nhận hoàn hàng";
+//                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY ||
+//                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG;
+//                }
+//                case YEU_CAU_HOAN_HANG ->
+//                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.XAC_NHAN_HOAN_HANG ||
+//                                trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH;
+//
+//                case XAC_NHAN_HOAN_HANG ->
+//                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.DA_HOAN;
+//
+//                case HOAN_THANH, HUY, DA_HOAN -> {
+//                    message = "Đơn hàng đã kết thúc, không thể thay đổi trạng thái nữa";
+//                    yield false;
+//                }
+//            };
+//
+//            if (!hopLe) {
+//                return new KetQuaCapNhatTrangThai(false,
+//                        message != null ? message : "Trạng thái mới không hợp lệ theo luồng xử lý");
+//            }
+//
+//            // Xử lý logic nghiệp vụ theo từng trạng thái
+//            return xuLyLogicNghiepVu(maHoaDon, trangThaiMoiEnum, ghiChu, nhanVien, hoaDonDTO);
+//
+//        } catch (Exception e) {
+//            return new KetQuaCapNhatTrangThai(false, "Có lỗi xảy ra: " + e.getMessage());
+//        }
+//    }
+//
+//    // Hoàn thiện method cho Khách hàng
+//    @Override
+//    public KetQuaCapNhatTrangThai xuLyCapNhatTrangThaiKhachHang(String maHoaDon, Integer trangThaiMoi, String ghiChu, KhachHang khachHang) {
+//        try {
+//            HoaDonDTO hoaDonDTO = hoaDonService.getHoaDonByMa(maHoaDon);
+//            TrangThaiLichSuHoaDon trangThaiHienTai = hoaDonDTO.getTrangThaiLichSuHoaDon();
+//
+//            // Kiểm tra tham số đầu vào
+//            if (trangThaiMoi == null) {
+//                return new KetQuaCapNhatTrangThai(false, "Vui lòng chọn trạng thái mới");
+//            }
+//
+//            TrangThaiLichSuHoaDon trangThaiMoiEnum = TrangThaiLichSuHoaDon.fromValue(trangThaiMoi);
+//            if (trangThaiMoiEnum == null) {
+//                return new KetQuaCapNhatTrangThai(false, "Trạng thái không hợp lệ");
+//            }
+//
+//            if (trangThaiMoiEnum == trangThaiHienTai) {
+//                return new KetQuaCapNhatTrangThai(false, "Trạng thái mới không được trùng với trạng thái hiện tại");
+//            }
+//
+//            // Kiểm tra quyền của khách hàng (chỉ được thực hiện một số hành động nhất định)
+//            String message = null;
+//            boolean hopLe = switch (trangThaiHienTai) {
+//                case CHO_XAC_NHAN ->
+//                        trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY; // Khách hàng chỉ được hủy
+//
+//                case XAC_NHAN -> {
+//                    if (hoaDonDTO.getPhiVanChuyen().equals(BigDecimal.ZERO)) {
+//                        // Đơn tại cửa hàng - khách hàng không được thay đổi
+//                        message = "Đơn hàng tại cửa hàng không thể thay đổi trạng thái";
+//                        yield false;
+//                    }
+//                    // Đơn online - cho phép hủy trong thời gian nhất định
+//                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY;
+//                }
+//                case CHO_GIAO_HANG -> {
+//                    message = "Đơn hàng đang được giao, không thể thay đổi trạng thái";
+//                    yield false;
+//                }
+//                case DA_GIAO -> {
+//                    // Khách hàng có thể xác nhận hoàn thành hoặc yêu cầu hoàn hàng
+//                    if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH &&
+//                            !"Đã thanh toán".equals(hoaDonDTO.getTrangThaiHoaDonString())) {
+//                        message = "Không thể hoàn thành vì hóa đơn chưa được thanh toán";
+//                        yield false;
+//                    }
+//                    yield trangThaiMoiEnum == TrangThaiLichSuHoaDon.HOAN_THANH ||
+//                            trangThaiMoiEnum == TrangThaiLichSuHoaDon.YEU_CAU_HOAN_HANG;
+//                }
+//                case GIAO_KHONG_THANH_CONG -> {
+//                    message = "Đơn giao không thành công, vui lòng liên hệ cửa hàng";
+//                    yield false;
+//                }
+//                case YEU_CAU_HOAN_HANG -> {
+//                    message = "Đã gửi yêu cầu hoàn hàng, vui lòng chờ xử lý";
+//                    yield false;
+//                }
+//                case XAC_NHAN_HOAN_HANG, HOAN_THANH, HUY, DA_HOAN -> {
+//                    message = "Đơn hàng đã kết thúc, không thể thay đổi trạng thái";
+//                    yield false;
+//                }
+//            };
+//
+//            if (!hopLe) {
+//                return new KetQuaCapNhatTrangThai(false,
+//                        message != null ? message : "Bạn không có quyền thực hiện hành động này");
+//            }
+//
+//            // Kiểm tra thời gian cho phép hủy đơn (ví dụ: chỉ cho phép hủy trong 30 phút sau khi đặt)
+//            if (trangThaiMoiEnum == TrangThaiLichSuHoaDon.HUY) {
+//                LocalDateTime ngayTao = hoaDonDTO.getNgayTao();
+//                long minutesDiff = ChronoUnit.MINUTES.between(ngayTao, LocalDateTime.now());
+//                if (minutesDiff > 30) { // Giới hạn 30 phút
+//                    return new KetQuaCapNhatTrangThai(false, "Đã quá thời gian cho phép hủy đơn hàng (30 phút)");
+//                }
+//            }
+//
+//            // Xử lý logic nghiệp vụ
+//            return xuLyLogicNghiepVuKhachHang(maHoaDon, trangThaiMoiEnum, ghiChu, khachHang, hoaDonDTO);
+//
+//        } catch (Exception e) {
+//            return new KetQuaCapNhatTrangThai(false, "Có lỗi xảy ra: " + e.getMessage());
+//        }
+//    }
+//
+//    // Method hỗ trợ xử lý logic nghiệp vụ cho Admin
+//    private KetQuaCapNhatTrangThai xuLyLogicNghiepVu(String maHoaDon, TrangThaiLichSuHoaDon trangThaiMoi,
+//                                                     String ghiChu, NhanVien nhanVien, HoaDonDTO hoaDonDTO) {
+//        List<HoaDonChiTietDTO> hdctList = hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(maHoaDon);
+//
+//        switch (trangThaiMoi) {
+//            case XAC_NHAN -> {
+//                // Kiểm tra và trừ số lượng tồn kho
+//                for (HoaDonChiTietDTO ct : hdctList) {
+//                    ChiTietSanPham spct = chitietsanphamrepository.findById(ct.getIdCTSP()).orElse(null);
+//                    if (spct == null) {
+//                        return new KetQuaCapNhatTrangThai(false, "Không tìm thấy sản phẩm có ID: " + ct.getIdCTSP());
+//                    }
+//                    if (spct.getSoLuong() < ct.getSoLuong()) {
+//                        return new KetQuaCapNhatTrangThai(false, "Sản phẩm \"" + spct.getSanPham().getTen() + "\" không đủ tồn kho!");
+//                    }
+//                    spct.setSoLuong(spct.getSoLuong() - ct.getSoLuong());
+//                    chitietsanphamrepository.save(spct);
+//                }
+//            }
+//            case HUY -> {
+//                // Cập nhật trạng thái hóa đơn và hoàn lại số lượng tồn kho nếu cần
+//                HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
+//                hoaDon.setTrangThai(5); // Trạng thái hủy
+//                hoaDon.setNgaySua(LocalDateTime.now());
+//                hoaDonRepository.save(hoaDon);
+//
+//                // Hoàn lại tồn kho nếu đã xác nhận trước đó
+//                TrangThaiLichSuHoaDon trangThaiTruoc = getTrangThaiTruocDo(maHoaDon);
+//                if (trangThaiTruoc == TrangThaiLichSuHoaDon.XAC_NHAN) {
+//                    for (HoaDonChiTietDTO ct : hdctList) {
+//                        ChiTietSanPham spct = chitietsanphamrepository.findById(ct.getIdCTSP()).orElse(null);
+//                        if (spct != null) {
+//                            spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+//                            chitietsanphamrepository.save(spct);
+//                        }
+//                    }
+//                }
+//            }
+//            case DA_HOAN -> {
+//                // Cập nhật trạng thái hóa đơn và hoàn lại số lượng
+//                HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
+//                hoaDon.setTrangThai(4); // Trạng thái hoàn hàng
+//                hoaDon.setNgaySua(LocalDateTime.now());
+//                hoaDonRepository.save(hoaDon);
+//
+//                for (HoaDonChiTietDTO ct : hdctList) {
+//                    ChiTietSanPham spct = chitietsanphamrepository.findById(ct.getIdCTSP()).orElse(null);
+//                    if (spct != null) {
+//                        spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+//                        chitietsanphamrepository.save(spct);
+//                    }
+//                }
+//            }
+//            case DA_GIAO -> {
+//                // Cập nhật trạng thái thành đã thanh toán
+//                HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
+//                hoaDon.setTrangThai(3); // Đã thanh toán
+//                hoaDon.setNgaySua(LocalDateTime.now());
+//                hoaDon.setNgayThanhToan(LocalDateTime.now());
+//                hoaDonRepository.save(hoaDon);
+//            }
+//            case GIAO_KHONG_THANH_CONG -> {
+//                // Cập nhật trạng thái và hoàn lại số lượng
+//                HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
+//                hoaDon.setTrangThai(5); // Hủy
+//                hoaDon.setNgaySua(LocalDateTime.now());
+//                hoaDonRepository.save(hoaDon);
+//
+//                for (HoaDonChiTietDTO ct : hdctList) {
+//                    ChiTietSanPham spct = chitietsanphamrepository.findById(ct.getIdCTSP()).orElse(null);
+//                    if (spct != null) {
+//                        spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+//                        chitietsanphamrepository.save(spct);
+//                    }
+//                }
+//            }
+//            case HOAN_THANH -> {
+//                // Không cần xử lý đặc biệt, chỉ lưu lịch sử
+//            }
+//            default -> {
+//                // Các trạng thái khác không cần xử lý đặc biệt
+//            }
+//        }
+//
+//        // Lưu lịch sử thay đổi
+//        capNhatTrangThai(maHoaDon, trangThaiMoi.getValue(), ghiChu, nhanVien);
+//        return new KetQuaCapNhatTrangThai(true, "Cập nhật trạng thái thành công");
+//    }
+//
+//    // Method hỗ trợ xử lý logic nghiệp vụ cho Khách hàng
+//    private KetQuaCapNhatTrangThai xuLyLogicNghiepVuKhachHang(String maHoaDon, TrangThaiLichSuHoaDon trangThaiMoi,
+//                                                              String ghiChu, KhachHang khachHang, HoaDonDTO hoaDonDTO) {
+//        List<HoaDonChiTietDTO> hdctList = hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(maHoaDon);
+//
+//        switch (trangThaiMoi) {
+//            case HUY -> {
+//                // Khách hàng hủy đơn - cập nhật trạng thái và hoàn tồn kho nếu cần
+//                HoaDon hoaDon = hoaDonRepository.getHoaDonByMa(maHoaDon);
+//                hoaDon.setTrangThai(5);
+//                hoaDon.setNgaySua(LocalDateTime.now());
+//                hoaDonRepository.save(hoaDon);
+//
+//                // Nếu đã xác nhận thì hoàn lại tồn kho
+//                TrangThaiLichSuHoaDon trangThaiTruoc = getTrangThaiTruocDo(maHoaDon);
+//                if (trangThaiTruoc == TrangThaiLichSuHoaDon.XAC_NHAN) {
+//                    for (HoaDonChiTietDTO ct : hdctList) {
+//                        ChiTietSanPham spct = chitietsanphamrepository.findById(ct.getIdCTSP()).orElse(null);
+//                        if (spct != null) {
+//                            spct.setSoLuong(spct.getSoLuong() + ct.getSoLuong());
+//                            chitietsanphamrepository.save(spct);
+//                        }
+//                    }
+//                }
+//            }
+//            case YEU_CAU_HOAN_HANG -> {
+//                // Khách hàng yêu cầu hoàn hàng - chỉ lưu lịch sử
+//            }
+//            case YEU_CAU_TRA_HANG_1_PHAN -> {
+//                // Khách hàng yêu cầu trả hàng 1 phần - chỉ lưu lịch sử
+//            }
+//            case HOAN_THANH -> {
+//                // Khách hàng xác nhận hoàn thành - không cần xử lý đặc biệt
+//            }
+//            default -> {
+//                return new KetQuaCapNhatTrangThai(false, "Hành động không được phép");
+//            }
+//        }
+//
+//        // Lưu lịch sử với người tạo là khách hàng
+//        capNhatTrangThaiByKhachHang(maHoaDon, trangThaiMoi.getValue(), ghiChu, khachHang);
+//        return new KetQuaCapNhatTrangThai(true, "Cập nhật trạng thái thành công");
+//    }
+
     @Override
     public void updateStatusAfter3Days() {
 

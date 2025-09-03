@@ -57,7 +57,7 @@ public class ListSanPhamController {
     public String hienThiDanhSachSanPham(
             @RequestParam(value="q", required=false) String q,
             @RequestParam(value="danhMucId", required=false) Integer danhMucId,
-                    @RequestParam(value="priceRange", required=false) Integer priceRange,
+            @RequestParam(value="priceRange", required=false) String priceRange, // Đổi từ Integer sang String
         @RequestParam(value="loaiThuId", required=false) Integer loaiThuId,
         @RequestParam(value="sizeId", required=false) Integer sizeId,
         @RequestParam(value="mauSacId", required=false) Integer mauSacId,
@@ -73,9 +73,10 @@ public class ListSanPhamController {
             Integer currentId = getKhachHang.getCurrentKhachHang().getId();
             model.addAttribute("idKhachHang", currentId);
         }
-        // Sử dụng method search mới
+        // Sử dụng method search mới với priceRange là String
         List<SanPham> danhSachSanPham = sanPhamService.searchAdvanced(
-            q, danhMucId, loaiThuId, sizeId, mauSacId, kieuDangId, thuongHieuId, xuatXuId, priceRange, sortBy, sortDir
+                q, danhMucId, loaiThuId, sizeId, mauSacId, kieuDangId, thuongHieuId, xuatXuId,
+                priceRange, sortBy, sortDir // priceRange giờ là String
         );
         model.addAttribute("danhSachSanPham", danhSachSanPham);
 
@@ -419,7 +420,7 @@ public class ListSanPhamController {
 
     @GetMapping("/search")
     public String searchSanPham(
-            @RequestParam("q") String q,
+            @RequestParam(value = "q", required = false) String q,
             Model model) {
 
         // Sử dụng service để đảm bảo chỉ lấy sản phẩm đang hoạt động
@@ -457,18 +458,15 @@ public class ListSanPhamController {
         model.addAttribute("q", q);
         model.addAttribute("isSearch", true);
 
-        return "client/pages/product/search";
+        return "client/pages/product/product";
     }
-
-
-
 
     @GetMapping("/danh-sach/filter")
     public String filterProducts(
             @RequestHeader(value = "X-Requested-With", required = false) String requestedWith,
             @RequestParam(value="q", required=false) String q,
             @RequestParam(value="danhMucId", required=false) String danhMucIdStr,
-            @RequestParam(value="priceRange", required=false) Integer priceRange,
+            @RequestParam(value="priceRange", required=false) String priceRange, // Đổi thành String
             @RequestParam(value="loaiThuId", required=false) Integer loaiThuId,
             @RequestParam(value="sizeId", required=false) Integer sizeId,
             @RequestParam(value="mauSacId", required=false) Integer mauSacId,
@@ -505,9 +503,10 @@ public class ListSanPhamController {
             }
         }
 
-        // Sử dụng method search mới
+        // Sử dụng searchAdvanced với priceRange String
         List<SanPham> danhSachSanPham = sanPhamService.searchAdvanced(
-            q, danhMucId, loaiThuId, sizeId, mauSacId, kieuDangId, thuongHieuId, xuatXuId, priceRange, sortBy, sortDir
+                q, danhMucId, loaiThuId, sizeId, mauSacId, kieuDangId, thuongHieuId, xuatXuId,
+                priceRange, sortBy, sortDir
         );
 
         model.addAttribute("danhSachSanPham", danhSachSanPham);

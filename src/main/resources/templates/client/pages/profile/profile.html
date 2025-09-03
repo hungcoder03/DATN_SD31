@@ -3,125 +3,421 @@
 
 <head>
     <title>Thông tin tài khoản - Waggy Pet Shop</title>
+    <style>
+        .profile-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-control-plaintext {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+        }
+
+        .btn-edit {
+            padding: 5px 15px;
+            font-size: 12px;
+        }
+
+        .alert {
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .edit-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #dee2e6;
+        }
+
+        .password-section {
+            border-top: 1px solid #dee2e6;
+            padding-top: 30px;
+            margin-top: 30px;
+        }
+    </style>
 </head>
 
 <body>
-    <div layout:fragment="content">
-        <div class="container py-5">
-            <div class="profile-card">
-                <h3>Hồ Sơ Của Tôi</h3>
-                <hr>
+<div layout:fragment="content">
+    <div class="container py-5">
+        <!-- Hiển thị thông báo -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Thành công!</strong> <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
-                <!-- Họ tên -->
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label field-label">Họ và tên:</label>
-                    <div class="col-sm-10">
-                        <p class="form-control-plaintext" th:text="${khachHang.ten}">Tên</p>
-                    </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Lỗi!</strong> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="profile-card">
+            <h3 class="section-title">Hồ Sơ Của Tôi</h3>
+
+            <!-- Họ tên -->
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label field-label">Họ và tên:</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext" th:text="${khachHang.ten ?: 'Chưa cập nhật'}">Tên</p>
                 </div>
-
-                <!-- Email -->
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label field-label">Email:</label>
-                    <div class="col-sm-10">
-                        <p class="form-control-plaintext" th:text="${khachHang.email}">email@gmail.com</p>
-                    </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-primary btn-edit" onclick="toggleEditForm('editTenForm')">Sửa</button>
                 </div>
+            </div>
 
-                <!-- Số điện thoại -->
-                <form method="post" action="/tai-khoan/cap-nhat-sdt" class="row mb-3">
-                    <label class="col-sm-2 col-form-label field-label">Số điện thoại:</label>
-                    <div class="col-sm-6">
-                        <input type="text" name="soDienThoai" class="form-control" th:value="${khachHang.soDienThoai}" required>
-                    </div>
-                    <div class="col-sm-4">
-                        <button type="submit" class="btn btn-primary">Cập nhật SĐT</button>
+            <!-- Form sửa tên -->
+            <div id="editTenForm" class="edit-form d-none">
+                <form method="post" action="/tai-khoan/cap-nhat-ten">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="text" name="ten" class="form-control" th:value="${khachHang.ten}"
+                                   placeholder="Nhập họ và tên" required minlength="2" maxlength="100">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-success me-2">Lưu</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditForm('editTenForm')">Hủy</button>
+                        </div>
                     </div>
                 </form>
+            </div>
 
-                <!-- Địa chỉ -->
-                <div class="row mb-3">
-                    <label class="col-sm-2 col-form-label field-label">Địa chỉ:</label>
-                    <div class="col-sm-10">
-                        <!-- Nếu chưa có địa chỉ -->
-                        <div th:if="${khachHang.diaChi == null or #strings.isEmpty(khachHang.diaChi)}">
-                            <button id="btnHienForm" type="button" class="btn btn-warning">Thêm địa chỉ</button>
+            <!-- Email -->
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label field-label">Email:</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext" th:text="${khachHang.email}">email@gmail.com</p>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-primary btn-edit" onclick="toggleEditForm('editEmailForm')">Sửa</button>
+                </div>
+            </div>
+
+            <!-- Form sửa email -->
+            <div id="editEmailForm" class="edit-form d-none">
+                <div class="alert alert-warning">
+                    <small><strong>Lưu ý:</strong> Sau khi thay đổi email, bạn sẽ cần đăng nhập lại với email mới.</small>
+                </div>
+                <form method="post" action="/tai-khoan/cap-nhat-email">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="email" name="email" class="form-control" th:value="${khachHang.email}"
+                                   placeholder="Nhập email mới" required>
                         </div>
-
-                        <!-- Nếu đã có địa chỉ -->
-                        <div th:unless="${khachHang.diaChi == null or #strings.isEmpty(khachHang.diaChi)}">
-                            <p class="form-control-plaintext mb-2" th:text="${khachHang.diaChi}"></p>
-                            <button id="btnSuaDiaChi" type="button" class="btn btn-sm btn-primary me-2">Sửa</button>
-                            <form method="post" action="/tai-khoan/xoa-dia-chi" class="d-inline">
-                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                            </form>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-success me-2">Lưu</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditForm('editEmailForm')">Hủy</button>
                         </div>
+                    </div>
+                </form>
+            </div>
 
-                        <!-- Form thêm/sửa địa chỉ -->
-                        <form method="post" action="/tai-khoan/cap-nhat-dia-chi" id="formDiaChi" class="mt-3 d-none" onsubmit="return buildFullAddress()">
+            <!-- Số điện thoại -->
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label field-label">Số điện thoại:</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext" th:text="${khachHang.soDienThoai ?: 'Chưa cập nhật'}">Số điện thoại</p>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-primary btn-edit" onclick="toggleEditForm('editSdtForm')">Sửa</button>
+                </div>
+            </div>
+
+            <!-- Form sửa số điện thoại -->
+            <div id="editSdtForm" class="edit-form d-none">
+                <form method="post" action="/tai-khoan/cap-nhat-sdt">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="tel" name="soDienThoai" class="form-control" th:value="${khachHang.soDienThoai}"
+                                   placeholder="Nhập số điện thoại (VD: 0987654321)" required pattern="^(0[3|5|7|8|9])[0-9]{8}$">
+                            <small class="text-muted">Định dạng: 0xxxxxxxxx (10 số)</small>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-success me-2">Lưu</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditForm('editSdtForm')">Hủy</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Giới tính -->
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label field-label">Giới tính:</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext" th:text="${khachHang.gioiTinh != null ? (khachHang.gioiTinh ? 'Nam' : 'Nữ') : 'Chưa cập nhật'}">Giới tính</p>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-primary btn-edit" onclick="toggleEditForm('editGioiTinhForm')">Sửa</button>
+                </div>
+            </div>
+
+            <!-- Form sửa giới tính -->
+            <div id="editGioiTinhForm" class="edit-form d-none">
+                <form method="post" action="/tai-khoan/cap-nhat-gioi-tinh">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gioiTinh" id="nam" value="true"
+                                       th:checked="${khachHang.gioiTinh == true}">
+                                <label class="form-check-label" for="nam">Nam</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gioiTinh" id="nu" value="false"
+                                       th:checked="${khachHang.gioiTinh == false}">
+                                <label class="form-check-label" for="nu">Nữ</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-success me-2">Lưu</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditForm('editGioiTinhForm')">Hủy</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Ngày sinh -->
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label field-label">Ngày sinh:</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext" th:text="${khachHang.ngaySinh != null ? #temporals.format(khachHang.ngaySinh, 'dd/MM/yyyy') : 'Chưa cập nhật'}">Ngày sinh</p>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-primary btn-edit" onclick="toggleEditForm('editNgaySinhForm')">Sửa</button>
+                </div>
+            </div>
+
+            <!-- Form sửa ngày sinh -->
+            <div id="editNgaySinhForm" class="edit-form d-none">
+                <form method="post" action="/tai-khoan/cap-nhat-ngay-sinh">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="date" name="ngaySinh" class="form-control"
+                                   th:value="${khachHang.ngaySinh}"
+                                   th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-success me-2">Lưu</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditForm('editNgaySinhForm')">Hủy</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Địa chỉ -->
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label field-label">Địa chỉ:</label>
+                <div class="col-sm-10">
+                    <!-- Nếu chưa có địa chỉ -->
+                    <div th:if="${khachHang.diaChi == null or #strings.isEmpty(khachHang.diaChi)}">
+                        <button id="btnHienForm" type="button" class="btn btn-warning">Thêm địa chỉ</button>
+                    </div>
+
+                    <!-- Nếu đã có địa chỉ -->
+                    <div th:unless="${khachHang.diaChi == null or #strings.isEmpty(khachHang.diaChi)}">
+                        <p class="form-control-plaintext mb-2" th:text="${khachHang.diaChi}"></p>
+                        <button id="btnSuaDiaChi" type="button" class="btn btn-sm btn-primary me-2">Sửa</button>
+                        <form method="post" action="/tai-khoan/xoa-dia-chi" class="d-inline">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-4">
-                                    <select id="province" class="form-select" name="province">
-                                        <option value="">-- Chọn tỉnh --</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <select id="district" class="form-select" name="district">
-                                        <option value="">-- Chọn huyện --</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <select id="ward" class="form-select" name="ward">
-                                        <option value="">-- Chọn xã --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Nhập cụ thể -->
-                            <div class="mb-3">
-                                <input type="text" class="form-control" name="chiTiet" id="chiTiet" placeholder="Số nhà, tên đường..." required>
-                            </div>
-
-                            <!-- Hidden để gộp -->
-                            <input type="hidden" id="hiddenTinh" name="tinh">
-                            <input type="hidden" id="hiddenHuyen" name="huyen">
-                            <input type="hidden" id="hiddenXa" name="xa">
-
-                            <button type="submit" class="btn btn-success">Lưu địa chỉ</button>
+                            <button type="submit" class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Bạn có chắc muốn xóa địa chỉ?')">Xóa</button>
                         </form>
                     </div>
+
+                    <!-- Form thêm/sửa địa chỉ -->
+                    <form method="post" action="/tai-khoan/cap-nhat-dia-chi" id="formDiaChi" class="mt-3 d-none edit-form" onsubmit="return buildFullAddress()">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <select id="province" class="form-select" name="province" required>
+                                    <option value="">-- Chọn tỉnh --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="district" class="form-select" name="district" required>
+                                    <option value="">-- Chọn huyện --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="ward" class="form-select" name="ward" required>
+                                    <option value="">-- Chọn xã --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Nhập cụ thể -->
+                        <div class="mb-3">
+                            <input type="text" class="form-control" name="chiTiet" id="chiTiet"
+                                   placeholder="Số nhà, tên đường..." required>
+                        </div>
+
+                        <!-- Hidden để gộp -->
+                        <input type="hidden" id="hiddenTinh" name="tinh">
+                        <input type="hidden" id="hiddenHuyen" name="huyen">
+                        <input type="hidden" id="hiddenXa" name="xa">
+
+                        <button type="submit" class="btn btn-success me-2">Lưu địa chỉ</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddressForm()">Hủy</button>
+                    </form>
                 </div>
+            </div>
 
+            <!-- Phần đổi mật khẩu -->
+            <div class="password-section">
+                <h4 class="section-title">Đổi Mật Khẩu</h4>
 
+                <button id="btnDoiMatKhau" type="button" class="btn btn-outline-danger" onclick="toggleEditForm('editMatKhauForm')">
+                    Đổi mật khẩu
+                </button>
 
+                <!-- Form đổi mật khẩu -->
+                <div id="editMatKhauForm" class="edit-form d-none">
+                    <form method="post" action="/tai-khoan/cap-nhat-mat-khau">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Mật khẩu cũ:</label>
+                            <div class="col-sm-9">
+                                <input type="password" name="matKhauCu" class="form-control" required
+                                       placeholder="Nhập mật khẩu hiện tại">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Mật khẩu mới:</label>
+                            <div class="col-sm-9">
+                                <input type="password" name="matKhauMoi" id="matKhauMoi" class="form-control" required
+                                       placeholder="Nhập mật khẩu mới" minlength="6">
+                                <small class="text-muted">Mật khẩu phải có ít nhất 6 ký tự</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Xác nhận mật khẩu:</label>
+                            <div class="col-sm-9">
+                                <input type="password" name="xacNhanMatKhau" id="xacNhanMatKhau" class="form-control" required
+                                       placeholder="Nhập lại mật khẩu mới">
+                                <div id="passwordMatchMessage" class="mt-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <button type="submit" class="btn btn-danger me-2" id="btnSubmitMatKhau">Đổi mật khẩu</button>
+                                <button type="button" class="btn btn-secondary" onclick="toggleEditForm('editMatKhauForm')">Hủy</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-        <script>
-            document.addEventListener("DOMContentLoaded", async function () {
-                const btnHienForm = document.getElementById("btnHienForm");
-                const btnSuaDiaChi = document.getElementById("btnSuaDiaChi");
-                const formDiaChi = document.getElementById("formDiaChi");
+    </div>
 
-                async function fetchData(url) {
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error("Lỗi khi fetch dữ liệu");
-                    return await response.json();
+    <script>
+        // Hàm toggle form edit
+        function toggleEditForm(formId) {
+            const form = document.getElementById(formId);
+            if (form.classList.contains('d-none')) {
+                // Ẩn tất cả form khác trước
+                const allForms = document.querySelectorAll('.edit-form');
+                allForms.forEach(f => f.classList.add('d-none'));
+
+                // Hiện form được chọn
+                form.classList.remove('d-none');
+            } else {
+                form.classList.add('d-none');
+            }
+        }
+
+        // Hàm ẩn form địa chỉ
+        function hideAddressForm() {
+            const formDiaChi = document.getElementById('formDiaChi');
+            formDiaChi.classList.add('d-none');
+
+            const btnHienForm = document.getElementById('btnHienForm');
+            const btnSuaDiaChi = document.getElementById('btnSuaDiaChi');
+            if (btnHienForm) btnHienForm.classList.remove('d-none');
+            if (btnSuaDiaChi) btnSuaDiaChi.classList.remove('d-none');
+        }
+
+        // Validation mật khẩu
+        document.addEventListener('DOMContentLoaded', function() {
+            const matKhauMoi = document.getElementById('matKhauMoi');
+            const xacNhanMatKhau = document.getElementById('xacNhanMatKhau');
+            const passwordMatchMessage = document.getElementById('passwordMatchMessage');
+            const btnSubmitMatKhau = document.getElementById('btnSubmitMatKhau');
+
+            function checkPasswordMatch() {
+                if (matKhauMoi && xacNhanMatKhau && passwordMatchMessage) {
+                    if (xacNhanMatKhau.value === '') {
+                        passwordMatchMessage.innerHTML = '';
+                        btnSubmitMatKhau.disabled = false;
+                        return;
+                    }
+
+                    if (matKhauMoi.value === xacNhanMatKhau.value) {
+                        passwordMatchMessage.innerHTML = '<small class="text-success">Mật khẩu khớp ✓</small>';
+                        btnSubmitMatKhau.disabled = false;
+                    } else {
+                        passwordMatchMessage.innerHTML = '<small class="text-danger">Mật khẩu không khớp ✗</small>';
+                        btnSubmitMatKhau.disabled = true;
+                    }
                 }
+            }
 
-                async function hienFormDiaChi() {
-                    formDiaChi.classList.remove("d-none");
-                    if (btnHienForm) btnHienForm.classList.add("d-none");
-                    if (btnSuaDiaChi) btnSuaDiaChi.classList.add("d-none");
+            if (matKhauMoi && xacNhanMatKhau) {
+                matKhauMoi.addEventListener('input', checkPasswordMatch);
+                xacNhanMatKhau.addEventListener('input', checkPasswordMatch);
+            }
+        });
 
-                    const provinceSelect = document.getElementById("province");
-                    const districtSelect = document.getElementById("district");
-                    const wardSelect = document.getElementById("ward");
+        // Xử lý địa chỉ
+        document.addEventListener("DOMContentLoaded", async function () {
+            const btnHienForm = document.getElementById("btnHienForm");
+            const btnSuaDiaChi = document.getElementById("btnSuaDiaChi");
+            const formDiaChi = document.getElementById("formDiaChi");
 
-                    // Load tỉnh
+            async function fetchData(url) {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Lỗi khi fetch dữ liệu");
+                return await response.json();
+            }
+
+            async function hienFormDiaChi() {
+                formDiaChi.classList.remove("d-none");
+                if (btnHienForm) btnHienForm.classList.add("d-none");
+                if (btnSuaDiaChi) btnSuaDiaChi.classList.add("d-none");
+
+                const provinceSelect = document.getElementById("province");
+                const districtSelect = document.getElementById("district");
+                const wardSelect = document.getElementById("ward");
+
+                // Load tỉnh
+                try {
                     const provinces = await fetchData("/tai-khoan/dia-chi/tinh");
                     provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh --</option>';
                     provinces.forEach(p => {
@@ -133,44 +429,71 @@
                         districtSelect.innerHTML = '<option value="">-- Chọn huyện --</option>';
                         wardSelect.innerHTML = '<option value="">-- Chọn xã --</option>';
                         if (!provinceId) return;
-                        const districts = await fetchData(`/tai-khoan/dia-chi/huyen?provinceId=${provinceId}`);
-                        districts.forEach(d => {
-                            districtSelect.innerHTML += `<option value="${d.DistrictID}">${d.DistrictName}</option>`;
-                        });
+                        try {
+                            const districts = await fetchData(`/tai-khoan/dia-chi/huyen?provinceId=${provinceId}`);
+                            districts.forEach(d => {
+                                districtSelect.innerHTML += `<option value="${d.DistrictID}">${d.DistrictName}</option>`;
+                            });
+                        } catch (error) {
+                            console.error('Lỗi load huyện:', error);
+                        }
                     });
 
                     districtSelect.addEventListener("change", async function () {
                         const districtId = this.value;
                         wardSelect.innerHTML = '<option value="">-- Chọn xã --</option>';
                         if (!districtId) return;
-                        const wards = await fetchData(`/tai-khoan/dia-chi/xa?districtId=${districtId}`);
-                        wards.forEach(w => {
-                            wardSelect.innerHTML += `<option value="${w.WardCode}">${w.WardName}</option>`;
-                        });
+                        try {
+                            const wards = await fetchData(`/tai-khoan/dia-chi/xa?districtId=${districtId}`);
+                            wards.forEach(w => {
+                                wardSelect.innerHTML += `<option value="${w.WardCode}">${w.WardName}</option>`;
+                            });
+                        } catch (error) {
+                            console.error('Lỗi load xã:', error);
+                        }
                     });
+                } catch (error) {
+                    console.error('Lỗi load tỉnh:', error);
+                    alert('Có lỗi khi tải danh sách tỉnh thành');
+                }
+            }
+
+            if (btnHienForm) {
+                btnHienForm.addEventListener("click", hienFormDiaChi);
+            }
+
+            if (btnSuaDiaChi) {
+                btnSuaDiaChi.addEventListener("click", hienFormDiaChi);
+            }
+
+            window.buildFullAddress = function () {
+                const tinh = document.getElementById("province").selectedOptions[0]?.text || "";
+                const huyen = document.getElementById("district").selectedOptions[0]?.text || "";
+                const xa = document.getElementById("ward").selectedOptions[0]?.text || "";
+
+                if (!tinh || !huyen || !xa) {
+                    alert('Vui lòng chọn đầy đủ tỉnh/huyện/xã!');
+                    return false;
                 }
 
-                if (btnHienForm) {
-                    btnHienForm.addEventListener("click", hienFormDiaChi);
+                document.getElementById("hiddenTinh").value = tinh;
+                document.getElementById("hiddenHuyen").value = huyen;
+                document.getElementById("hiddenXa").value = xa;
+                return true;
+            };
+        });
+
+        // Auto dismiss alerts
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                if (alert.querySelector('.btn-close')) {
+                    alert.querySelector('.btn-close').click();
                 }
-
-                if (btnSuaDiaChi) {
-                    btnSuaDiaChi.addEventListener("click", hienFormDiaChi);
-                }
-
-                window.buildFullAddress = function () {
-                    const tinh = document.getElementById("province").selectedOptions[0]?.text || "";
-                    const huyen = document.getElementById("district").selectedOptions[0]?.text || "";
-                    const xa = document.getElementById("ward").selectedOptions[0]?.text || "";
-
-                    document.getElementById("hiddenTinh").value = tinh;
-                    document.getElementById("hiddenHuyen").value = huyen;
-                    document.getElementById("hiddenXa").value = xa;
-                    return true;
-                };
             });
-        </script>
-    </div>
+        }, 5000);
+    </script>
+</div>
 </body>
 
-</html> 
+</html>

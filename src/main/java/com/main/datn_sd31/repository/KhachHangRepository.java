@@ -34,4 +34,11 @@ public interface KhachHangRepository extends JpaRepository<KhachHang, Integer> {
     KhachHang findSoDienThoai(String sdt);
 
     boolean existsBySoDienThoai(@Size(max = 20) String soDienThoai);
+
+
+    // Thêm vào KhachHangRepository.java
+    boolean existsBySoDienThoaiAndIdNot(String soDienThoai, Integer id);
+
+    @Query("SELECT CASE WHEN COUNT(k) > 0 THEN true ELSE false END FROM KhachHang k WHERE k.soDienThoai = :soDienThoai")
+    boolean existsBySoDienThoaiCustom(@Param("soDienThoai") String soDienThoai);
 }

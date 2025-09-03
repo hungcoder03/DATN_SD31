@@ -641,6 +641,8 @@ public class Sanphamservice {
         sanPhamRepo.deleteById(id);
     }
 
+    // 1. Sửa method searchAdvanced trong Sanphamservice.java
+
     public List<SanPham> searchAdvanced(
             String q,
             Integer danhMucId,
@@ -650,46 +652,100 @@ public class Sanphamservice {
             Integer kieuDangId,
             Integer thuongHieuId,
             Integer xuatXuId,
-            Integer priceRange,
+            String priceRange, // Đổi từ Integer sang String
             String sortBy,
             String sortDir
     ) {
         // normalize keyword
         String keyword = (q == null ? "" : q.trim());
 
-        // parse priceRange
+        // Parse priceRange - SỬA LẠI LOGIC NÀY
         BigDecimal min = null, max = null;
-        if (priceRange != null) {
-            min = BigDecimal.ZERO;
-            max = new BigDecimal(priceRange);
+        if (priceRange != null && !priceRange.trim().isEmpty()) {
+            try {
+                switch (priceRange) {
+                    case "0-200000":
+                        min = BigDecimal.ZERO;
+                        max = new BigDecimal("200000");
+                        break;
+                    case "200000-300000":
+                        min = new BigDecimal("200000");
+                        max = new BigDecimal("300000");
+                        break;
+                    case "300000-500000":
+                        min = new BigDecimal("300000");
+                        max = new BigDecimal("500000");
+                        break;
+                    case "500000+":
+                        min = new BigDecimal("500000");
+                        max = null; // Không giới hạn trên
+                        break;
+                    default:
+                        // Xử lý format tùy chỉnh như "min-max" hoặc chỉ một số
+                        if (priceRange.contains("-")) {
+                            String[] parts = priceRange.split("-");
+                            if (parts.length >= 1 && !parts[0].trim().isEmpty()) {
+                                min = new BigDecimal(parts[0].trim());
+                            }
+                            if (parts.length >= 2 && !parts[1].trim().isEmpty()) {
+                                max = new BigDecimal(parts[1].trim());
+                            }
+                        } else {
+                            // Chỉ có một số - coi như giá tối đa
+                            max = new BigDecimal(priceRange);
+                        }
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid price range format: " + priceRange);
+                // Tiếp tục với min = max = null
+            }
         }
 
         // if no filter at all, trả về all
-        if (keyword.isEmpty() && danhMucId == null && loaiThuId == null && 
-            sizeId == null && mauSacId == null && kieuDangId == null && 
-            thuongHieuId == null && xuatXuId == null && min == null) {
+        if (keyword.isEmpty() && danhMucId == null && loaiThuId == null &&
+                sizeId == null && mauSacId == null && kieuDangId == null &&
+                thuongHieuId == null && xuatXuId == null && min == null && max == null) {
             return sanPhamRepo.findByTrangThaiTrue();
         }
 
         // Sử dụng method filter cơ bản trước
         List<SanPham> basicFiltered = sanPhamRepo.filter(
-            keyword, danhMucId, loaiThuId, null, kieuDangId, xuatXuId, min, max
+                keyword, danhMucId, loaiThuId, null, kieuDangId, xuatXuId, min, max
         );
 
         // Lọc thêm theo thương hiệu nếu có
         if (thuongHieuId != null) {
             basicFiltered = basicFiltered.stream()
-                .filter(sp -> sp.getThuongHieu() != null && sp.getThuongHieu().getId().equals(thuongHieuId))
-                .collect(Collectors.toList());
+                    .filter(sp -> sp.getThuongHieu() != null && sp.getThuongHieu().getId().equals(thuongHieuId))
+                    .collect(Collectors.toList());
         }
 
         // Lọc theo size và màu sắc nếu có
         if (sizeId != null || mauSacId != null) {
             basicFiltered = basicFiltered.stream()
-                .filter(sp -> sp.getChiTietSanPhams().stream()
-                    .anyMatch(ct -> (sizeId == null || ct.getSize().getId().equals(sizeId)) &&
-                                   (mauSacId == null || ct.getMauSac().getId().equals(mauSacId))))
-                .collect(Collectors.toList());
+                    .filter(sp -> sp.getChiTietSanPhams().stream()
+                            .anyMatch(ct -> (sizeId == null || ct.getSize().getId().equals(sizeId)) &&
+                                    (mauSacId == null || ct.getMauSac().getId().equals(mauSacId))))
+                    .collect(Collectors.toList());
+        }
+
+        // THÊM LOGIC LỌC GIÁ CHO CÁC SẢN PHẨM ĐÃ LỌC
+        if (min != null || max != null) {
+            final BigDecimal finalMin = min;
+            final BigDecimal finalMax = max;
+
+            basicFiltered = basicFiltered.stream()
+                    .filter(sp -> {
+                        // Lấy giá bán thấp nhất của sản phẩm
+                        BigDecimal minPrice = getMinDiscountedPrice(sp);
+
+                        // Kiểm tra khoảng giá
+                        boolean matchMin = finalMin == null || minPrice.compareTo(finalMin) >= 0;
+                        boolean matchMax = finalMax == null || minPrice.compareTo(finalMax) <= 0;
+
+                        return matchMin && matchMax;
+                    })
+                    .collect(Collectors.toList());
         }
 
         // Áp dụng sắp xếp nếu có
@@ -718,28 +774,43 @@ public class Sanphamservice {
         return basicFiltered;
     }
 
-    private java.math.BigDecimal getMinDiscountedPrice(SanPham sp) {
+    // 2. Cải thiện method getMinDiscountedPrice
+    private BigDecimal getMinDiscountedPrice(SanPham sp) {
         return sp.getChiTietSanPhams().stream()
                 .map(ct -> {
-                    java.math.BigDecimal giaGoc = ct.getGiaGoc() == null ? java.math.BigDecimal.ZERO : ct.getGiaGoc();
-                    java.math.BigDecimal giaBan = giaGoc;
-                    if (ct.getDotGiamGia() != null && giaGoc != null) {
-                        var dgg = ct.getDotGiamGia();
-                        var giaTri = dgg.getGiaTriDotGiamGia();
+                    BigDecimal giaGoc = ct.getGiaGoc();
+                    if (giaGoc == null) {
+                        return BigDecimal.ZERO;
+                    }
+
+                    // Sử dụng giaBan đã được tính toán sẵn trong database
+                    BigDecimal giaBan = ct.getGiaBan();
+                    if (giaBan != null) {
+                        return giaBan;
+                    }
+
+                    // Fallback: tính toán lại nếu giaBan null
+                    if (ct.getDotGiamGia() != null) {
+                        DotGiamGia dgg = ct.getDotGiamGia();
+                        BigDecimal giaTri = dgg.getGiaTriDotGiamGia();
                         if (giaTri != null) {
-                            if ("TIEN".equalsIgnoreCase(dgg.getLoai())) {
+                            if ("TIEN".equalsIgnoreCase(dgg.getLoai()) || "tien_mat".equalsIgnoreCase(dgg.getLoai())) {
                                 giaBan = giaGoc.subtract(giaTri);
                             } else {
-                                var phanTram = giaTri.divide(new java.math.BigDecimal(100), 2, java.math.RoundingMode.HALF_UP);
+                                BigDecimal phanTram = giaTri.divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
                                 giaBan = giaGoc.subtract(giaGoc.multiply(phanTram));
                             }
-                            if (giaBan.compareTo(java.math.BigDecimal.ZERO) < 0) giaBan = java.math.BigDecimal.ZERO;
+                            if (giaBan.compareTo(BigDecimal.ZERO) < 0) {
+                                giaBan = BigDecimal.ZERO;
+                            }
+                            return giaBan;
                         }
                     }
-                    return giaBan;
+
+                    return giaGoc;
                 })
-                .min(java.util.Comparator.naturalOrder())
-                .orElse(java.math.BigDecimal.ZERO);
+                .min(Comparator.naturalOrder())
+                .orElse(BigDecimal.ZERO);
     }
 
     /**

@@ -445,12 +445,20 @@ public class GiohangController {
         PhieuGiamGia phieuTotNhat = timPhieuTotNhat(dsPhieuGiamGia, tongTien);
         model.addAttribute("phieuTotNhat", phieuTotNhat);
 
+        // Ajouter après la récupération des IDs de localisation
+        if (provinceId != null && districtId != null && wardCode != null) {
+            // Calculer les frais de livraison initiaux
+            Integer phiVanChuyen = calculateInitialShippingFee(districtId, wardCode);
+            model.addAttribute("phiVanChuyenInit", phiVanChuyen != null ? phiVanChuyen : 0);
+        } else {
+            model.addAttribute("phiVanChuyenInit", 0);
+        }
+
         return "/client/pages/cart/checkout";
     }
 
 
     // Thay thế phần gửi email trong Controller của bạn
-
     @PostMapping("/thanh-toan/xac-nhan")
     @Transactional
     public String xacNhanThanhToan(@RequestParam("phuongThucThanhToan") String phuongThuc,
@@ -493,6 +501,8 @@ public class GiohangController {
                     .collect(Collectors.joining("&selectedId="));
             return "redirect:/gio-hang/thanh-toan?selectedId=" + joinedIds;
         }
+
+
 
         String fullAddress = diaChiChiTiet + ", " + tenXa + ", " + tenHuyen + ", " + tenTinh;
 
@@ -648,6 +658,7 @@ public class GiohangController {
 
     @GetMapping("/thanh-toan/shipping-fee")
     @ResponseBody
+
     public ResponseEntity<?> getShippingFee(@RequestParam("districtId") int districtId,
                                             @RequestParam("wardCode") String wardCode) {
         int fromDistrictId = 3440;
@@ -711,5 +722,21 @@ public class GiohangController {
         return ResponseEntity.ok(tienGiam);
     }
 
+    private Integer calculateInitialShippingFee(Integer districtId, String wardCode) {
+        try {
+            int fromDistrictId = 3440; // District d'expédition
+            int weight = 500; // Poids par défaut
+
+            List<Map<String, Object>> services = ghnService.getAvailableServices(fromDistrictId, districtId);
+
+            if (!services.isEmpty()) {
+                int serviceId = (Integer) services.get(0).get("service_id");
+                return ghnService.getShippingFee(fromDistrictId, districtId, wardCode, weight, serviceId);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur calcul frais initial: " + e.getMessage());
+        }
+        return 0;
+    }
 
 }

@@ -341,9 +341,29 @@ class CheckoutValidator {
         this.validateForm();
     }
 
+    updateShippingFeeDisplay() {
+        const shippingFeeText = document.getElementById('tienVanChuyenText');
+        const shippingFeeInput = document.getElementById('tienVanChuyenInput');
+
+        if (shippingFeeText) {
+            shippingFeeText.innerText = this.currentShippingFee.toLocaleString('vi-VN') + " ₫";
+        }
+        if (shippingFeeInput) {
+            shippingFeeInput.value = this.currentShippingFee;
+        }
+    }
+
     initializeShippingFee() {
         this.tongTien = parseInt(document.querySelector('input[name="tongTien"]')?.value || 0);
-        this.resetShippingFee();
+
+        // ✅ NOUVEAU : Calculer frais initial si adresse pré-remplie
+        if (window.hasInitialAddress && window.initialShippingFee > 0) {
+            this.currentShippingFee = window.initialShippingFee;
+            this.updateShippingFeeDisplay();
+            this.updateTotalPay();
+        } else {
+            this.resetShippingFee();
+        }
     }
 
     initializeDiscount() {

@@ -8,7 +8,7 @@ INSERT INTO ai_training_data (question, answer, category, is_active, created_at)
 
 ('Chất liệu quần áo có an toàn cho chó không?', 'Tuyệt đối an toàn bạn nhé! D&G Fashion sử dụng 100% vải cotton tự nhiên, không hóa chất độc hại, mềm mại và thoáng mát. Tất cả sản phẩm đều được kiểm định chất lượng nghiêm ngặt! 🌿✅', 'Chất liệu', 1, GETDATE()),
 
-('Có chính sách đổi trả không?', 'Có bạn nhé! D&G Fashion có chính sách đổi trả trong 7 ngày nếu sản phẩm có lỗi từ nhà sản xuất hoặc không vừa size. Chúng tôi cam kết 100% hài lòng với mọi khách hàng! 🔄💯', 'Chính sách', 1, GETDATE()),
+('Có chính sách đổi trả không?', 'Có bạn nhé! D&G Fashion có chính sách đổi trả trong 3 ngày nếu sản phẩm có lỗi từ nhà sản xuất hoặc không vừa size. Chúng tôi cam kết 100% hài lòng với mọi khách hàng! 🔄💯', 'Chính sách', 1, GETDATE()),
 
 ('Bạn có tư vấn chọn quần áo theo giống chó không?', 'Có bạn nhé! D&G Fashion có đội ngũ tư vấn chuyên nghiệp, am hiểu về đặc điểm của từng giống chó. Ví dụ: Chó nhỏ (Poodle, Chihuahua) phù hợp với áo nhẹ nhàng, chó lớn (Golden, Husky) phù hợp với áo ấm áp! 🎯🐕', 'Tư vấn mua hàng', 1, GETDATE()),
 
@@ -18,4 +18,4 @@ INSERT INTO ai_training_data (question, answer, category, is_active, created_at)
 
 ('Có ship ra nước ngoài không?', 'Hiện tại D&G Fashion chỉ ship trong nước Việt Nam bạn nhé! Chúng tôi đang phát triển dịch vụ ship quốc tế và sẽ thông báo sớm nhất! 🌍📦', 'Phí giao hàng', 1, GETDATE()),
 
-('Làm sao để trở thành khách hàng VIP?', 'Để trở thành khách hàng VIP của D&G Fashion, bạn cần tích lũy điểm từ các đơn hàng. Mỗi 100k = 1 điểm, tích lũy 100 điểm sẽ được nâng cấp VIP với nhiều ưu đãi đặc biệt! 👑💎', 'Chính sách', 1, GETDATE()); 
+-- ('Làm sao để trở thành khách hàng VIP?', 'Để trở thành khách hàng VIP của D&G Fashion, bạn cần tích lũy điểm từ các đơn hàng. Mỗi 100k = 1 điểm, tích lũy 100 điểm sẽ được nâng cấp VIP với nhiều ưu đãi đặc biệt! 👑💎', 'Chính sách', 1, GETDATE());

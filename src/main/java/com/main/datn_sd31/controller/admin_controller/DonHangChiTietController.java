@@ -1,19 +1,15 @@
 package com.main.datn_sd31.controller.admin_controller;
 
-import com.lowagie.text.Font;
-import com.lowagie.text.Document;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.Phrase;
+import com.lowagie.text.*;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import com.main.datn_sd31.Enum.LyDoGiaoKhongThanhCong;
-import com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonChiTietDTO;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonDTO;
-import com.main.datn_sd31.entity.HoaDonChiTiet;
+import com.main.datn_sd31.dto.tra_hang_dto.TraHangChiTietDTO;
+import com.main.datn_sd31.dto.tra_hang_dto.TraHangRequestDTO;
+import com.main.datn_sd31.entity.KhachHang;
 import com.main.datn_sd31.entity.NhanVien;
 import com.main.datn_sd31.repository.Chitietsanphamrepository;
 import com.main.datn_sd31.repository.LichSuHoaDonRepository;
@@ -21,11 +17,10 @@ import com.main.datn_sd31.repository.NhanVienRepository;
 import com.main.datn_sd31.service.HoaDonChiTietService;
 import com.main.datn_sd31.service.HoaDonService;
 import com.main.datn_sd31.service.LichSuHoaDonService;
+import com.main.datn_sd31.service.TraHangChiTietService;
 import com.main.datn_sd31.util.ThongBaoUtils;
-import com.main.datn_sd31.util.ThymleafHelper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -33,10 +28,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/don-hang/detail")
@@ -54,6 +46,8 @@ public class DonHangChiTietController {
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
 
     private final NhanVienRepository nhanVienRepository;
+
+    private final TraHangChiTietService traHangService;
 
     //Lấy thông tin nhân viên
     private NhanVien getCurrentNhanVien() {
@@ -83,21 +77,6 @@ public class DonHangChiTietController {
 //        model.addAttribute("lyDoGiaoKhongThanhCongList", LyDoGiaoKhongThanhCong.values());
         return "admin/pages/don-hang/don-hang-detail";
     }
-
-//    @PostMapping("/cap-nhat-ghi-chu")
-//    public String capNhatGhiChu(
-//            @RequestParam("maHoaDon") String maHoaDon,
-//            @RequestParam(value = "ghiChuHoaDon", required = false) String ghiChuHoaDon,
-//            RedirectAttributes redirectAttributes
-//    ) {
-//        if (ghiChuHoaDon == null) {
-//            return "redirect:/admin/don-hang/detail";
-//        }
-//        hoaDonService.capNhatGhiChuHoaDon(maHoaDon, ghiChuHoaDon);
-//        redirectAttributes.addFlashAttribute("success", "Cập nhật ghi chú thành công.");
-//        redirectAttributes.addAttribute("maHoaDon", maHoaDon);
-//        return "redirect:/admin/don-hang/detail";
-//    }
 
     @PostMapping("/cap-nhat-trang-thai")
     public String capNhatTrangThai(
@@ -189,23 +168,61 @@ public class DonHangChiTietController {
         document.close();
     }
 
-//    @PostMapping("/api/cap-nhat-so-luong")
-//    @ResponseBody
-//    public ResponseEntity<Map<String, String>> apiCapNhatSoLuong(@RequestBody Map<String, Object> payload) {
-//        Integer id = Integer.valueOf(payload.get("id").toString());
-//        Integer soLuong = Integer.valueOf(payload.get("soLuong").toString());
+//    @PostMapping("/yeu-cau-tra-hang-1-phan")
+//    public String yeuCauTraHang1Phan(
+//            @RequestBody TraHangRequestDTO request,
+//            RedirectAttributes redirectAttributes) {
 //
-//        HoaDonChiTietDTO hdct = hoaDonChiTietService.capNhatSoLuong(id, soLuong);
-//        BigDecimal tongTien = hdct.getGiaSauGiam().multiply(BigDecimal.valueOf(soLuong));
+//        // Lấy thông tin khách hàng từ session hoặc authentication
+//        KhachHang khachHang = getCurrentKhachHang();
 //
-//        String tongTienFormatted = ThymleafHelper.formatCurrency(tongTien); // bạn đã có hàm này rồi
+//        var ketQua = traHangService.taoYeuCauTraHang1Phan(request, khachHang);
 //
-//        Map<String, String> response = new HashMap<>();
-//        response.put("tongTienFormatted", tongTienFormatted);
+//        if (ketQua.thanhCong()) {
+//            ThongBaoUtils.addSuccess(redirectAttributes, ketQua.message());
+//        } else {
+//            ThongBaoUtils.addError(redirectAttributes, ketQua.message());
+//        }
 //
-//        return ResponseEntity.ok(response);
+//        return "redirect:/admin/don-hang/detail?maHoaDon=" + request.getMaHoaDon();
 //    }
 
+//    @PostMapping("/xac-nhan-tra-hang-1-phan")
+//    public String xacNhanTraHang1Phan(
+//            @RequestParam("maHoaDon") String maHoaDon,
+//            RedirectAttributes redirectAttributes) {
+//
+//        var ketQua = traHangService.xacNhanTraHang1Phan(maHoaDon, getCurrentNhanVien());
+//
+//        if (ketQua.thanhCong()) {
+//            ThongBaoUtils.addSuccess(redirectAttributes, ketQua.message());
+//        } else {
+//            ThongBaoUtils.addError(redirectAttributes, ketQua.message());
+//        }
+//
+//        return "redirect:/admin/don-hang/detail?maHoaDon=" + maHoaDon;
+//    }
 
+//    @PostMapping("/hoan-thanh-tra-hang-1-phan")
+//    public String hoanThanhTraHang1Phan(
+//            @RequestParam("maHoaDon") String maHoaDon,
+//            RedirectAttributes redirectAttributes) {
+//
+//        var ketQua = traHangService.hoanThanhTraHang1Phan(maHoaDon, getCurrentNhanVien());
+//
+//        if (ketQua.thanhCong()) {
+//            ThongBaoUtils.addSuccess(redirectAttributes, ketQua.message());
+//        } else {
+//            ThongBaoUtils.addError(redirectAttributes, ketQua.message());
+//        }
+//
+//        return "redirect:/admin/don-hang/detail?maHoaDon=" + maHoaDon;
+//    }
+
+//    @GetMapping("/danh-sach-tra-hang/{maHoaDon}")
+//    @ResponseBody
+//    public List<TraHangChiTietDTO> getDanhSachTraHang(@PathVariable String maHoaDon) {
+//        return traHangService.getDanhSachYeuCauTraHang(maHoaDon);
+//    }
 
 }
