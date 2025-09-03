@@ -7,12 +7,14 @@ import com.main.datn_sd31.repository.Giohangreposiroty;
 import com.main.datn_sd31.repository.Hinhanhrepository;
 import com.main.datn_sd31.repository.KhachHangRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import com.main.datn_sd31.service.DichVuBanDichService;
 
 @Service
 public class CartService {
@@ -25,6 +27,9 @@ public class CartService {
 
     @Autowired
     private KhachHangRepository khachHangRepository;
+
+    @Autowired
+    private DichVuBanDichService dichVuBanDichService;
 
     /**
      * Lấy dữ liệu mini cart cho Thymeleaf
@@ -81,9 +86,26 @@ public class CartService {
             int tongSoLuong = 0;
 
             for (GioHangChiTiet item : gopMap.values()) {
+                // Lấy ngôn ngữ hiện tại của user
+                Locale currentLocale = LocaleContextHolder.getLocale();
+                String targetLang = currentLocale.getLanguage();
+                
+
+                
                 Map<String, Object> itemData = new HashMap<>();
                 itemData.put("id", item.getId());
-                itemData.put("tenSanPham", item.getChiTietSp().getSanPham().getTen());
+                itemData.put("sanPhamId", item.getChiTietSp().getSanPham().getId()); // Thêm sanPhamId để dịch tên sản phẩm
+                
+                // Dịch tên sản phẩm
+                String translatedName = dichVuBanDichService.layBanDichOrTranslate(
+                    "product_" + item.getChiTietSp().getSanPham().getId(), 
+                    targetLang, 
+                    item.getChiTietSp().getSanPham().getTen(), 
+                    "vi"
+                );
+
+                
+                itemData.put("tenSanPham", translatedName);
                 itemData.put("tenSize", item.getChiTietSp().getSize().getTen());
                 itemData.put("tenMauSac", item.getChiTietSp().getMauSac().getTen());
                 itemData.put("soLuong", item.getSoLuong());
@@ -145,4 +167,6 @@ public class CartService {
         Map<String, Object> cartData = getMiniCartData();
         return (Integer) cartData.get("totalItems");
     }
+    
+
 } 

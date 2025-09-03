@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{client/layout}">
+
+<head>
+    <title th:text="#{contact.title} + ' - Waggy Pet Shop'">Liên hệ - Waggy Pet Shop</title>
+    <meta name="description" content="Liên hệ với Waggy Pet Shop - Chúng tôi luôn sẵn sàng hỗ trợ bạn">
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Contact Header -->
+        <section class="contact-header py-5" style="background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%);">
+            <div class="container text-center">
+                <h1 class="display-3 fw-bold text-dark mb-4" th:text="#{contact.title}">Liên hệ</h1>
+                <p class="lead text-muted" th:text="#{contact.subtitle}">Chúng tôi luôn sẵn sàng hỗ trợ bạn</p>
+            </div>
+        </section>
+
+        <!-- Contact Content -->
+        <section class="contact-content py-5">
+            <div class="container">
+                <div class="row g-5">
+                    <!-- Contact Form -->
+                    <div class="col-lg-6">
+                        <div class="contact-form">
+                            <h2 class="h2 fw-bold text-dark mb-4">Gửi tin nhắn cho chúng tôi</h2>
+                            
+                            <!-- Success Message -->
+                            <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4">
+                                <span th:text="#{contact.form.success}">Thông báo thành công</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            
+                            <form th:action="@{/contact/send}" method="post" class="needs-validation" novalidate>
+                                <!-- Name -->
+                                <div class="mb-3">
+                                    <label for="name" class="form-label fw-medium" th:text="#{contact.form.name}">Họ và tên</label>
+                                    <input type="text" class="form-control" id="name" name="name" required
+                                           placeholder="Nhập họ và tên của bạn">
+                                </div>
+                                
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label for="email" class="form-label fw-medium" th:text="#{contact.form.email}">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" required
+                                           placeholder="Nhập email của bạn">
+                                </div>
+                                
+                                <!-- Subject -->
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label fw-medium" th:text="#{contact.form.subject}">Tiêu đề</label>
+                                    <input type="text" class="form-control" id="subject" name="subject" required
+                                           placeholder="Nhập tiêu đề tin nhắn">
+                                </div>
+                                
+                                <!-- Message -->
+                                <div class="mb-4">
+                                    <label for="message" class="form-label fw-medium" th:text="#{contact.form.message}">Nội dung</label>
+                                    <textarea class="form-control" id="message" name="message" rows="5" required
+                                              placeholder="Nhập nội dung tin nhắn"></textarea>
+                                </div>
+                                
+                                <!-- Submit Button -->
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <span th:text="#{contact.form.send}">Gửi tin nhắn</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="col-lg-6">
+                        <div class="contact-info">
+                            <h2 class="h2 fw-bold text-dark mb-4">Thông tin liên hệ</h2>
+                            
+                            <!-- Company Info -->
+                            <div class="space-y-4">
+                                <!-- Company Name -->
+                                <div class="d-flex align-items-start mb-4">
+                                    <div class="bg-pink-100 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: #f4f1e8;">
+                                        <i class="fas fa-store" style="color: #dead6f;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 fw-bold text-dark mb-1" th:text="#{contact.company.name}">Tên công ty</h3>
+                                        <p class="text-muted mb-0" th:text="#{contact.company.address}">Địa chỉ công ty</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Phone -->
+                                <div class="d-flex align-items-start mb-4">
+                                    <div class="bg-pink-100 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: #f4f1e8;">
+                                        <i class="fas fa-phone" style="color: #dead6f;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 fw-bold text-dark mb-1">Điện thoại</h3>
+                                        <p class="text-muted mb-0" th:text="#{contact.company.phone}">Số điện thoại</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Email -->
+                                <div class="d-flex align-items-start mb-4">
+                                    <div class="bg-pink-100 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: #f4f1e8;">
+                                        <i class="fas fa-envelope" style="color: #dead6f;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 fw-bold text-dark mb-1">Email</h3>
+                                        <p class="text-muted mb-0" th:text="#{contact.company.email}">Email công ty</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Website -->
+                                <div class="d-flex align-items-start mb-4">
+                                    <div class="bg-pink-100 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background-color: #f4f1e8;">
+                                        <i class="fas fa-globe" style="color: #dead6f;"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="h6 fw-bold text-dark mb-1">Website</h3>
+                                        <p class="text-muted mb-0" th:text="#{contact.company.website}">Website công ty</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Working Hours -->
+                            <div class="mt-5">
+                                <h3 class="h5 fw-bold text-dark mb-3">Giờ làm việc</h3>
+                                <div class="row">
+                                    <div th:each="hour : ${workingHours}" class="col-6 mb-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span class="text-muted" th:text="#{${hour.dayKey}}">Thứ 2</span>
+                                            <span class="fw-medium" th:text="${hour.hours}">8:00 - 22:00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Support Services -->
+        <section class="support-services py-5" style="background-color: #f4f1e8;">
+            <div class="container">
+                <h2 class="h1 fw-bold text-dark mb-5 text-center">Dịch vụ hỗ trợ</h2>
+                <div class="row g-4">
+                    <!-- Support Service -->
+                    <div th:each="service : ${supportServices}" class="col-lg-3 col-md-6 col-12">
+                        <div class="card border-0 shadow-sm h-100 text-center">
+                            <div class="card-body p-4">
+                                <div class="bg-pink-100 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 64px; height: 64px; background-color: #f4f1e8;">
+                                    <i class="fas fa-headset fa-2x" style="color: #dead6f;"></i>
+                                </div>
+                                <h3 class="h6 fw-bold text-dark mb-2" th:text="#{${service.nameKey}}">Tên dịch vụ</h3>
+                                <p class="text-muted small mb-0" th:text="#{${service.descriptionKey}}">Mô tả dịch vụ...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="map-section py-5">
+            <div class="container">
+                <h2 class="h1 fw-bold text-dark mb-4 text-center">Vị trí của chúng tôi</h2>
+                <div class="bg-light rounded" style="height: 400px; display: flex; align-items: center; justify-content: center;">
+                    <div class="text-center">
+                        <i class="fas fa-map-marker-alt fa-4x mb-3" style="color: #dead6f;"></i>
+                        <p class="text-muted" th:text="#{contact.map.location}">Mô tả vị trí</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Additional Info -->
+        <section class="additional-info py-5" style="background-color: #f4f1e8;">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 text-center">
+                        <p class="lead text-muted mb-0" th:text="#{contact.additional.info}">Thông tin bổ sung...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <th:block layout:fragment="css">
+        <style>
+            .contact-form .form-control:focus {
+                border-color: #dead6f;
+                box-shadow: 0 0 0 0.2rem rgba(236, 72, 153, 0.25);
+            }
+        </style>
+    </th:block>
+</body>
+
+</html> 

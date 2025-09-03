@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.main.datn_sd31.service.CartService;
 
 @Controller
 @RequiredArgsConstructor
@@ -50,6 +51,7 @@ public class GiohangController {
     private final ChiTietSanPhamService chiTietSanPhamService;
     private final GHNService ghnService;
     private final SendMailService sendMailService;
+    private final CartService cartService;
 
     private KhachHang getCurrentKhachHang() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -130,6 +132,20 @@ public class GiohangController {
 
         model.addAttribute("list", newList);
         model.addAttribute("tongTien", tongTien);
+
+        // Lấy dữ liệu đã dịch từ CartService
+        Map<String, Object> cartData = cartService.getMiniCartData();
+        if (cartData.containsKey("items")) {
+            List<Map<String, Object>> translatedItems = (List<Map<String, Object>>) cartData.get("items");
+            // Tạo map để map giữa chiTietId và tên đã dịch
+            Map<Integer, String> translatedNames = new HashMap<>();
+            for (Map<String, Object> item : translatedItems) {
+                Integer sanPhamId = (Integer) item.get("sanPhamId");
+                String translatedName = (String) item.get("tenSanPham");
+                translatedNames.put(sanPhamId, translatedName);
+            }
+            model.addAttribute("translatedNames", translatedNames);
+        }
 
         model.addAttribute("messa", messa);
         return "client/pages/cart/list";

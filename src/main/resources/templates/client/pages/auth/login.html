@@ -2,7 +2,7 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{client/layout}" lang="vi">
 
 <head>
-    <title>Đăng nhập - Waggy Pet Shop</title>
+    <title th:text="#{auth.login_title}">Đăng nhập - Waggy Pet Shop</title>
 </head>
 
 <body>
@@ -11,6 +11,18 @@
             :root {
                 --dark-blue: #243946;
                 --rotate-head: 0deg;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             * { box-sizing: border-box; }
             
@@ -26,6 +38,18 @@
                 padding: 20px;
                 z-index: 1;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             
             .center {
                 position: relative;
@@ -37,9 +61,33 @@
                 background-image: linear-gradient(to top right, #f9a743, #f9db5f);
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             
             @media screen and (max-height: 500px) {
                 .center { transform: scale(0.8); }
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             
             .ear {
@@ -49,6 +97,18 @@
                 height: 200px;
                 border-radius: 50%;
                 background-color: var(--dark-blue);
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .ear--left { left: -135px; }
             .ear--right { right: -135px; }
@@ -63,6 +123,18 @@
                 transition: transform 0.2s;
                 transform-origin: center 20px;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .eyes { display: flex; }
             .eye {
                 display: inline-block;
@@ -71,6 +143,18 @@
                 border-radius: 50%;
                 background-color: var(--dark-blue);
                 position: relative;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .eye--left { margin-right: 40px; }
             .eye--right { margin-left: 40px; }
@@ -84,10 +168,34 @@
                 background-color: white;
                 transform: rotate(38deg);
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .nose {
                 position: relative;
                 top: 30px;
                 transform: scale(1.1);
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .nose .glow {
                 position: absolute;
@@ -98,6 +206,18 @@
                 border-radius: 50%;
                 background-color: #476375;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .mouth { position: relative; margin-top: 45px; }
             svg.smile {
                 position: absolute;
@@ -105,6 +225,18 @@
                 top: -19px;
                 transform: scaleX(1.1);
                 stroke: var(--dark-blue);
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .mouth-hole {
                 position: absolute;
@@ -117,6 +249,18 @@
                 background-color: var(--dark-blue);
                 z-index: -1;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .tongue {
                 position: relative;
                 top: 5px;
@@ -126,12 +270,48 @@
                 transform-origin: top;
                 transform: rotateX(60deg);
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .tongue.breath {
                 animation: breath 0.3s infinite linear;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             @keyframes breath {
                 0%, 100% { transform: rotateX(0deg); }
                 50% { transform: rotateX(60deg); }
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .tongue-top {
                 position: absolute;
@@ -141,12 +321,36 @@
                 border-radius: 15px;
                 background-color: #ffd7dd;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .line {
                 position: absolute;
                 top: 0;
                 width: 30px;
                 height: 5px;
                 background-color: #fcb7bf;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .median {
                 position: absolute;
@@ -158,6 +362,18 @@
                 border-radius: 5px;
                 background-color: #fcb7bf;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .hands { position: relative; }
             .hand {
                 position: absolute;
@@ -165,6 +381,18 @@
                 display: flex;
                 transition: transform 0.5s ease-in-out;
                 z-index: 1;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .hand--left { left: 50px; }
             .hand--left.hide { transform: translate(2px, -155px) rotate(-160deg); }
@@ -181,6 +409,18 @@
                 border-top: none;
                 background-color: #fac555;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .nail {
                 position: absolute;
                 left: 0;
@@ -192,9 +432,33 @@
                 background-color: #fac555;
                 z-index: -1;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .finger:nth-child(1), .finger:nth-child(3) {
                 left: 4px;
                 z-index: 1;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .finger:nth-child(3) { left: -4px; }
             .finger:nth-child(2) { top: -5px; z-index: 2; }
@@ -204,9 +468,33 @@
                 display: flex;
                 flex-direction: column;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .login label {
                 position: relative;
                 padding: 0 20px;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .login .fa {
                 position: absolute;
@@ -215,11 +503,35 @@
                 color: #bbb;
                 z-index: 2;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .login input, .login .login-button {
                 width: 100%;
                 height: 35px;
                 border: none;
                 border-radius: 30px;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .login input {
                 padding: 0 20px 0 40px;
@@ -228,9 +540,33 @@
                 outline: none;
                 font-size: 12px;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .login input::placeholder { 
                 color: #ccc; 
                 font-size: 11px;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .login input.password { padding: 0 90px 0 40px; }
             .password-button {
@@ -250,6 +586,18 @@
                 cursor: pointer;
                 font-size: 10px;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .password-button:active { transform: scale(0.95); }
             .login-button {
                 width: calc(100% - 40px);
@@ -261,11 +609,35 @@
                 cursor: pointer;
                 font-size: 12px;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .login-button:active { transform: scale(0.95); }
             .social-buttons {
                 display: flex;
                 justify-content: center;
                 margin-top: 25px;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             .social {
                 display: flex;
@@ -280,15 +652,51 @@
                 font-size: 18px;
                 cursor: pointer;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .social:active { transform: scale(0.95); }
             .footer { 
                 text-align: center; 
                 margin-top: 15px; 
                 font-size: 11px;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .footer a {
                 color: var(--dark-blue) !important;
                 text-decoration: none;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
             
             /* Thông báo lỗi và thành công */
@@ -304,13 +712,49 @@
                 max-width: 200px;
                 text-align: center;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .alert-danger {
                 background-color: #ff6b6b;
                 color: white;
             }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
             .alert-success {
                 background-color: #51cf66;
                 color: white;
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             }
         </style>
 
@@ -356,10 +800,10 @@
                 
                 <!-- Thông báo lỗi và thành công -->
                 <div th:if="${param.error}" class="alert alert-danger">
-                    ❌ Sai email hoặc mật khẩu!
+                    ❌ <span th:text="#{auth.login_error}">Sai email hoặc mật khẩu!</span>
                 </div>
                 <div th:if="${param.logout}" class="alert alert-success">
-                    ✅ Đã đăng xuất thành công.
+                    ✅ <span th:text="#{auth.logout_success}">Đã đăng xuất thành công.</span>
                 </div>
                 <div th:if="${success}" class="alert alert-success">
                     ✅ <span th:text="${success}"></span>
@@ -368,21 +812,25 @@
                 <form class="login" th:action="@{/khach-hang/dang-nhap}" method="post" autocomplete="on">
                     <label>
                         <span class="fa fa-envelope"></span>
-                        <input class="username" name="username" type="email" autocomplete="on" placeholder="Email" required>
+                        <input class="username" name="username" type="email" autocomplete="on" th:placeholder="#{auth.email}" required>
                     </label>
                     <label>
                         <span class="fa fa-lock"></span>
-                        <input class="password" name="password" type="password" autocomplete="off" placeholder="Mật khẩu" required>
-                        <button type="button" class="password-button">Hiện mật khẩu</button>
+                        <input class="password" name="password" type="password" autocomplete="off" th:placeholder="#{auth.password}" required>
+                        <button type="button" class="password-button" th:text="#{auth.show_password}">Hiện mật khẩu</button>
                     </label>
-                    <button type="submit" class="login-button">Đăng nhập</button>
+                    <button type="submit" class="login-button" th:text="#{auth.login_button}">Đăng nhập</button>
                 </form>
+
+                <div class="forgot-password">
+                    <a href="/quen-mat-khau"> Quên mật khẩu?</a>
+                </div>
                 
             
                 
                 <div class="footer">
-                    <span class="text-muted">Chưa có tài khoản? </span>
-                    <a href="/khach-hang/dang-ky">Đăng ký ngay</a>
+                    <span class="text-muted" th:text="#{auth.no_account}">Chưa có tài khoản? </span>
+                    <a href="/khach-hang/dang-ky" th:text="#{auth.register_now}">Đăng ký ngay</a>
                 </div>
             </div>
         </div>
@@ -400,8 +848,32 @@
                 hands.forEach(hand => {
                     hand.classList.add('hide');
                     gsap.to(hand, {y: -120, rotation: hand.classList.contains('hand--left') ? -160 : 160, duration: 0.5});
-                });
+                }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            });
                 tongue.classList.remove('breath');
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             });
 
             passwordInput.addEventListener('blur', () => {
@@ -409,8 +881,32 @@
                     hand.classList.remove('hide');
                     hand.classList.remove('peek');
                     gsap.to(hand, {y: 0, rotation: 0, duration: 0.5});
-                });
+                }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            });
                 tongue.classList.add('breath');
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             });
 
             usernameInput.addEventListener('focus', () => {
@@ -419,40 +915,148 @@
                     hand.classList.remove('hide');
                     hand.classList.remove('peek');
                     gsap.to(hand, {y: 0, rotation: 0, duration: 0.5});
-                });
+                }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            });
                 gsap.to(face, {rotate: -length, duration: 0.2});
                 face.style.setProperty('--rotate-head', `${-length}deg`);
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             });
 
             usernameInput.addEventListener('blur', () => {
                 gsap.to(face, {rotate: 0, duration: 0.2});
                 face.style.setProperty('--rotate-head', '0deg');
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             });
 
             usernameInput.addEventListener('input', (event) => {
                 let length = Math.min(event.target.value.length - 16, 19);
                 gsap.to(face, {rotate: -length, duration: 0.2});
                 face.style.setProperty('--rotate-head', `${-length}deg`);
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             });
 
             showPasswordButton.addEventListener('click', () => {
                 if (passwordInput.type === 'text') {
                     passwordInput.type = 'password';
-                    showPasswordButton.textContent = 'Hiện mật khẩu';
+                    showPasswordButton.textContent = document.querySelector('[data-i18n="auth.show_password"]')?.textContent || 'Hiện mật khẩu';
                     hands.forEach(hand => {
                         hand.classList.remove('peek');
                         hand.classList.add('hide');
                         gsap.to(hand, {y: -155, rotation: hand.classList.contains('hand--left') ? -160 : 160, duration: 0.5});
-                    });
-                } else {
+                    }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            });
+                }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            } else {
                     passwordInput.type = 'text';
-                    showPasswordButton.textContent = 'Ẩn mật khẩu';
+                    showPasswordButton.textContent = document.querySelector('[data-i18n="auth.hide_password"]')?.textContent || 'Ẩn mật khẩu';
                     hands.forEach(hand => {
                         hand.classList.remove('hide');
                         hand.classList.add('peek');
                         gsap.to(hand, {y: -120, rotation: hand.classList.contains('hand--left') ? -160 : 160, duration: 0.5});
-                    });
+                    }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            });
                 }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
+            }
+            }
+            .forgot-password {
+                text-align: center;
+                margin-top: 10px;
+                font-size: 12px;
+            }
+            .forgot-password a {
+                color: #667eea;
+                text-decoration: none;
+            }
+            .forgot-password a:hover {
+                text-decoration: underline;
             });
         </script>
     </div>
