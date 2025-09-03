@@ -385,14 +385,20 @@
                                             <span th:each="i : ${#numbers.sequence(1, emptyStars)}" class="star">★</span>
                                         </th:block>
                                     </div>
-                                    <div class="total-reviews" th:text="${totalCount + ' ' + #{product.reviews_count}}">0 đánh giá</div>
+                                    <div class="total-reviews">
+                                        <span th:text="${totalCount}">0</span>
+                                        <span th:text="#{product.reviews_count}">đánh giá</span>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Rating Breakdown -->
                             <div class="rating-breakdown">
                                 <div th:each="star : ${#numbers.sequence(5, 1)}" class="rating-bar">
-                                    <span class="star-label" th:text="${star} + ' ' + #{product.stars}">5 sao</span>
+                                    <span class="star-label">
+                                        <span th:text="${star}">5</span>
+                                        <span th:text="#{product.stars}">sao</span>
+                                    </span>
                                     <div class="rating-progress">
                                         <div class="progress-bar"
                                              th:style="'width: ' + ${countByStar.get(star) != null ? (countByStar.get(star) * 100 / totalCount) : 0} + '%'">
@@ -412,8 +418,9 @@
                                             <iconify-icon icon="healthicons:person" class="avatar-icon"></iconify-icon>
                                         </div>
                                         <div class="reviewer-details">
-                                            <div class="reviewer-name" th:text="${review.khachHang.ten != null ? review.khachHang.ten : #{product.customer}}">
-                                                Khách hàng
+                                            <div class="reviewer-name">
+                                                <span th:if="${review.khachHang.ten != null}" th:text="${review.khachHang.ten}">Tên khách hàng</span>
+                                                <span th:unless="${review.khachHang.ten != null}" th:text="#{product.customer}">Khách hàng</span>
                                             </div>
                                             <div class="review-date" th:text="${#temporals.format(review.thoiGian, 'dd/MM/yyyy')}">
                                                 01/01/2024
