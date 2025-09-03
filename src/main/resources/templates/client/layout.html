@@ -21,6 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,100..900;1,100..900&family=Patrick+Hand&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" th:href="@{/client-static/css/language-switcher.css}">
   <!-- Font Awesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <!-- Page-specific CSS -->
@@ -218,30 +219,30 @@
           <div class="offcanvas-body justify-content-between">
             <ul class="navbar-nav menu-list list-unstyled d-flex gap-md-3 mb-0">
               <li class="nav-item">
-                <a th:href="@{/home}" class="nav-link" th:classappend="${activePage} == 'home' ? 'active' : ''">Trang chủ</a>
+                <a th:href="@{/home}" class="nav-link" th:classappend="${activePage == 'home' ? 'active' : ''}" th:text="#{nav.home}">Trang chủ</a>
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown"
-                  aria-expanded="false">Sản phẩm</a>
+                  aria-expanded="false" th:text="#{nav.products}">Sản phẩm</a>
                 <ul class="dropdown-menu" aria-labelledby="pages">
                   <li th:each="danhMuc : ${danhMucs}">
                     <a th:href="@{/san-pham/danh-sach(danhMucId=${danhMuc.id})}" 
-                       th:text="${danhMuc.ten}" 
+                       th:text="${tenDanhMucDaDich != null and tenDanhMucDaDich.containsKey(danhMuc.id) ? tenDanhMucDaDich.get(danhMuc.id) : danhMuc.ten}" 
                        class="dropdown-item"></a>
                   </li>
                   <li><hr class="dropdown-divider"></li>
-                  <li><a th:href="@{/san-pham/danh-sach}" class="dropdown-item">Tất cả sản phẩm</a></li>
+                  <li><a th:href="@{/san-pham/danh-sach}" class="dropdown-item" th:text="#{nav.all_products}">Tất cả sản phẩm</a></li>
 
                 </ul>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link" th:classappend="${activePage} == 'blog' ? 'active' : ''">Bài viết</a>
+                <a href="#" class="nav-link" th:classappend="${activePage == 'blog' ? 'active' : ''}" th:text="#{nav.blog}">Bài viết</a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link" th:classappend="${activePage} == 'contact' ? 'active' : ''">Về chúng tôi</a>
+                <a href="#" class="nav-link" th:text="#{nav.about}">Về chúng tôi</a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">Liên hệ</a>
+                <a href="#" class="nav-link" th:text="#{nav.contact}">Liên hệ</a>
               </li>
             </ul>
 
@@ -255,6 +256,11 @@
                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" id="userDropdownMenu">
                     <!-- Content will be loaded dynamically -->
                   </ul>
+                </li>
+                
+                <!-- Language Switcher -->
+                <li class="d-flex align-items-center mx-2">
+                  <div th:replace="~{client/fragments/language-switcher :: language-switcher}"></div>
                 </li>
                 
                 <li>
@@ -740,3 +746,4 @@
 </body>
 
 </html> 
+

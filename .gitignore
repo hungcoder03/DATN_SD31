@@ -34,3 +34,5 @@ build/
 
 ### Node ###
 node_modules/
+# Local maintenance scripts
+remove-bom.ps1

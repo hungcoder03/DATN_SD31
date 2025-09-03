@@ -37,11 +37,11 @@
     <div class="stepper-items">
         <div class="stepper-item active">
             <div class="step-counter active">1</div>
-            <div class="step-name">Thanh toán</div>
+                    <div class="step-name" th:text="#{checkout.step1}">Thanh toán</div>
         </div>
         <div class="stepper-item ">
-            <div class="step-counter">2</div>
-            <div class="step-name">Hoàn tất thanh toán</div>
+        <div class="step-counter">2</div>
+        <div class="step-name" th:text="#{checkout.step2}">Hoàn tất thanh toán</div>
         </div>
     </div>
 </div>
@@ -53,8 +53,11 @@
             <!-- Cart Review Section -->
             <div class="checkout-step active" id="cart-review">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="mb-0">Giỏ hàng của bạn</h3>
-                    <span class="badge bg-primary" th:text="${selectedItems.size()} + ' sản phẩm'">Sản phẩm</span>
+                    <h3 class="mb-0" th:text="#{checkout.cart_review}">Giỏ hàng của bạn</h3>
+                    <span class="badge bg-primary">
+    <span th:text="${selectedItems.size()}">0</span>
+    <span th:text="#{cart.items}">sản phẩm</span>
+</span>
                 </div>
 
                 <!-- Products Table -->
@@ -70,8 +73,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-8">
-                                        <h6 class="product-title mb-2" th:text="${item.chiTietSp.sanPham.ten}">Tên
-                                            sản phẩm</h6>
+                                        <h6 class="product-title mb-2" th:text="${item.chiTietSp.sanPham.ten}">Tên sản phẩm</h6>
                                         <div class="product-meta mb-2">
                                                 <span class="badge bg-secondary me-2"
                                                       th:text="'Size: ' + ${item.chiTietSp.size.ten}">Size: M</span>
@@ -80,9 +82,9 @@
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="price-info">
-                                                <small class="text-muted">Giá: <span
+                                                <small class="text-muted" th:text="#{cart.price} + ': '"><span
                                                         th:text="${#numbers.formatDecimal(item.chiTietSp.giaBan,0,'COMMA',0,'POINT')} + '₫'">0₫</span></small><br>
-                                                <small class="text-muted">SL: <span
+                                                <small class="text-muted" th:text="#{cart.quantity} + ': '"><span
                                                         th:text="${item.soLuong}">1</span></small>
                                             </div>
                                             <div class="total-price">

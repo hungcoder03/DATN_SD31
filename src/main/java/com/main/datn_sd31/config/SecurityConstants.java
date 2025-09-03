@@ -47,7 +47,8 @@ public final class SecurityConstants {
         "/uploads/**", "/css/**", "/js/**", "/images/**",
         "/vendors/**", "/webjars/**", "/static/**", "/favicon.ico",
         "/san-pham/**", "/client-static/**", "/bootstrap-5.3.7-dist/**",
-        "/api/auth/**", "/api/ai-chat/**", "/ws/**"
+        "/api/auth/**", "/api/ai-chat/**", "/ws/**",
+        "/doi-ngon-ngu"
     };
     
     public static final String[] ADMIN_PERMIT_ALL = {
@@ -102,4 +103,4 @@ public final class SecurityConstants {
     private SecurityConstants() {
         throw new UnsupportedOperationException("Utility class");
     }
-} 
+}
