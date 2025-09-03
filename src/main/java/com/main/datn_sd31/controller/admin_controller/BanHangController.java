@@ -817,7 +817,7 @@ public class BanHangController {
             }
             hd.setGhiChu(ghiChuFull);
         } else {
-            hd.setTenNguoiNhan("Khách lẻ");
+            hd.setTenNguoiNhan(kh.getTen());
         }
 
         if (kh != null) {
@@ -831,16 +831,21 @@ public class BanHangController {
         if (sdtvc != null) {
             hd.setSoDienThoai(sdtvc);
         } else {
-            hd.setSoDienThoai("Khách lẻ");
+            if (kh != null) {
+                hd.setSoDienThoai(kh.getSoDienThoai());
+            }
         }
 
         hd.setPhuongThuc(phuongThuc);
 
-        if (phuongThuc.equals("tien_mat") && !BigDecimal.ZERO.equals(phiShip)) {
-            hd.setTrangThai(2);
-        } else {
-            hd.setTrangThai(3);
-        }
+//        if (phuongThuc.equals("tien_mat") && !BigDecimal.ZERO.equals(phiShip)) {
+//            hd.setTrangThai(2);
+//        } else {
+//            hd.setTrangThai(3);
+//        }
+
+        //Luôn luôn để trạng thái 3 - Đã thanh toán đối với Bán off
+        hd.setTrangThai(3);
 
         hd.setGiaGoc(tongTien);
         hd.setGiaGiamGia(giagiam);
