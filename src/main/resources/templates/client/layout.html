@@ -219,7 +219,7 @@
           <div class="offcanvas-body justify-content-between">
             <ul class="navbar-nav menu-list list-unstyled d-flex gap-md-3 mb-0">
               <li class="nav-item">
-                <a th:href="@{/home}" class="nav-link" th:classappend="${activePage} == 'home' ? 'active' : ''" th:text="#{nav.home}">Trang chủ</a>
+                <a th:href="@{/home}" class="nav-link" th:classappend="${activePage == 'home' ? 'active' : ''}" th:text="#{nav.home}">Trang chủ</a>
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown"
@@ -236,7 +236,7 @@
                 </ul>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link" th:classappend="${activePage} == 'blog' ? 'active' : ''" th:text="#{nav.blog}">Bài viết</a>
+                <a href="#" class="nav-link" th:classappend="${activePage == 'blog' ? 'active' : ''}" th:text="#{nav.blog}">Bài viết</a>
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link" th:text="#{nav.about}">Về chúng tôi</a>
