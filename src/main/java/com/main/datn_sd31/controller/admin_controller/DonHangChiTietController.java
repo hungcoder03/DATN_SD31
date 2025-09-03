@@ -7,9 +7,6 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonChiTietDTO;
 import com.main.datn_sd31.dto.hoa_don_dto.HoaDonDTO;
-import com.main.datn_sd31.dto.tra_hang_dto.TraHangChiTietDTO;
-import com.main.datn_sd31.dto.tra_hang_dto.TraHangRequestDTO;
-import com.main.datn_sd31.entity.KhachHang;
 import com.main.datn_sd31.entity.NhanVien;
 import com.main.datn_sd31.repository.Chitietsanphamrepository;
 import com.main.datn_sd31.repository.LichSuHoaDonRepository;
@@ -17,7 +14,6 @@ import com.main.datn_sd31.repository.NhanVienRepository;
 import com.main.datn_sd31.service.HoaDonChiTietService;
 import com.main.datn_sd31.service.HoaDonService;
 import com.main.datn_sd31.service.LichSuHoaDonService;
-import com.main.datn_sd31.service.TraHangChiTietService;
 import com.main.datn_sd31.util.ThongBaoUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +42,6 @@ public class DonHangChiTietController {
     private final LichSuHoaDonRepository lichSuHoaDonRepository;
 
     private final NhanVienRepository nhanVienRepository;
-
-    private final TraHangChiTietService traHangService;
 
     //Lấy thông tin nhân viên
     private NhanVien getCurrentNhanVien() {
