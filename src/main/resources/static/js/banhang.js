@@ -117,13 +117,16 @@
 				<td class=\"p-3\">${sp.tenSanPham} - ${sp.mauSac} / ${sp.kichThuoc}</td>
 				<td class=\"p-3\">${sp.soLuong}</td>
 				<td class=\"p-3\">${sp.giaBan}</td>
-				<td class=\"p-3\">
-					${(sp.trangThaiHoatDong && sp.soLuong > 0)
-						? `<button class=\"px-3 py-1 rounded-md bg-[#dead6f] text-[#333333] hover:bg-[#997351]\" onclick=\"themVaoGioHang('${sp.id}')\">Thêm vào giỏ</button>`
-						: (sp.trangThaiHoatDong && sp.soLuong === 0
-							? `<span class=\"text-yellow-600\">Hết hàng</span>`
-							: `<span class=\"text-red-600\">Ngừng bán</span>`)}
+				<td class="p-3 text-center">
+					${ (sp.trangThaiHoatDong && sp.soLuong > 0)
+							? `<button class="btn btn-success px-3 py-1 rounded-md" onclick="themVaoGioHang('${sp.id}')">Thêm vào giỏ</button>`
+							: (sp.trangThaiHoatDong && sp.soLuong === 0
+								? `<span class="btn btn-warning px-3 py-1 rounded-md disabled">Hết hàng</span>`
+								: `<span class="btn btn-danger px-3 py-1 rounded-md disabled">Ngừng bán</span>`)
+						}
 				</td>
+
+
 			</tr>
 		`).join('');
 	}
