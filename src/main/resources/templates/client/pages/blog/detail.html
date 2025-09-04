@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{client/layout}">
+
+<head>
+    <title th:text="#{${post.titleKey}} + ' - Waggy Pet Shop'">Chi tiết bài viết - Waggy Pet Shop</title>
+    <meta name="description" th:content="#{${post.excerptKey}}">
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Blog Post Header -->
+        <section class="blog-post-header py-5" style="background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%);">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <!-- Back Button -->
+                        <div class="mb-4">
+                            <a th:href="@{/blog}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                <span th:text="#{blog.back_to_list}">Quay lại danh sách</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Post Title -->
+                        <h1 class="display-4 fw-bold text-dark mb-4 text-center">
+                            <span th:text="#{${post.titleKey}}">Tiêu đề bài viết</span>
+                        </h1>
+                        
+                        <!-- Post Meta -->
+                        <div class="d-flex align-items-center justify-content-center text-muted mb-4">
+                            <div class="d-flex align-items-center me-4">
+                                <i class="fas fa-calendar me-2"></i>
+                                <span th:text="#{blog.published_on}">Đăng ngày</span>
+                                <span th:text="${#temporals.format(post.publishDate, 'dd/MM/yyyy')}" class="ms-1">15/01/2024</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user me-2"></i>
+                                <span>Waggy Pet Shop</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Excerpt -->
+                        <p class="lead text-muted text-center">
+                            <span th:text="#{${post.excerptKey}}">Tóm tắt bài viết...</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Post Content -->
+        <section class="blog-post-content py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <!-- Post Image -->
+                        <div class="post-image mb-4" style="height: 400px; background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-paw fa-5x" style="color: #dead6f;"></i>
+                        </div>
+                        
+                        <!-- Post Content -->
+                        <article class="blog-content">
+                            <div class="text-muted lh-lg fs-5">
+                                <span th:text="#{${post.contentKey}}">Nội dung bài viết...</span>
+                            </div>
+                        </article>
+                        
+                        <!-- Post Actions -->
+                        <div class="d-flex align-items-center justify-content-between mt-5 pt-4 border-top">
+                            <!-- Share Buttons -->
+                            <div class="d-flex align-items-center">
+                                <span class="text-muted fw-medium me-3" th:text="#{blog.share}">Chia sẻ:</span>
+                                <button class="btn btn-outline-primary btn-sm me-2">
+                                    <i class="fab fa-facebook-f"></i>
+                                </button>
+                                <button class="btn btn-outline-info btn-sm me-2">
+                                    <i class="fab fa-twitter"></i>
+                                </button>
+                                <button class="btn btn-outline-success btn-sm">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Back to List -->
+                            <a th:href="@{/blog}" class="btn btn-outline-primary btn-sm">
+                                <span th:text="#{blog.back_to_list}">Quay lại danh sách</span>
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Related Posts -->
+        <section class="related-posts py-5" style="background-color: #f4f1e8;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h3 class="h2 fw-bold text-dark mb-5 text-center" th:text="#{blog.related_posts}">Bài viết liên quan</h3>
+                        
+                        <div class="row g-4">
+                            <!-- Related Post Card -->
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <article class="card h-100 shadow-sm border-0">
+                                    <div class="card-img-top" style="height: 160px; background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-paw fa-2x" style="color: #dead6f;"></i>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="h6 fw-bold text-dark mb-2">Chăm sóc mèo con</h4>
+                                        <p class="text-muted small mb-3">Hướng dẫn chăm sóc mèo con từ khi mới sinh...</p>
+                                        <a href="#" class="btn btn-outline-primary btn-sm">Đọc thêm</a>
+                                    </div>
+                                </article>
+                            </div>
+                            
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <article class="card h-100 shadow-sm border-0">
+                                    <div class="card-img-top" style="height: 160px; background: linear-gradient(135deg, #e0f2fe 0%, #dcfce7 100%); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-utensils fa-2x text-blue-500"></i>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="h6 fw-bold text-dark mb-2">Thức ăn cho chó</h4>
+                                        <p class="text-muted small mb-3">Chế độ dinh dưỡng khoa học cho chó...</p>
+                                        <a href="#" class="btn btn-outline-primary btn-sm">Đọc thêm</a>
+                                    </div>
+                                </article>
+                            </div>
+                            
+                            <div class="col-lg-4 col-md-6 col-12">
+                                <article class="card h-100 shadow-sm border-0">
+                                    <div class="card-img-top" style="height: 160px; background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-heart fa-2x text-yellow-500"></i>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="h6 fw-bold text-dark mb-2">Sức khỏe thú cưng</h4>
+                                        <p class="text-muted small mb-3">Những dấu hiệu bệnh cần chú ý...</p>
+                                        <a href="#" class="btn btn-outline-primary btn-sm">Đọc thêm</a>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <th:block layout:fragment="css">
+        <style>
+            .post-image {
+                background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%);
+            }
+            
+            .prose {
+                color: #374151;
+            }
+            
+            .prose p {
+                margin-bottom: 1.5rem;
+                line-height: 1.8;
+            }
+        </style>
+    </th:block>
+</body>
+
+</html> 

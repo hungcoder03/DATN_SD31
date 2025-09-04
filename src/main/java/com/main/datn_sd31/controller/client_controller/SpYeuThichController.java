@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -91,6 +92,76 @@ public class SpYeuThichController {
 			response.put("success", false);
 			response.put("error", "Có lỗi xảy ra: " + e.getMessage());
 			return ResponseEntity.status(500).body(response);
+		}
+	}
+
+	@PostMapping("/remove-multiple")
+	public ResponseEntity<Map<String, Object>> removeMultipleFromWishlist(@RequestBody List<Integer> productIds,
+																		Principal principal) {
+		Map<String, Object> response = new HashMap<>();
+		
+		try {
+			if (principal == null) {
+				response.put("success", false);
+				response.put("error", "Bạn cần đăng nhập để sử dụng tính năng này");
+				return ResponseEntity.status(401).body(response);
+			}
+			
+			String username = principal.getName();
+			KhachHang khachHang = khachHangServiceImpl.findByEmail(username);
+			
+			if (khachHang == null) {
+				response.put("success", false);
+				response.put("error", "Không tìm thấy thông tin khách hàng");
+				return ResponseEntity.status(404).body(response);
+			}
+			
+			int removedCount = 0;
+			for (Integer productId : productIds) {
+				boolean removed = spYeuThichService.xoaKhoiYeuThich(khachHang.getId(), productId);
+				if (removed) {
+					removedCount++;
+				}
+			}
+			
+			response.put("success", true);
+			response.put("removedCount", removedCount);
+			response.put("message", "Đã xóa " + removedCount + " sản phẩm khỏi danh sách yêu thích");
+			
+			return ResponseEntity.ok(response);
+			
+		} catch (Exception e) {
+			response.put("success", false);
+			response.put("error", "Có lỗi xảy ra: " + e.getMessage());
+			return ResponseEntity.status(500).body(response);
+		}
+	}
+
+	@GetMapping("/count")
+	public ResponseEntity<Map<String, Object>> getWishlistCount(Principal principal) {
+		Map<String, Object> response = new HashMap<>();
+		
+		try {
+			if (principal == null) {
+				response.put("count", 0);
+				return ResponseEntity.ok(response);
+			}
+			
+			String username = principal.getName();
+			KhachHang khachHang = khachHangServiceImpl.findByEmail(username);
+			
+			if (khachHang != null) {
+				long count = spYeuThichRepository.countByKhachHang_Id(khachHang.getId());
+				response.put("count", count);
+			} else {
+				response.put("count", 0);
+			}
+			
+			return ResponseEntity.ok(response);
+			
+		} catch (Exception e) {
+			response.put("count", 0);
+			return ResponseEntity.ok(response);
 		}
 	}
 }

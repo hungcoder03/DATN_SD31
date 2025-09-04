@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+      layout:decorate="~{client/layout}">
+
+<head>
+    <title th:text="#{blog.title} + ' - Waggy Pet Shop'">Blog - Waggy Pet Shop</title>
+    <meta name="description" content="Tin tức và kiến thức về chăm sóc thú cưng">
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Blog Header -->
+        <section class="blog-header py-5" style="background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%);">
+            <div class="container">
+                <div class="text-center">
+                    <h1 class="display-4 fw-bold text-dark mb-3" th:text="#{blog.title}">Bài viết</h1>
+                    <p class="lead text-muted" th:text="#{blog.subtitle}">Tin tức và kiến thức về thú cưng</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Posts Grid -->
+        <section class="blog-posts py-5">
+            <div class="container">
+                <div class="row g-4">
+                    <!-- Blog Post Card -->
+                    <div th:each="post : ${blogPosts}" class="col-lg-4 col-md-6 col-12">
+                        <article class="card h-100 shadow-sm border-0 hover-shadow">
+                            <!-- Post Image -->
+                            <div class="post-image card-img-top" style="height: 200px; background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%); display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-paw fa-3x" style="color: #dead6f;"></i>
+                            </div>
+                            
+                            <!-- Post Content -->
+                            <div class="card-body d-flex flex-column">
+                                <!-- Post Meta -->
+                                <div class="d-flex align-items-center text-muted small mb-2">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    <span th:text="${#temporals.format(post.publishDate, 'dd/MM/yyyy')}">15/01/2024</span>
+                                </div>
+                                
+                                <!-- Post Title -->
+                                <h3 class="card-title h5 fw-bold text-dark mb-2 line-clamp-2">
+                                    <span th:text="#{${post.titleKey}}">Tiêu đề bài viết</span>
+                                </h3>
+                                
+                                <!-- Post Excerpt -->
+                                <p class="card-text text-muted mb-3 line-clamp-3 flex-grow-1">
+                                    <span th:text="#{${post.excerptKey}}">Tóm tắt bài viết...</span>
+                                </p>
+                                
+                                <!-- Read More Button -->
+                                <a th:href="@{/blog/{id}(id=${post.id})}" 
+                                   class="btn btn-outline-primary btn-sm align-self-start">
+                                    <span th:text="#{blog.read_more}">Đọc thêm</span>
+                                    <i class="fas fa-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter Section -->
+        <section class="newsletter-section py-5" style="background-color: #f4f1e8;">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6 text-center">
+                        <h3 class="h2 fw-bold text-dark mb-3">Đăng ký nhận tin tức</h3>
+                        <p class="text-muted mb-4">Nhận những bài viết mới nhất về chăm sóc thú cưng</p>
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Nhập email của bạn">
+                            <button class="btn btn-primary">Đăng ký</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <th:block layout:fragment="css">
+        <style>
+            .line-clamp-2 {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            
+            .line-clamp-3 {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            
+            .hover-shadow:hover {
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                transition: box-shadow 0.3s ease;
+            }
+            
+            .post-image {
+                background: linear-gradient(135deg, #f4f1e8 0%, #e8dcc0 100%);
+            }
+        </style>
+    </th:block>
+</body>
+
+</html> 

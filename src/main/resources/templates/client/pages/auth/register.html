@@ -2,7 +2,64 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{client/layout}">
 
 <head>
-    <title>Đăng ký - Waggy Pet Shop</title>
+    <title th:text="#{auth.register_title}">Đăng ký - Waggy Pet Shop</title>
+    
+    <!-- Custom CSS for validation -->
+    <style>
+        .form-control.is-valid {
+            border-color: #198754;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 3.47-3.47L7.1 1.86 6.16.92 4.72 2.36 2.3 4.78l.94.94L5.66 3.3z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 1.4 1.4M7.2 4.6l-1.4 1.4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .valid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #198754;
+        }
+        
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+        
+        .form-text {
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+        }
+        
+        .btn:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+    </style>
 </head>
 
 <body>
@@ -12,24 +69,28 @@
                 <div class="col-md-8 col-lg-6">
                     <div class="card shadow">
                         <div class="card-body p-5">
-                            <h2 class="text-center mb-4">Đăng Ký Tài Khoản</h2>
+                            <h2 class="text-center mb-4" th:text="#{auth.register}">Đăng Ký Tài Khoản</h2>
 
-                            <form th:action="@{/khach-hang/dang-ky}" method="post" id="registerForm">
+                            <form th:action="@{/khach-hang/dang-ky}" method="post" id="registerForm" novalidate>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label class="form-label">Họ và tên: <span class="text-danger">*</span></label>
-                                            <input type="text" name="ten" class="form-control" required 
-                                                   th:value="${khachHang != null ? khachHang.ten : ''}" />
+                                            <label class="form-label"><span th:text="#{auth.full_name}">Họ và tên:</span> <span class="text-danger">*</span></label>
+                                            <input type="text" name="ten" id="ten" class="form-control" required 
+                                                   th:value="${khachHang != null ? khachHang.ten : ''}" 
+                                                   autocomplete="name" />
                                             <div class="invalid-feedback" id="tenError"></div>
+                                            <div class="valid-feedback" id="tenSuccess"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label class="form-label">Email: <span class="text-danger">*</span></label>
-                                            <input type="email" name="email" class="form-control" required 
-                                                   th:value="${khachHang != null ? khachHang.email : ''}" />
+                                            <label class="form-label"><span th:text="#{auth.email}">Email:</span> <span class="text-danger">*</span></label>
+                                            <input type="email" name="email" id="email" class="form-control" required 
+                                                   th:value="${khachHang != null ? khachHang.email : ''}" 
+                                                   autocomplete="email" />
                                             <div class="invalid-feedback" id="emailError"></div>
+                                            <div class="valid-feedback" id="emailSuccess"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -37,16 +98,21 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label class="form-label">Mật khẩu: <span class="text-danger">*</span></label>
-                                            <input type="password" name="matKhau" id="matKhau" class="form-control" required />
+                                            <label class="form-label"><span th:text="#{auth.password}">Mật khẩu:</span> <span class="text-danger">*</span></label>
+                                            <input type="password" name="matKhau" id="matKhau" class="form-control" required 
+                                                   autocomplete="new-password" />
                                             <div class="invalid-feedback" id="matKhauError"></div>
+                                            <div class="valid-feedback" id="matKhauSuccess"></div>
+                                            <div class="form-text" id="passwordStrength"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label class="form-label">Xác nhận mật khẩu: <span class="text-danger">*</span></label>
-                                            <input type="password" name="xacNhanMatKhau" id="xacNhanMatKhau" class="form-control" required />
+                                            <label class="form-label"><span th:text="#{auth.confirm_password}">Xác nhận mật khẩu:</span> <span class="text-danger">*</span></label>
+                                            <input type="password" name="xacNhanMatKhau" id="xacNhanMatKhau" class="form-control" required 
+                                                   autocomplete="new-password" />
                                             <div class="invalid-feedback" id="xacNhanMatKhauError"></div>
+                                            <div class="valid-feedback" id="xacNhanMatKhauSuccess"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -54,44 +120,54 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label class="form-label">Số điện thoại: <span class="text-danger">*</span></label>
-                                            <input type="tel" name="soDienThoai" class="form-control" required 
-                                                   th:value="${khachHang != null ? khachHang.soDienThoai : ''}" />
+                                            <label class="form-label"><span th:text="#{auth.phone}">Số điện thoại:</span> <span class="text-danger">*</span></label>
+                                            <input type="tel" name="soDienThoai" id="soDienThoai" class="form-control" required 
+                                                   th:value="${khachHang != null ? khachHang.soDienThoai : ''}" 
+                                                   autocomplete="tel" />
                                             <div class="invalid-feedback" id="soDienThoaiError"></div>
+                                            <div class="valid-feedback" id="soDienThoaiSuccess"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label class="form-label">Ngày sinh:</label>
-                                            <input type="date" name="ngaySinh" class="form-control" 
-                                                   th:value="${khachHang != null ? khachHang.ngaySinh : ''}" />
+                                            <label class="form-label"><span th:text="#{auth.birth_date}">Ngày sinh:</span></label>
+                                            <input type="date" name="ngaySinh" id="ngaySinh" class="form-control" 
+                                                   th:value="${khachHang != null ? khachHang.ngaySinh : ''}" 
+                                                   autocomplete="bday" />
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label">Địa chỉ:</label>
-                                    <textarea name="diaChi" class="form-control" rows="3" 
-                                              th:text="${khachHang != null ? khachHang.diaChi : ''}"></textarea>
+                                    <label class="form-label"><span th:text="#{auth.address}">Địa chỉ:</span></label>
+                                    <textarea name="diaChi" id="diaChi" class="form-control" rows="3" 
+                                              th:text="${khachHang != null ? khachHang.diaChi : ''}" 
+                                              autocomplete="street-address"></textarea>
                                 </div>
 
                                 <div class="mb-3">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="dongYDieuKhoan" required>
                                         <label class="form-check-label" for="dongYDieuKhoan">
-                                            Tôi đồng ý với <a href="#" class="text-primary">điều khoản sử dụng</a> và <a href="#" class="text-primary">chính sách bảo mật</a>
+                                            <span th:text="#{auth.terms_agree}">Tôi đồng ý với</span> 
+                                            <a href="#" class="text-primary" th:text="#{auth.terms_of_use}">điều khoản sử dụng</a> 
+                                            <span th:text="#{auth.and}">và</span> 
+                                            <a href="#" class="text-primary" th:text="#{auth.privacy_policy}">chính sách bảo mật</a>
                                         </label>
-                                        <div class="invalid-feedback">
+                                        <div class="invalid-feedback" th:text="#{auth.terms_required}">
                                             Bạn phải đồng ý với điều khoản sử dụng
                                         </div>
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary w-100 mb-3">Đăng ký</button>
+                                <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn">
+                                    <span id="submitText" th:text="#{auth.register_button}">Đăng ký</span>
+                                    <span id="loadingSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+                                </button>
                                 
                                 <div class="text-center">
-                                    <span class="text-muted">Đã có tài khoản? </span>
-                                    <a href="/khach-hang/dang-nhap" class="text-primary text-decoration-none">Đăng nhập ngay</a>
+                                    <span class="text-muted" th:text="#{auth.has_account}">Đã có tài khoản? </span>
+                                    <a href="/khach-hang/dang-nhap" class="text-primary text-decoration-none" th:text="#{auth.login_now}">Đăng nhập ngay</a>
                                 </div>
                             </form>
 
@@ -119,69 +195,244 @@
         </div>
     </div>
 
-    <script>
-        // Form validation
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            let isValid = true;
+    <!-- Scripts fragment for Thymeleaf layout -->
+    <th:block layout:fragment="scripts">
+        <script>
+            // Real-time validation for registration form
+            const tenInput = document.getElementById('ten');
+            const emailInput = document.getElementById('email');
+            const matKhauInput = document.getElementById('matKhau');
+            const xacNhanMatKhauInput = document.getElementById('xacNhanMatKhau');
+            const soDienThoaiInput = document.getElementById('soDienThoai');
+            const dongYDieuKhoanInput = document.getElementById('dongYDieuKhoan');
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
             
-            // Reset validation
-            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-            document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
-            
-            // Validate họ tên
-            const ten = document.querySelector('input[name="ten"]');
-            if (!ten.value.trim()) {
-                ten.classList.add('is-invalid');
-                document.getElementById('tenError').textContent = 'Vui lòng nhập họ và tên';
-                isValid = false;
+            let tenValid = false;
+            let emailValid = false;
+            let matKhauValid = false;
+            let xacNhanMatKhauValid = false;
+            let soDienThoaiValid = false;
+            let dongYDieuKhoanValid = false;
+            let isSubmitting = false;
+
+            // Validation functions
+            function validateTen(ten) {
+                return ten.trim().length >= 2;
             }
-            
-            // Validate email
-            const email = document.querySelector('input[name="email"]');
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email.value.trim() || !emailRegex.test(email.value)) {
-                email.classList.add('is-invalid');
-                document.getElementById('emailError').textContent = 'Vui lòng nhập email hợp lệ';
-                isValid = false;
+
+            function validateEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
             }
-            
-            // Validate mật khẩu
-            const matKhau = document.getElementById('matKhau');
-            if (matKhau.value.length < 6) {
-                matKhau.classList.add('is-invalid');
-                document.getElementById('matKhauError').textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
-                isValid = false;
+
+            function validatePassword(password) {
+                return password.length >= 6;
             }
-            
-            // Validate xác nhận mật khẩu
-            const xacNhanMatKhau = document.getElementById('xacNhanMatKhau');
-            if (matKhau.value !== xacNhanMatKhau.value) {
-                xacNhanMatKhau.classList.add('is-invalid');
-                document.getElementById('xacNhanMatKhauError').textContent = 'Mật khẩu xác nhận không khớp';
-                isValid = false;
+
+            function validateConfirmPassword(password, confirmPassword) {
+                return password === confirmPassword && password !== '';
             }
-            
-            // Validate số điện thoại
-            const soDienThoai = document.querySelector('input[name="soDienThoai"]');
-            const phoneRegex = /^[0-9]{10,11}$/;
-            if (!soDienThoai.value.trim() || !phoneRegex.test(soDienThoai.value)) {
-                soDienThoai.classList.add('is-invalid');
-                document.getElementById('soDienThoaiError').textContent = 'Vui lòng nhập số điện thoại hợp lệ';
-                isValid = false;
+
+            function validatePhone(phone) {
+                const phoneRegex = /^[0-9]{10,11}$/;
+                return phoneRegex.test(phone);
             }
-            
-            // Validate điều khoản
-            const dongYDieuKhoan = document.getElementById('dongYDieuKhoan');
-            if (!dongYDieuKhoan.checked) {
-                dongYDieuKhoan.classList.add('is-invalid');
-                isValid = false;
+
+            function getPasswordStrength(password) {
+                if (password.length < 6) return { text: 'Quá ngắn', class: 'text-danger' };
+                if (password.length < 8) return { text: 'Yếu', class: 'text-warning' };
+                if (password.length < 10) return { text: 'Trung bình', class: 'text-info' };
+                if (password.length < 12) return { text: 'Mạnh', class: 'text-success' };
+                return { text: 'Rất mạnh', class: 'text-success' };
             }
-            
-            if (!isValid) {
-                e.preventDefault();
+
+            // Update submit button state
+            function updateSubmitButton() {
+                if (tenValid && emailValid && matKhauValid && xacNhanMatKhauValid && 
+                    soDienThoaiValid && dongYDieuKhoanValid && !isSubmitting) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('btn-secondary');
+                    submitBtn.classList.add('btn-primary');
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.remove('btn-primary');
+                    submitBtn.classList.add('btn-secondary');
+                }
             }
-        });
-    </script>
+
+            // Real-time ten validation
+            tenInput.addEventListener('input', function() {
+                const ten = this.value;
+                const tenError = document.getElementById('tenError');
+                const tenSuccess = document.getElementById('tenSuccess');
+                
+                this.classList.remove('is-valid', 'is-invalid');
+                tenError.textContent = '';
+                tenSuccess.textContent = '';
+                
+                if (ten === '') {
+                    tenValid = false;
+                } else if (!validateTen(ten)) {
+                    this.classList.add('is-invalid');
+                    tenError.textContent = 'Họ và tên phải có ít nhất 2 ký tự';
+                    tenValid = false;
+                } else {
+                    this.classList.add('is-valid');
+                    tenSuccess.textContent = '✓ Họ và tên hợp lệ';
+                    tenValid = true;
+                }
+                
+                updateSubmitButton();
+            });
+
+            // Real-time email validation
+            emailInput.addEventListener('input', function() {
+                const email = this.value.trim();
+                const emailError = document.getElementById('emailError');
+                const emailSuccess = document.getElementById('emailSuccess');
+                
+                this.classList.remove('is-valid', 'is-invalid');
+                emailError.textContent = '';
+                emailSuccess.textContent = '';
+                
+                if (email === '') {
+                    emailValid = false;
+                } else if (!validateEmail(email)) {
+                    this.classList.add('is-invalid');
+                    emailError.textContent = 'Vui lòng nhập email hợp lệ';
+                    emailValid = false;
+                } else {
+                    this.classList.add('is-valid');
+                    emailSuccess.textContent = '✓ Email hợp lệ';
+                    emailValid = true;
+                }
+                
+                updateSubmitButton();
+            });
+
+            // Real-time password validation
+            matKhauInput.addEventListener('input', function() {
+                const password = this.value;
+                const passwordError = document.getElementById('matKhauError');
+                const passwordSuccess = document.getElementById('matKhauSuccess');
+                const passwordStrength = document.getElementById('passwordStrength');
+                
+                this.classList.remove('is-valid', 'is-invalid');
+                passwordError.textContent = '';
+                passwordSuccess.textContent = '';
+                
+                if (password === '') {
+                    matKhauValid = false;
+                    passwordStrength.textContent = '';
+                } else if (!validatePassword(password)) {
+                    this.classList.add('is-invalid');
+                    passwordError.textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
+                    matKhauValid = false;
+                    passwordStrength.textContent = '';
+                } else {
+                    this.classList.add('is-valid');
+                    passwordSuccess.textContent = '✓ Mật khẩu hợp lệ';
+                    matKhauValid = true;
+                    
+                    const strength = getPasswordStrength(password);
+                    passwordStrength.textContent = `Độ mạnh: ${strength.text}`;
+                    passwordStrength.className = `form-text ${strength.class}`;
+                }
+                
+                // Re-validate confirm password
+                validateConfirmPasswordField();
+                updateSubmitButton();
+            });
+
+            // Real-time confirm password validation
+            xacNhanMatKhauInput.addEventListener('input', function() {
+                validateConfirmPasswordField();
+                updateSubmitButton();
+            });
+
+            function validateConfirmPasswordField() {
+                const password = matKhauInput.value;
+                const confirmPassword = xacNhanMatKhauInput.value;
+                const confirmError = document.getElementById('xacNhanMatKhauError');
+                const confirmSuccess = document.getElementById('xacNhanMatKhauSuccess');
+                
+                xacNhanMatKhauInput.classList.remove('is-valid', 'is-invalid');
+                confirmError.textContent = '';
+                confirmSuccess.textContent = '';
+                
+                if (confirmPassword === '') {
+                    xacNhanMatKhauValid = false;
+                } else if (!validateConfirmPassword(password, confirmPassword)) {
+                    xacNhanMatKhauInput.classList.add('is-invalid');
+                    confirmError.textContent = 'Mật khẩu xác nhận không khớp';
+                    xacNhanMatKhauValid = false;
+                } else {
+                    xacNhanMatKhauInput.classList.add('is-valid');
+                    confirmSuccess.textContent = '✓ Mật khẩu xác nhận khớp';
+                    xacNhanMatKhauValid = true;
+                }
+            }
+
+            // Real-time phone validation
+            soDienThoaiInput.addEventListener('input', function() {
+                const phone = this.value.trim();
+                const phoneError = document.getElementById('soDienThoaiError');
+                const phoneSuccess = document.getElementById('soDienThoaiSuccess');
+                
+                this.classList.remove('is-valid', 'is-invalid');
+                phoneError.textContent = '';
+                phoneSuccess.textContent = '';
+                
+                if (phone === '') {
+                    soDienThoaiValid = false;
+                } else if (!validatePhone(phone)) {
+                    this.classList.add('is-invalid');
+                    phoneError.textContent = 'Số điện thoại phải có 10-11 số';
+                    soDienThoaiValid = false;
+                } else {
+                    this.classList.add('is-valid');
+                    phoneSuccess.textContent = '✓ Số điện thoại hợp lệ';
+                    soDienThoaiValid = true;
+                }
+                
+                updateSubmitButton();
+            });
+
+            // Terms agreement validation
+            dongYDieuKhoanInput.addEventListener('change', function() {
+                dongYDieuKhoanValid = this.checked;
+                updateSubmitButton();
+            });
+
+            // Form submission with loading state
+            document.getElementById('registerForm').addEventListener('submit', function(e) {
+                if (!tenValid || !emailValid || !matKhauValid || !xacNhanMatKhauValid || 
+                    !soDienThoaiValid || !dongYDieuKhoanValid || isSubmitting) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                // Show loading state
+                isSubmitting = true;
+                submitText.textContent = 'Đang xử lý...';
+                loadingSpinner.classList.remove('d-none');
+                submitBtn.disabled = true;
+                
+                // Re-enable after 5 seconds as fallback
+                setTimeout(() => {
+                    isSubmitting = false;
+                    submitText.textContent = 'Đăng ký';
+                    loadingSpinner.classList.add('d-none');
+                    updateSubmitButton();
+                }, 5000);
+            });
+
+            // Initial button state
+            updateSubmitButton();
+        </script>
+    </th:block>
 </body>
 
 </html> 

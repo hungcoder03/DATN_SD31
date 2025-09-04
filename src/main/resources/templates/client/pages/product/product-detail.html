@@ -611,6 +611,9 @@
                                         }
 
                                         showNotification(data.message || "Đã thêm vào danh sách yêu thích!", "success");
+                                        
+                                        // Trigger wishlist counter update
+                                        window.dispatchEvent(new Event('wishlistUpdated'));
 
                                     } else if (data.status === "removed") {
                                         // Xóa khỏi wishlist
@@ -624,6 +627,9 @@
                                         }
 
                                         showNotification(data.message || "Đã xóa khỏi danh sách yêu thích!", "success");
+                                        
+                                        // Trigger wishlist counter update
+                                        window.dispatchEvent(new Event('wishlistUpdated'));
                                     }
                                 } else {
                                     showNotification(data.error || "Có lỗi xảy ra", "error");

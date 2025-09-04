@@ -1,6 +1,8 @@
 package com.main.datn_sd31.repository;
 
 import com.main.datn_sd31.entity.SpYeuThich;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +18,10 @@ public interface SpYeuThichRepository extends JpaRepository<SpYeuThich, Integer>
 
 	@Query("SELECT s.sanPham.id FROM SpYeuThich s WHERE s.khachHang.id = :khId")
 	List<Integer> findAllSanPhamIdByKhachHang(@Param("khId") Integer khId);
+	
+	// Thêm method mới cho phân trang wishlist
+	Page<SpYeuThich> findByKhachHang_Id(Integer khachHangId, Pageable pageable);
+	
+	// Đếm số lượng sản phẩm yêu thích
+	long countByKhachHang_Id(Integer khachHangId);
 }
