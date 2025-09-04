@@ -3,6 +3,7 @@ package com.main.datn_sd31.controller.admin_controller;
 import com.main.datn_sd31.controller.client_controller.GiohangController;
 import com.main.datn_sd31.entity.*;
 import com.main.datn_sd31.repository.*;
+import com.main.datn_sd31.service.SendMailService;
 import com.main.datn_sd31.service.impl.VnpayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,6 +44,9 @@ public class VnpayController {
     private HoaDonChiTietRepository hoaDonChiTietRepository;
     @Autowired
     private PhieuGiamGiaRepository phieuGiamGiaRepository;
+
+    @Autowired
+    private SendMailService sendMailService;
 
     @GetMapping("/thanh-toan-vnpay")
     public void thanhToan(@RequestParam("maHoaDon") String maHoaDon,
@@ -146,6 +150,15 @@ public class VnpayController {
             lichSuHoaDonRepository.save(lichSu);
 
             model.addAttribute("message", "Thanh toán thất bại hoặc bị hủy.");
+        }
+
+        // 🎯 GỬI EMAIL HTML ĐẸP
+        try {
+            sendMailService.sendOrderConfirmationMail(hoaDon.getEmail(), hoaDon, gioHangChiTiets);
+            System.out.println("✅ Gửi email xác nhận thành công tới: " + hoaDon.getEmail());
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi email: " + e.getMessage());
+            // Email thất bại nhưng đơn hàng vẫn thành công, không cần redirect
         }
 
         return "/client/pages/payment/success";

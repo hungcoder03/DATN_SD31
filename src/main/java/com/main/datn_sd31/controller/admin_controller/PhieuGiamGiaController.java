@@ -35,9 +35,9 @@ public class PhieuGiamGiaController {
         LocalDate today = LocalDate.now();
 
         // Kiểm tra ngày bắt đầu không được nhỏ hơn hôm nay
-        if (phieuGiamGia.getNgayBatDau() != null && phieuGiamGia.getNgayBatDau().isBefore(today)) {
-            bindingResult.rejectValue("ngayBatDau", "error.ngayBatDau", "Ngày bắt đầu không được nhỏ hơn ngày hiện tại");
-        }
+//        if (phieuGiamGia.getNgayBatDau() != null && phieuGiamGia.getNgayBatDau().isBefore(today)) {
+//            bindingResult.rejectValue("ngayBatDau", "error.ngayBatDau", "Ngày bắt đầu không được nhỏ hơn ngày hiện tại");
+//        }
 
         // Kiểm tra khoảng cách tối thiểu 1 ngày giữa ngày bắt đầu và kết thúc
         if (phieuGiamGia.getNgayBatDau() != null && phieuGiamGia.getNgayKetThuc() != null) {
@@ -55,15 +55,15 @@ public class PhieuGiamGiaController {
                 }
 
                 // Kiểm tra giảm tối đa với phần trăm
-                if (phieuGiamGia.getGiamToiDa() != null && phieuGiamGia.getDieuKien() != null) {
-                    BigDecimal maxPossibleDiscount = phieuGiamGia.getDieuKien()
-                            .multiply(phieuGiamGia.getMucDo())
-                            .divide(BigDecimal.valueOf(100));
-                    if (phieuGiamGia.getGiamToiDa().compareTo(maxPossibleDiscount) > 0) {
-                        bindingResult.rejectValue("giamToiDa", "error.giamToiDa",
-                                "Giảm tối đa không được lớn hơn mức giảm tính từ điều kiện");
-                    }
-                }
+//                if (phieuGiamGia.getGiamToiDa() != null && phieuGiamGia.getDieuKien() != null) {
+//                    BigDecimal maxPossibleDiscount = phieuGiamGia.getDieuKien()
+//                            .multiply(phieuGiamGia.getMucDo())
+//                            .divide(BigDecimal.valueOf(100));
+////                    if (phieuGiamGia.getGiamToiDa().compareTo(maxPossibleDiscount) > 0) {
+////                        bindingResult.rejectValue("giamToiDa", "error.giamToiDa",
+////                                "Giảm tối đa không được lớn hơn mức giảm tính từ điều kiện");
+////                    }
+//                }
             } else if (phieuGiamGia.getLoaiPhieuGiamGia() == 2) { // Tiền mặt
                 if (phieuGiamGia.getMucDo().compareTo(BigDecimal.ZERO) <= 0) {
                     bindingResult.rejectValue("mucDo", "error.mucDo", "Mức giảm tiền mặt phải lớn hơn 0");

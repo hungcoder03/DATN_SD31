@@ -210,14 +210,14 @@ class VoucherFormValidator {
         const dieuKien = parseFloat(this.elements.dieuKien.value);
         const mucDo = parseFloat(this.elements.mucDo.value);
 
-        if (dieuKien && mucDo) {
-            const maxPossibleDiscount = (dieuKien * mucDo) / 100;
-            if (giamToiDa > maxPossibleDiscount) {
-                this.setError('giamToiDa',
-                    `Giảm tối đa không được lớn hơn ${this.formatMoney(maxPossibleDiscount)} VNĐ (${mucDo}% của điều kiện)`);
-                return false;
-            }
-        }
+        // if (dieuKien && mucDo) {
+        //     const maxPossibleDiscount = (dieuKien * mucDo) / 100;
+        //     if (giamToiDa > maxPossibleDiscount) {
+        //         this.setError('giamToiDa',
+        //             `Giảm tối đa không được lớn hơn ${this.formatMoney(maxPossibleDiscount)} VNĐ (${mucDo}% của điều kiện)`);
+        //         return false;
+        //     }
+        // }
 
         this.clearError('giamToiDa');
         this.updateBorderColor(this.elements.giamToiDa, true);
@@ -291,10 +291,10 @@ class VoucherFormValidator {
         }
 
         // For create form, start date should not be in the past
-        if (!this.isEditMode && ngayBatDau < today) {
-            this.setError('ngayBatDau', 'Ngày bắt đầu không được nhỏ hơn ngày hiện tại');
-            return false;
-        }
+        // if (!this.isEditMode && ngayBatDau < today) {
+        //     this.setError('ngayBatDau', 'Ngày bắt đầu không được nhỏ hơn ngày hiện tại');
+        //     return false;
+        // }
 
         if (ngayKetThuc <= ngayBatDau) {
             this.setError('ngayKetThuc', 'Ngày kết thúc phải sau ngày bắt đầu');
@@ -342,7 +342,7 @@ class VoucherFormValidator {
         // Show loading state
         const originalText = this.elements.submitBtn.innerHTML;
         this.elements.submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin tw-mr-2"></i>Đang xử lý...';
-        this.elements.submitBtn.disabled = true;
+        // this.elements.submitBtn.disabled = true;
 
         // Validate form
         if (!this.validateAll()) {

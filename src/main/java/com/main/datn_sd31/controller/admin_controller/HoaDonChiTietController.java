@@ -132,7 +132,7 @@ public class HoaDonChiTietController {
         document.add(new Paragraph("Khách hàng: " + hoaDon.getTenKH(), normalFont));
         document.add(new Paragraph("Email: " + (hoaDon.getEmail() == null ? " " : hoaDon.getEmail() ), normalFont));
         document.add(new Paragraph("Số điện thoại: " + (hoaDon.getSoDienThoai().equals("Khách lẻ") ? " " : hoaDon.getSoDienThoai() ), normalFont));
-        document.add(new Paragraph("Địa chỉ: " + (hoaDon.getDiaChi().equals("-- Chọn tỉnh ----") ? " " : hoaDon.getDiaChi()), normalFont));
+        document.add(new Paragraph("Địa chỉ: " + (hoaDon.getDiaChi().isEmpty() ? " " : hoaDon.getDiaChi()), normalFont));
         document.add(new Paragraph("Ngày tạo: " + hoaDon.getNgayTao(), normalFont));
         document.add(new Paragraph(" "));
 

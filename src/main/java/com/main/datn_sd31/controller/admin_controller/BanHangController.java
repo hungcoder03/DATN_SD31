@@ -682,7 +682,7 @@ public class BanHangController {
                             @RequestParam(value = "soDienThoaivc", required = false) String sdtvc,
                             @RequestParam(value = "ten", required = false) String ten,
                             @RequestParam(value = "ghichu", required = false) String ghichu,
-                            @RequestParam(value = "diaChiChiTiet", required = false) String diaChiChiTiet, // THÊM FIELD MỚI
+                            @RequestParam(value = "diaChiChiTiet", required = false) String diaChiChiTiet,
                             @RequestParam(value = "giagiam", required = false) BigDecimal giagiam,
                             @RequestParam(value = "magiam", required = false) String magiam,
                             @RequestParam("phuongThucThanhToan") String phuongThuc,
@@ -756,6 +756,8 @@ public class BanHangController {
                 diaChiBuilder.append(diaChiTinh);
             }
             diachi = diaChiBuilder.toString();
+        } else {
+            diachi = "--";
         }
 
         if (!BigDecimal.ZERO.equals(phiShip)) {
@@ -767,6 +769,8 @@ public class BanHangController {
                 ghiChuFull += "\n" + ghichu;
             }
             hd.setGhiChu(ghiChuFull);
+        } else {
+            hd.setDiaChi(diachi);
         }
 
         hd.setGiaGoc(tongTien);
@@ -787,17 +791,18 @@ public class BanHangController {
     }
 
     /**
-     * Cập nhật method hoanTatThanhToan để xử lý địa chỉ chi tiết
+     * Cập nhật method hoanTatThanhToan để xử lý địa chỉ chi tiết và tự động in hóa đơn
      */
     private String hoanTatThanhToan(String cartKey, List<HoaDonChiTiet> gio,
-                                    String sdt, String sdtvc, String ten, String ghichu, String diaChiChiTiet, // THÊM PARAM
+                                    String sdt, String sdtvc, String ten, String ghichu, String diaChiChiTiet,
                                     BigDecimal giagiam, String magiam, BigDecimal tongTien,
                                     BigDecimal phiShip, String phuongThuc, String diachi,
                                     RedirectAttributes redirectAttributes,
                                     HttpSession session) {
 
         HoaDon hd = new HoaDon();
-        hd.setMa("HD" + System.currentTimeMillis());
+        String maHD = "HD" + System.currentTimeMillis();
+        hd.setMa(maHD);
         hd.setNgayTao(LocalDateTime.now());
         hd.setNgayThanhToan(LocalDateTime.now());
 
@@ -808,7 +813,7 @@ public class BanHangController {
         KhachHang kh = khachHangRepository.findSoDienThoai(sdt);
 
         if (!BigDecimal.ZERO.equals(phiShip)) {
-            hd.setDiaChi(diachi); // Đã được ghép đầy đủ ở method trên
+            hd.setDiaChi(diachi);
             hd.setTenNguoiNhan(ten);
 
             String ghiChuFull = "Số điện thoại người nhận:" + sdtvc;
@@ -817,7 +822,12 @@ public class BanHangController {
             }
             hd.setGhiChu(ghiChuFull);
         } else {
-            hd.setTenNguoiNhan(kh.getTen());
+            if (kh != null) {
+                hd.setTenNguoiNhan(kh.getTen());
+            } else {
+                hd.setTenNguoiNhan("Khách lẻ");
+            }
+            hd.setDiaChi(diachi);
         }
 
         if (kh != null) {
@@ -837,16 +847,7 @@ public class BanHangController {
         }
 
         hd.setPhuongThuc(phuongThuc);
-
-//        if (phuongThuc.equals("tien_mat") && !BigDecimal.ZERO.equals(phiShip)) {
-//            hd.setTrangThai(2);
-//        } else {
-//            hd.setTrangThai(3);
-//        }
-
-        //Luôn luôn để trạng thái 3 - Đã thanh toán đối với Bán off
-        hd.setTrangThai(3);
-
+        hd.setTrangThai(3); // Luôn luôn để trạng thái 3 - Đã thanh toán đối với Bán off
         hd.setGiaGoc(tongTien);
         hd.setGiaGiamGia(giagiam);
         hd.setPhiVanChuyen(phiShip);
@@ -857,9 +858,10 @@ public class BanHangController {
         hd.setNguoiTao(getNhanVien.getCurrentNhanVien().getId());
         hd.setPhieuGiamGia(phieugiamgiarepository.findByMa(magiam));
 
+        // LUU HOA DON
         hoaDonRepository.save(hd);
 
-        // Phần còn lại giữ nguyên...
+        // Lưu chi tiết hóa đơn
         for (HoaDonChiTiet ct : gio) {
             ChiTietSanPham sp = chiTietSanPhamRepository.findWithDetailsById(ct.getChiTietSanPham().getId());
             ct.setChiTietSanPham(sp);
@@ -926,18 +928,151 @@ public class BanHangController {
         session.removeAttribute("diaChiTinh_" + cartKey);
         session.removeAttribute("diaChiHuyen_" + cartKey);
         session.removeAttribute("diaChiXa_" + cartKey);
-        session.removeAttribute("diaChiChiTiet_" + cartKey); // THÊM DÒNG MỚI
+        session.removeAttribute("diaChiChiTiet_" + cartKey);
 
         // Xóa session chung (backward compatibility)
         session.removeAttribute("phiVanChuyen");
         session.removeAttribute("giamGia");
         session.removeAttribute("maGiamGia");
-        session.removeAttribute("diaChiChiTiet"); // THÊM DÒNG MỚI
+        session.removeAttribute("diaChiChiTiet");
         session.removeAttribute("hoaDonTam");
         session.removeAttribute("gioTam");
 
         ThongBaoUtils.addSuccess(redirectAttributes, "Thanh toán thành công");
+
+        // *** TỰ ĐỘNG MỞ PDF SAU KHI THANH TOÁN THÀNH CÔNG ***
+        redirectAttributes.addAttribute("printInvoice", "true");
+        redirectAttributes.addAttribute("maHoaDon", maHD);
+
         return "redirect:/admin/ban-hang";
+    }
+
+    // Thêm endpoint mới để xử lý việc tự động mở PDF
+    @GetMapping("/auto-print-pdf")
+    public void autoPrintPDF(@RequestParam("maHoaDon") String maHoaDon,
+                             HttpServletResponse response) throws Exception {
+
+        HoaDonDTO hoaDon = hoaDonService.getHoaDonByMa(maHoaDon);
+        List<HoaDonChiTietDTO> chiTietList = hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(maHoaDon);
+
+        response.setContentType("application/pdf");
+        // Sử dụng inline để mở PDF trực tiếp trong browser thay vì download
+        response.setHeader("Content-Disposition", "inline; filename=hoa-don-" + maHoaDon + ".pdf");
+
+        Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        // Font cơ bản hỗ trợ tiếng Việt
+        BaseFont baseFont = BaseFont.createFont("fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font normalFont = new Font(baseFont, 12);
+        Font boldFont = new Font(baseFont, 14, Font.BOLD);
+
+        document.add(new Paragraph("HÓA ĐƠN BÁN HÀNG", boldFont));
+        document.add(new Paragraph("Mã hóa đơn: " + hoaDon.getMa(), normalFont));
+        document.add(new Paragraph("Khách hàng: " + hoaDon.getTenKH(), normalFont));
+        document.add(new Paragraph("Email: " + (hoaDon.getEmail() == null ? " " : hoaDon.getEmail() ), normalFont));
+        document.add(new Paragraph("Số điện thoại: " + (hoaDon.getSoDienThoai().equals("Khách lẻ") ? " " : hoaDon.getSoDienThoai() ), normalFont));
+        document.add(new Paragraph("Địa chỉ: " + (hoaDon.getDiaChi().isEmpty() ? " " : hoaDon.getDiaChi()), normalFont));
+        document.add(new Paragraph("Ngày tạo: " + hoaDon.getNgayTao(), normalFont));
+        document.add(new Paragraph(" "));
+
+        PdfPTable table = new PdfPTable(5);
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(10);
+        table.setWidths(new float[]{1f, 3f, 2f, 1f, 2f});
+
+        // Tiêu đề bảng
+        String[] headers = {"STT", "Tên sản phẩm", "Đơn giá", "SL", "Tổng"};
+        for (String h : headers) {
+            PdfPCell cell = new PdfPCell(new Phrase(h, boldFont));
+            table.addCell(cell);
+        }
+
+        int stt = 1;
+        for (HoaDonChiTietDTO ct : chiTietList) {
+            table.addCell(new Phrase(String.valueOf(stt++), normalFont));
+            table.addCell(new Phrase(ct.getTenCTSP(), normalFont));
+            table.addCell(new Phrase(String.valueOf(ct.getGiaSauGiam()), normalFont));
+            table.addCell(new Phrase(String.valueOf(ct.getSoLuong()), normalFont));
+            table.addCell(new Phrase(String.valueOf(ct.getTongTien()), normalFont));
+        }
+
+        document.add(table);
+        document.add(new Paragraph(" ", normalFont));
+
+        document.add(new Paragraph("Tổng tiền: " + hoaDon.getGiaGoc(), boldFont));
+        document.add(new Paragraph("Giá giảm: " + hoaDon.getGiaGiamGia(), boldFont));
+        document.add(new Paragraph("Phí vận chuyển: " + hoaDon.getPhiVanChuyen(), boldFont));
+        document.add(new Paragraph("Thành tiền: " + hoaDon.getThanhTien(), boldFont));
+
+        document.add(new Paragraph(" ", normalFont));
+        document.add(new Paragraph("Thanh toán: " + (hoaDon.getTrangThaiHoaDonString()), boldFont));
+
+        document.close();
+    }
+
+    // Giữ nguyên method xuất PDF cũ
+    @GetMapping("/{maHoaDon}/pdf")
+    public void xuatHoaDonPDF(@PathVariable("maHoaDon") String maHoaDon,
+                              HttpServletResponse response) throws Exception {
+        HoaDonDTO hoaDon = hoaDonService.getHoaDonByMa(maHoaDon);
+        List<HoaDonChiTietDTO> chiTietList = hoaDonChiTietService.getHoaDonChiTietByMaHoaDon(maHoaDon);
+
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=hoa-don-" + maHoaDon + ".pdf");
+
+        Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+        PdfWriter.getInstance(document, response.getOutputStream());
+        document.open();
+
+        // Font cơ bản hỗ trợ tiếng Việt
+        BaseFont baseFont = BaseFont.createFont("fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font normalFont = new Font(baseFont, 12);
+        Font boldFont = new Font(baseFont, 14, Font.BOLD);
+
+        document.add(new Paragraph("HÓA ĐƠN BÁN HÀNG", boldFont));
+        document.add(new Paragraph("Mã hóa đơn: " + hoaDon.getMa(), normalFont));
+        document.add(new Paragraph("Khách hàng: " + hoaDon.getTenKH(), normalFont));
+        document.add(new Paragraph("Email: " + (hoaDon.getEmail() == null ? " " : hoaDon.getEmail() ), normalFont));
+        document.add(new Paragraph("Số điện thoại: " + (hoaDon.getSoDienThoai().equals("Khách lẻ") ? " " : hoaDon.getSoDienThoai() ), normalFont));
+        document.add(new Paragraph("Địa chỉ: " + (hoaDon.getDiaChi().isEmpty() ? " " : hoaDon.getDiaChi()), normalFont));
+        document.add(new Paragraph("Ngày tạo: " + hoaDon.getNgayTao(), normalFont));
+        document.add(new Paragraph(" "));
+
+        PdfPTable table = new PdfPTable(5);
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(10);
+        table.setWidths(new float[]{1f, 3f, 2f, 1f, 2f});
+
+        // Tiêu đề bảng
+        String[] headers = {"STT", "Tên sản phẩm", "Đơn giá", "SL", "Tổng"};
+        for (String h : headers) {
+            PdfPCell cell = new PdfPCell(new Phrase(h, boldFont));
+            table.addCell(cell);
+        }
+
+        int stt = 1;
+        for (HoaDonChiTietDTO ct : chiTietList) {
+            table.addCell(new Phrase(String.valueOf(stt++), normalFont));
+            table.addCell(new Phrase(ct.getTenCTSP(), normalFont));
+            table.addCell(new Phrase(String.valueOf(ct.getGiaSauGiam()), normalFont));
+            table.addCell(new Phrase(String.valueOf(ct.getSoLuong()), normalFont));
+            table.addCell(new Phrase(String.valueOf(ct.getTongTien()), normalFont));
+        }
+
+        document.add(table);
+        document.add(new Paragraph(" ", normalFont));
+
+        document.add(new Paragraph("Tổng tiền: " + hoaDon.getGiaGoc(), boldFont));
+        document.add(new Paragraph("Giá giảm: " + hoaDon.getGiaGiamGia(), boldFont));
+        document.add(new Paragraph("Phí vận chuyển: " + hoaDon.getPhiVanChuyen(), boldFont));
+        document.add(new Paragraph("Thành tiền: " + hoaDon.getThanhTien(), boldFont));
+
+        document.add(new Paragraph(" ", normalFont));
+        document.add(new Paragraph("Thanh toán: " + (hoaDon.getTrangThaiHoaDonString()), boldFont));
+
+        document.close();
     }
 
     @GetMapping("/dia-chi/tinh")

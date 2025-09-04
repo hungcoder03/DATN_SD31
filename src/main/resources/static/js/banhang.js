@@ -506,16 +506,14 @@
                 <td class="p-3">${sp.tenSanPham} - ${sp.mauSac} / ${sp.kichThuoc}</td>
                 <td class="p-3">${sp.soLuong}</td>
                 <td class="p-3">${sp.giaBan}</td>
-                <td class="p-3">
-                    ${(sp.trangThaiHoatDong && sp.soLuong > 0)
-			? `<button class="px-3 py-1 rounded-md bg-[#1abc9c] text-black hover:bg-[#16a085]"
-                                onclick="themVaoGioHang('${sp.id}')">
-                            Thêm vào giỏ
-                        </button>`
+                <td class="p-3 text-center">
+					${ (sp.trangThaiHoatDong && sp.soLuong > 0)
+			? `<button class="btn btn-success px-3 py-1 rounded-md" onclick="themVaoGioHang('${sp.id}')">Thêm vào giỏ</button>`
 			: (sp.trangThaiHoatDong && sp.soLuong === 0
-				? `<span class="text-yellow-600">Hết hàng</span>`
-				: `<span class="text-red-600">Ngừng bán</span>`)}
-                </td>
+				? `<span class="btn btn-warning px-3 py-1 rounded-md disabled">Hết hàng</span>`
+				: `<span class="btn btn-danger px-3 py-1 rounded-md disabled">Ngừng bán</span>`)
+		}
+				</td>
             </tr>
         `).join('');
 	}
@@ -706,5 +704,42 @@
 		initAddress();
 		initQuickCustomerForm();
 		toggleQrImage();
+	});
+
+	// Thêm vào trang ban-hang.jsp (trong thẻ <script>)
+
+// Kiểm tra xem có cần tự động in hóa đơn không
+	window.addEventListener('DOMContentLoaded', function() {
+		// Lấy tham số từ URL
+		const urlParams = new URLSearchParams(window.location.search);
+		const printInvoice = urlParams.get('printInvoice');
+		const maHoaDon = urlParams.get('maHoaDon');
+
+		if (printInvoice === 'true' && maHoaDon) {
+			// Tự động mở PDF trong tab mới
+			window.open('/admin/ban-hang/auto-print-pdf?maHoaDon=' + maHoaDon, '_blank');
+
+			// Xóa tham số khỏi URL để tránh in lại khi refresh
+			const newUrl = window.location.pathname;
+			window.history.replaceState({}, document.title, newUrl);
+		}
+	});
+
+// Hoặc nếu bạn muốn hiển thị popup xác nhận trước khi in:
+	window.addEventListener('DOMContentLoaded', function() {
+		const urlParams = new URLSearchParams(window.location.search);
+		const printInvoice = urlParams.get('printInvoice');
+		const maHoaDon = urlParams.get('maHoaDon');
+
+		if (printInvoice === 'true' && maHoaDon) {
+			// Hiển thị popup xác nhận
+			if (confirm('Thanh toán thành công! Bạn có muốn in hóa đơn không?')) {
+				window.open('/admin/ban-hang/auto-print-pdf?maHoaDon=' + maHoaDon, '_blank');
+			}
+
+			// Xóa tham số khỏi URL
+			const newUrl = window.location.pathname;
+			window.history.replaceState({}, document.title, newUrl);
+		}
 	});
 })();
