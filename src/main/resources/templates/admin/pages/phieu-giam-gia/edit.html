@@ -1,304 +1,518 @@
 <!DOCTYPE html>
-<!--Cấu hình layout cho Thymleaf-->
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{admin/layout}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{admin/layout}">
 <head>
-    <title>Voucher</title>
-    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"-->
-    <!--          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">-->
-
-    <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">-->
-    <!--    <style>-->
-    <!--        .filter-section {-->
-    <!--            background-color: #f8f9fa;-->
-    <!--            padding: 20px;-->
-    <!--            border-radius: 8px;-->
-    <!--            margin-bottom: 30px;-->
-    <!--        }-->
-
-    <!--        .filter-buttons .btn {-->
-    <!--            margin-right: 10px;-->
-    <!--            margin-bottom: 10px;-->
-    <!--        }-->
-
-    <!--        .table-section {-->
-    <!--            background-color: #fff;-->
-    <!--            padding: 20px;-->
-    <!--            border-radius: 8px;-->
-    <!--            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);-->
-    <!--        }-->
-
-    <!--        .table-section .table thead th {-->
-    <!--            background-color: #f1f1f1;-->
-    <!--        }-->
-
-    <!--        .action-btn {-->
-    <!--            border: none;-->
-    <!--            background: none;-->
-    <!--            cursor: pointer;-->
-    <!--            font-size: 1.2rem;-->
-    <!--            padding: 5px;-->
-    <!--        }-->
-
-    <!--        .action-btn.accept {-->
-    <!--            color: green;-->
-    <!--        }-->
-
-    <!--        .action-btn.cancel {-->
-    <!--            color: red;-->
-    <!--        }-->
-    <!--    </style>-->
+    <meta charset="UTF-8">
+    <title>Chỉnh sửa Phiếu Giảm Giá</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            prefix: 'tw-',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6',
+                        'primary-dark': '#2563eb',
+                        'primary-light': '#93c5fd',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'error': '#ef4444',
+                        'gray-50': '#f9fafb'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                        'pulse-warning': 'pulseWarning 2s infinite'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /*CSS Thong bao*/
-        .custom-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 40px 12px 18px; /* hoặc: padding: 12px 18px; */
-            border-radius: 6px;
-            color: white;
-            z-index: 9999;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-            min-width: 280px;
-            animation: fadeIn 0.3s ease-in-out;
-            overflow: hidden;
-        }
-
-
-        .custom-toast.success {
-            background-color: #28a745;
-        }
-
-        .custom-toast.error {
-            background-color: #dc3545;
-        }
-
-        .custom-toast .close-btn {
-            position: absolute;
-            top: 6px;
-            right: 8px;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            font-weight: bold;
-            line-height: 1;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        .custom-toast .progress-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.7);
-            animation: progressBar 4s linear forwards;
-        }
-
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes progressBar {
-            from {
-                width: 100%;
-            }
-            to {
-                width: 0%;
-            }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        /*CSS Thong bao*/
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulseWarning {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+        }
+
+        .form-group {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+
+        .input-focus:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
+        }
+
+        .status-indicator {
+            position: relative;
+        }
+
+        .status-indicator::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -20px;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-active::before {
+            background-color: #10b981;
+        }
+
+        .status-inactive::before {
+            background-color: #ef4444;
+        }
+
+        .status-expired::before {
+            background-color: #f59e0b;
+        }
     </style>
 </head>
-<body>
+<body class="tw-bg-gradient-to-br tw-from-gray-50 tw-to-blue-50">
 
 <section layout:fragment="content">
-
-    <!-- Error Toast -->
-    <div id="customError" class="custom-toast error" style="display:none;">
-        <i class="bi bi-x-circle-fill me-2"></i>
-        <span id="errorMsg"></span>
-        <button class="close-btn" onclick="closeToast('customError')">&times;</button>
-        <div class="progress-bar"></div>
+    <!-- Background Decoration -->
+    <div class="tw-fixed tw-inset-0 tw-pointer-events-none">
+        <div class="tw-absolute tw-top-10 tw-right-10 tw-w-72 tw-h-72 tw-bg-orange-200 tw-rounded-full tw-opacity-20 tw-blur-3xl"></div>
+        <div class="tw-absolute tw-bottom-10 tw-left-10 tw-w-96 tw-h-96 tw-bg-blue-200 tw-rounded-full tw-opacity-20 tw-blur-3xl"></div>
     </div>
 
-    <div class="container mt-4">
-        <h2 class="mb-4 text-center">Chỉnh sửa Phiếu giảm giá</h2>
-    </div>
+    <div class="tw-min-h-screen tw-py-8 tw-px-4 tw-relative">
+        <div class="tw-max-w-5xl tw-mx-auto">
+            <!-- Header -->
+            <div class="tw-text-center tw-mb-10 tw-animate-fade-in">
+                <div class="tw-inline-flex tw-items-center tw-justify-center tw-w-16 tw-h-16 tw-bg-gradient-to-r tw-from-orange-500 tw-to-red-600 tw-rounded-full tw-mb-6 tw-animate-bounce-in">
+                    <i class="fas fa-edit tw-text-2xl tw-text-white"></i>
+                </div>
+                <h1 class="tw-text-4xl tw-font-bold tw-bg-gradient-to-r tw-from-orange-600 tw-to-red-600 tw-bg-clip-text tw-text-transparent tw-mb-3">
+                    Chỉnh Sửa Phiếu Giảm Giá
+                </h1>
+                <p class="tw-text-gray-600 tw-text-lg">Cập nhật thông tin phiếu giảm giá</p>
 
-    <div class="container">
-        <form
-                th:action="@{/admin/phieu-giam-gia/update}"
-                th:object="${phieuGiamGia}"
-                method="post"
-        >
-            <input type="hidden" th:field="*{id}" />
-            <div th:if="${#fields.hasGlobalErrors()}">
-                <div
-                        class="alert alert-danger"
-                        th:each="err : ${#fields.globalErrors()}"
-                        th:text="${err}"
-                ></div>
-            </div>
-
-            <div class="mb-3">
-                <label>Tên</label>
-                <input type="text" class="form-control" th:field="*{ten}" maxlength="100" />
-                <div class="text-danger" th:errors="*{ten}"></div>
-            </div>
-
-            <div class="mb-3">
-                <label>Mã</label>
-                <input type="text" class="form-control" th:field="*{ma}" maxlength="50"/>
-                <div class="text-danger" th:errors="*{ma}"></div>
-            </div>
-
-            <div class="mb-3">
-                <label>Loại Phiếu</label>
-                <select
-                        class="form-select"
-                        th:field="*{loaiPhieuGiamGia}"
-                        id="loaiPhieuGiamGia"
-                >
-                    <option value="">-- Chọn loại phiếu --</option>
-                    <option value="1">Giảm %</option>
-                    <option value="2">Giảm tiền</option>
-                </select>
-                <div class="text-danger" th:errors="*{loaiPhieuGiamGia}"></div>
-            </div>
-
-            <div class="mb-3">
-                <label>Ngày bắt đầu</label>
-                <input type="date" class="form-control" th:field="*{ngayBatDau}" />
-                <div class="text-danger" th:errors="*{ngayBatDau}"></div>
-            </div>
-
-            <div class="mb-3">
-                <label>Ngày kết thúc</label>
-                <input type="date" class="form-control" th:field="*{ngayKetThuc}" />
-                <div class="text-danger" th:errors="*{ngayKetThuc}"></div>
-            </div>
-
-            <div class="mb-3">
-                <label>Mức giảm</label>
-                <input type="number" class="form-control" th:field="*{mucDo}" />
-                <div class="text-danger" th:errors="*{mucDo}"></div>
-            </div>
-
-            <div class="mb-3" id="divGiamToiDa">
-                <label>Giảm tối đa</label>
-                <input type="number" id="giamToiDa" class="form-control" th:field="*{giamToiDa}" oninput="limitNumberLength(this, 18)"/>
-                <div class="text-danger" th:errors="*{giamToiDa}"></div>
-            </div>
-
-            <div class="mb-3">
-                <label>Điều kiện</label>
-                <input type="number" class="form-control" th:field="*{dieuKien}" oninput="limitNumberLength(this, 18)"/>
-                <div class="text-danger" th:errors="*{dieuKien}"></div>
-            </div>
-
-            <div class="mb-3">
-                <label>Số lượng</label>
-                <input type="number" class="form-control" th:field="*{soLuongTon}" />
-                <div class="text-danger" th:errors="*{soLuongTon}"></div>
-            </div>
-            <div class="mb-3">
-                <label>Trạng thái</label>
-                <div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input"
-                               type="radio"
-                               th:field="*{trangThai}"
-                               value="true"
-                               id="trangThaiHoatDong"
-                               th:disabled="${phieuGiamGia.ngayKetThuc != null and phieuGiamGia.ngayKetThuc.isBefore(T(java.time.LocalDate).now())}">
-                        <label class="form-check-label" for="trangThaiHoatDong">Hoạt động</label>
+                <!-- Status Badge -->
+                <div class="tw-mt-4">
+                    <div th:if="${phieuGiamGia.ngayKetThuc != null and phieuGiamGia.ngayKetThuc.isBefore(T(java.time.LocalDate).now())}"
+                         class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-bg-yellow-100 tw-border tw-border-yellow-300 tw-rounded-full tw-text-yellow-800 tw-text-sm tw-font-medium tw-animate-pulse-warning">
+                        <i class="fas fa-exclamation-triangle tw-mr-2"></i>
+                        Phiếu này đã hết hạn
                     </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input"
-                               type="radio"
-                               th:field="*{trangThai}"
-                               value="false"
-                               id="trangThaiNgung">
-                        <label class="form-check-label" for="trangThaiNgung">Ngừng hoạt động</label>
+                    <div th:if="${phieuGiamGia.ngayBatDau != null and phieuGiamGia.ngayBatDau.isAfter(T(java.time.LocalDate).now())}"
+                         class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-bg-blue-100 tw-border tw-border-blue-300 tw-rounded-full tw-text-blue-800 tw-text-sm tw-font-medium">
+                        <i class="fas fa-clock tw-mr-2"></i>
+                        Phiếu chưa bắt đầu
+                    </div>
+                    <div th:if="${phieuGiamGia.ngayBatDau != null and phieuGiamGia.ngayKetThuc != null and !phieuGiamGia.ngayBatDau.isAfter(T(java.time.LocalDate).now()) and !phieuGiamGia.ngayKetThuc.isBefore(T(java.time.LocalDate).now())}"
+                         class="tw-inline-flex tw-items-center tw-px-4 tw-py-2 tw-bg-green-100 tw-border tw-border-green-300 tw-rounded-full tw-text-green-800 tw-text-sm tw-font-medium">
+                        <i class="fas fa-check-circle tw-mr-2"></i>
+                        Đang hoạt động
                     </div>
                 </div>
-                <div class="text-danger" th:errors="*{trangThai}"></div>
             </div>
 
+            <!-- Main Form Card -->
+            <div class="tw-bg-white/80 tw-backdrop-blur-sm tw-rounded-3xl tw-shadow-2xl tw-border tw-border-white/20 tw-overflow-hidden hover-lift">
+                <div class="tw-bg-gradient-to-r tw-from-orange-500 tw-to-red-600 tw-p-1">
+                    <div class="tw-bg-white tw-rounded-3xl tw-p-8">
+                        <form th:action="@{/admin/phieu-giam-gia/update}" th:object="${phieuGiamGia}" method="post" id="editVoucherForm">
+                            <input type="hidden" th:field="*{id}" />
 
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Lưu</button>
-                <a href="/admin/phieu-giam-gia" class="btn btn-secondary">Hủy</a>
+                            <!-- Error Display -->
+                            <div th:if="${error}" class="tw-mb-6 tw-p-4 tw-bg-red-50 tw-border tw-border-red-200 tw-rounded-xl tw-text-red-700">
+                                <i class="fas fa-exclamation-triangle tw-mr-2"></i>
+                                <span th:text="${error}"></span>
+                            </div>
+
+                            <!-- Success Message -->
+                            <div th:if="${success}" class="tw-mb-6 tw-p-4 tw-bg-green-50 tw-border tw-border-green-200 tw-rounded-xl tw-text-green-700">
+                                <i class="fas fa-check-circle tw-mr-2"></i>
+                                <span th:text="${success}"></span>
+                            </div>
+
+                            <!-- Thông tin cơ bản -->
+                            <div class="tw-mb-10 form-group">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-mb-6">
+                                    <div class="tw-flex tw-items-center">
+                                        <div class="tw-w-8 tw-h-8 tw-bg-blue-100 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mr-3">
+                                            <i class="fas fa-info-circle tw-text-blue-600 tw-text-sm"></i>
+                                        </div>
+                                        <h2 class="tw-text-2xl tw-font-semibold tw-text-gray-800">Thông Tin Cơ Bản</h2>
+                                    </div>
+                                    <div class="tw-text-sm tw-text-gray-500">
+                                        ID: <span class="tw-font-mono tw-bg-gray-100 tw-px-2 tw-py-1 tw-rounded" th:text="${phieuGiamGia.id}"></span>
+                                    </div>
+                                </div>
+
+                                <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-8">
+                                    <!-- Mã -->
+                                    <div class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Mã phiếu</label>
+                                        <input type="text" th:field="*{ma}" readonly
+                                               class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm tw-bg-gray-50 tw-cursor-not-allowed"
+                                               placeholder="Mã phiếu giảm giá">
+                                        <p class="tw-text-xs tw-text-gray-500 tw-flex tw-items-center">
+                                            <i class="fas fa-lock tw-mr-1 tw-text-gray-400"></i>
+                                            Mã không thể thay đổi sau khi tạo
+                                        </p>
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('ma')}" th:errors="*{ma}"></div>
+                                    </div>
+
+                                    <!-- Tên -->
+                                    <div class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">
+                                            Tên phiếu giảm giá <span class="tw-text-red-500">*</span>
+                                        </label>
+                                        <input type="text" th:field="*{ten}" required maxlength="100"
+                                               class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm input-focus"
+                                               placeholder="Nhập tên phiếu giảm giá">
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('ten')}" th:errors="*{ten}"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cấu hình giảm giá -->
+                            <div class="tw-mb-10 form-group">
+                                <div class="tw-flex tw-items-center tw-mb-6">
+                                    <div class="tw-w-8 tw-h-8 tw-bg-green-100 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mr-3">
+                                        <i class="fas fa-percent tw-text-green-600 tw-text-sm"></i>
+                                    </div>
+                                    <h2 class="tw-text-2xl tw-font-semibold tw-text-gray-800">Cấu Hình Giảm Giá</h2>
+                                </div>
+
+                                <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8">
+                                    <!-- Loại phiếu -->
+                                    <div class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Loại phiếu giảm giá</label>
+                                        <select id="loaiPhieuGiamGia" th:field="*{loaiPhieuGiamGia}"
+                                                class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm input-focus"
+                                                onchange="handleLoaiPhieuChange()">
+                                            <option value="1">🏷️ Phần trăm</option>
+                                            <option value="2">💰 Tiền mặt</option>
+                                        </select>
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('loaiPhieuGiamGia')}" th:errors="*{loaiPhieuGiamGia}"></div>
+                                    </div>
+
+                                    <!-- Mức độ -->
+                                    <div class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">
+                                            Mức độ giảm giá <span class="tw-text-red-500">*</span>
+                                        </label>
+                                        <div class="tw-relative">
+                                            <input type="number" id="mucDo" th:field="*{mucDo}" step="0.01" min="0" required
+                                                   class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm input-focus"
+                                                   placeholder="Nhập mức độ giảm giá"
+                                                   oninput="limitNumberLength(this, 18)">
+                                            <div id="mucDoUnit" class="tw-absolute tw-right-3 tw-top-3 tw-text-gray-500 tw-text-sm">%</div>
+                                        </div>
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('mucDo')}" th:errors="*{mucDo}"></div>
+                                    </div>
+
+                                    <!-- Giảm tối đa -->
+                                    <div id="divGiamToiDa" class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Giảm tối đa</label>
+                                        <div class="tw-relative">
+                                            <input type="number" id="giamToiDa" th:field="*{giamToiDa}" step="1000" min="0"
+                                                   class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm input-focus"
+                                                   placeholder="Nhập giảm tối đa"
+                                                   oninput="limitNumberLength(this, 18)">
+                                            <div class="tw-absolute tw-right-3 tw-top-3 tw-text-gray-500 tw-text-sm">VNĐ</div>
+                                        </div>
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('giamToiDa')}" th:errors="*{giamToiDa}"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Điều kiện và thời gian -->
+                            <div class="tw-mb-10 form-group">
+                                <div class="tw-flex tw-items-center tw-mb-6">
+                                    <div class="tw-w-8 tw-h-8 tw-bg-purple-100 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mr-3">
+                                        <i class="fas fa-clock tw-text-purple-600 tw-text-sm"></i>
+                                    </div>
+                                    <h2 class="tw-text-2xl tw-font-semibold tw-text-gray-800">Điều Kiện Và Thời Gian</h2>
+                                </div>
+
+                                <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8">
+                                    <!-- Điều kiện -->
+                                    <div class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">
+                                            Điều kiện áp dụng <span class="tw-text-red-500">*</span>
+                                        </label>
+                                        <div class="tw-relative">
+                                            <input type="number" th:field="*{dieuKien}" step="1000" min="0" required
+                                                   class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm input-focus"
+                                                   placeholder="Giá trị đơn hàng tối thiểu"
+                                                   oninput="limitNumberLength(this, 18)">
+                                            <div class="tw-absolute tw-right-3 tw-top-3 tw-text-gray-500 tw-text-sm">VNĐ</div>
+                                        </div>
+                                        <p class="tw-text-xs tw-text-gray-500 tw-flex tw-items-center">
+                                            <i class="fas fa-shopping-cart tw-mr-1 tw-text-blue-500"></i>
+                                            Đơn hàng phải có giá trị tối thiểu này
+                                        </p>
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('dieuKien')}" th:errors="*{dieuKien}"></div>
+                                    </div>
+
+                                    <!-- Ngày bắt đầu -->
+                                    <div class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">
+                                            Ngày bắt đầu <span class="tw-text-red-500">*</span>
+                                        </label>
+                                        <input type="date" th:field="*{ngayBatDau}" required
+                                               class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm input-focus">
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('ngayBatDau')}" th:errors="*{ngayBatDau}"></div>
+                                    </div>
+
+                                    <!-- Ngày kết thúc -->
+                                    <div class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">
+                                            Ngày kết thúc <span class="tw-text-red-500">*</span>
+                                        </label>
+                                        <input type="date" th:field="*{ngayKetThuc}" required
+                                               class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm input-focus">
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('ngayKetThuc')}" th:errors="*{ngayKetThuc}"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cài đặt khác -->
+                            <div class="tw-mb-10 form-group">
+                                <div class="tw-flex tw-items-center tw-mb-6">
+                                    <div class="tw-w-8 tw-h-8 tw-bg-orange-100 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mr-3">
+                                        <i class="fas fa-cog tw-text-orange-600 tw-text-sm"></i>
+                                    </div>
+                                    <h2 class="tw-text-2xl tw-font-semibold tw-text-gray-800">Cài Đặt Khác</h2>
+                                </div>
+
+                                <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-8">
+                                    <!-- Số lượng -->
+                                    <div class="tw-space-y-2">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Số lượng tồn</label>
+                                        <input type="number" th:field="*{soLuongTon}" min="0" step="1"
+                                               class="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-xl tw-text-sm input-focus"
+                                               placeholder="Số lượng phiếu còn lại">
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('soLuongTon')}" th:errors="*{soLuongTon}"></div>
+                                    </div>
+
+                                    <!-- Trạng thái -->
+                                    <div class="tw-space-y-4">
+                                        <label class="tw-block tw-text-sm tw-font-medium tw-text-gray-700">Trạng thái</label>
+                                        <div class="tw-flex tw-space-x-6">
+                                            <label class="tw-flex tw-items-center tw-cursor-pointer tw-group">
+                                                <input type="radio" th:field="*{trangThai}" th:value="true"
+                                                       th:disabled="${phieuGiamGia.ngayKetThuc != null and phieuGiamGia.ngayKetThuc.isBefore(T(java.time.LocalDate).now())}"
+                                                       class="tw-w-4 tw-h-4 tw-text-green-600 tw-border-gray-300 focus:tw-ring-green-500 disabled:tw-opacity-50 disabled:tw-cursor-not-allowed">
+                                                <div class="tw-ml-3 tw-flex tw-items-center">
+                                                    <div class="tw-w-2 tw-h-2 tw-bg-green-500 tw-rounded-full tw-mr-2 status-indicator status-active"></div>
+                                                    <span class="tw-text-sm tw-text-gray-700 group-hover:tw-text-gray-900">Hoạt động</span>
+                                                    <span th:if="${phieuGiamGia.ngayKetThuc != null and phieuGiamGia.ngayKetThuc.isBefore(T(java.time.LocalDate).now())}"
+                                                          class="tw-ml-2 tw-text-xs tw-text-red-500">(Đã hết hạn)</span>
+                                                </div>
+                                            </label>
+                                            <label class="tw-flex tw-items-center tw-cursor-pointer tw-group">
+                                                <input type="radio" th:field="*{trangThai}" th:value="false"
+                                                       class="tw-w-4 tw-h-4 tw-text-red-600 tw-border-gray-300 focus:tw-ring-red-500">
+                                                <div class="tw-ml-3 tw-flex tw-items-center">
+                                                    <div class="tw-w-2 tw-h-2 tw-bg-red-500 tw-rounded-full tw-mr-2 status-indicator status-inactive"></div>
+                                                    <span class="tw-text-sm tw-text-gray-700 group-hover:tw-text-gray-900">Không hoạt động</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <div class="tw-text-sm tw-text-red-600" th:if="${#fields.hasErrors('trangThai')}" th:errors="*{trangThai}"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Thông tin thời gian -->
+                            <div class="tw-mb-8 tw-bg-gray-50 tw-rounded-2xl tw-p-6">
+                                <h3 class="tw-text-lg tw-font-semibold tw-text-gray-800 tw-mb-4 tw-flex tw-items-center">
+                                    <i class="fas fa-history tw-mr-2 tw-text-gray-600"></i>
+                                    Thông Tin Thời Gian
+                                </h3>
+                                <div class="tw-grid tw-grid-cols-2 tw-gap-4 tw-text-sm">
+                                    <div>
+                                        <span class="tw-text-gray-600">Ngày tạo:</span>
+                                        <span class="tw-font-medium tw-ml-2" th:text="${#temporals.format(phieuGiamGia.ngayTao, 'dd/MM/yyyy')}"></span>
+                                    </div>
+                                    <div>
+                                        <span class="tw-text-gray-600">Lần sửa cuối:</span>
+                                        <span class="tw-font-medium tw-ml-2" th:text="${#temporals.format(phieuGiamGia.ngaySua, 'dd/MM/yyyy')}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="tw-flex tw-justify-end tw-space-x-4 tw-pt-8 tw-border-t tw-border-gray-100">
+                                <a href="/admin/phieu-giam-gia"
+                                   class="tw-px-8 tw-py-3 tw-border-2 tw-border-gray-300 tw-rounded-xl tw-text-gray-700 tw-bg-white hover:tw-bg-gray-50 tw-transition-all tw-duration-300 tw-flex tw-items-center tw-font-medium">
+                                    <i class="fas fa-arrow-left tw-mr-2"></i>Quay lại
+                                </a>
+                                <button type="submit"
+                                        class="tw-px-8 tw-py-3 tw-bg-gradient-to-r tw-from-orange-500 tw-to-red-600 tw-text-white tw-rounded-xl hover:tw-from-orange-600 hover:tw-to-red-700 tw-transition-all tw-duration-300 tw-flex tw-items-center tw-font-medium tw-shadow-lg hover:tw-shadow-xl tw-transform hover:tw-scale-105">
+                                    <i class="fas fa-save tw-mr-2"></i>Cập nhật
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
-</section>
 
-<!--  Thong bao-->
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const successMsg = [[${success} == null ? 'null' : '' + ${success} + '']];
-    const errorMsg = [[${error} == null ? 'null' : '' + ${error} + '']];
+    <script th:src="@{/js/admin/phieu-giam-gia.js}"></script>
 
-    function showCustomToast(type, message) {
-        const toastId = type === 'success' ? 'customSuccess' : 'customError';
-        const toastEl = document.getElementById(toastId);
-        const msgEl = document.getElementById(type === 'success' ? 'successMsg' : 'errorMsg');
-        const progressBar = toastEl.querySelector('.progress-bar');
+    <script>
+        // Enhanced edit form validation and UX
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('editVoucherForm');
+            const loaiPhieu = document.getElementById('loaiPhieuGiamGia');
+            const mucDo = document.getElementById('mucDo');
+            const mucDoUnit = document.getElementById('mucDoUnit');
+            const divGiamToiDa = document.getElementById('divGiamToiDa');
+            const ngayBatDau = document.querySelector('input[name="ngayBatDau"]');
+            const ngayKetThuc = document.querySelector('input[name="ngayKetThuc"]');
 
-        msgEl.textContent = message;
-        toastEl.style.display = 'block';
+            // Initialize form based on existing data
+            handleLoaiPhieuChange();
 
-        // Khởi động lại animation nếu toast được hiển thị lại
-        progressBar.style.animation = 'none';
-        void progressBar.offsetWidth; // force reflow
-        progressBar.style.animation = null;
+            // Update end date min when start date changes
+            ngayBatDau.addEventListener('change', function() {
+                ngayKetThuc.min = this.value;
+                if (ngayKetThuc.value && ngayKetThuc.value <= this.value) {
+                    showWarning('Ngày kết thúc phải sau ngày bắt đầu');
+                }
+            });
 
-        // Auto close sau 4s
-        setTimeout(() => {
-            toastEl.style.display = 'none';
-        }, 4000);
-    }
+            // Real-time validation
+            mucDo.addEventListener('input', function() {
+                validateMucDo();
+            });
 
-    function closeToast(toastId) {
-        const toastEl = document.getElementById(toastId);
-        toastEl.style.display = 'none';
-    }
+            // Form submission with loading state
+            form.addEventListener('submit', function(e) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin tw-mr-2"></i>Đang cập nhật...';
+                submitBtn.disabled = true;
+            });
+        });
 
-    document.addEventListener("DOMContentLoaded", function () {
-        if (successMsg && successMsg !== "null") showCustomToast('success', successMsg);
-        if (errorMsg && errorMsg !== "null") showCustomToast('error', errorMsg);
-    });
-    /*]]>*/
-</script>
-<!--  Thong bao-->
+        function handleLoaiPhieuChange() {
+            const loaiPhieu = document.getElementById('loaiPhieuGiamGia').value;
+            const mucDo = document.getElementById('mucDo');
+            const mucDoUnit = document.getElementById('mucDoUnit');
+            const divGiamToiDa = document.getElementById('divGiamToiDa');
+            const giamToiDa = document.getElementById('giamToiDa');
 
-<script>
-    $(document).ready(function () {
-        $("#loaiPhieuGiamGia").on("change", function () {
-            const selectedValue = parseInt($(this).val());
-            if (selectedValue === 1) {
-                $("#mucDo").attr("placeholder", "Nhập phần trăm giảm giá");
-                $("#divGiamToiDa").show();
-                $("#giamToiDa").attr("required", true).val(0);
-            } else if (selectedValue === 2) {
-                $("#mucDo").attr("placeholder", "Nhập số tiền giảm");
-                $("#divGiamToiDa").hide();
-                $("#giamToiDa").removeAttr("required").val(0);
+            if (loaiPhieu === '1') { // Phần trăm
+                mucDo.placeholder = 'Nhập phần trăm (1-100)';
+                mucDo.min = '1';
+                mucDo.max = '100';
+                mucDo.step = '0.01';
+                mucDoUnit.textContent = '%';
+                divGiamToiDa.style.display = 'block';
+                giamToiDa.required = true;
+            } else if (loaiPhieu === '2') { // Tiền mặt
+                mucDo.placeholder = 'Nhập số tiền giảm';
+                mucDo.min = '1000';
+                mucDo.max = '';
+                mucDo.step = '1000';
+                mucDoUnit.textContent = 'VNĐ';
+                divGiamToiDa.style.display = 'none';
+                giamToiDa.required = false;
+            }
+
+            validateMucDo();
+        }
+
+        function validateMucDo() {
+            const loaiPhieu = document.getElementById('loaiPhieuGiamGia').value;
+            const mucDo = document.getElementById('mucDo');
+            const value = parseFloat(mucDo.value);
+
+            // Remove previous validation classes
+            mucDo.classList.remove('tw-border-red-500', 'tw-border-green-500');
+
+            if (!value) return;
+
+            let isValid = true;
+
+            if (loaiPhieu === '1') { // Phần trăm
+                isValid = value >= 1 && value <= 100;
+            } else if (loaiPhieu === '2') { // Tiền mặt
+                isValid = value >= 1000;
+            }
+
+            if (isValid) {
+                mucDo.classList.add('tw-border-green-500');
+            } else {
+                mucDo.classList.add('tw-border-red-500');
+            }
+        }
+
+        function limitNumberLength(element, maxLength) {
+            if (element.value.length > maxLength) {
+                element.value = element.value.slice(0, maxLength);
+            }
+        }
+
+        function showWarning(message) {
+            // Create temporary warning message
+            const warning = document.createElement('div');
+            warning.className = 'tw-fixed tw-top-4 tw-right-4 tw-bg-yellow-100 tw-border tw-border-yellow-300 tw-text-yellow-800 tw-px-4 tw-py-3 tw-rounded-lg tw-shadow-lg tw-z-50';
+            warning.innerHTML = `<i class="fas fa-exclamation-triangle tw-mr-2"></i>${message}`;
+
+            document.body.appendChild(warning);
+
+            setTimeout(() => {
+                warning.remove();
+            }, 3000);
+        }
+
+        // Add input formatting for currency fields
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            if (input.step === '1000' || input.name === 'dieuKien' || input.name === 'giamToiDa') {
+                input.addEventListener('blur', function() {
+                    if (this.value) {
+                        this.value = Math.round(this.value);
+                    }
+                });
             }
         });
-    });
-</script>
-
+    </script>
+</section>
 </body>
 </html>
