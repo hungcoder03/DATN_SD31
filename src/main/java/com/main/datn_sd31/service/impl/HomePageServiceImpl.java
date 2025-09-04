@@ -1,6 +1,6 @@
 package com.main.datn_sd31.service.impl;
 
-//import com.main.datn_sd31.dto.home.HomeProductDto;
+import com.main.datn_sd31.dto.HomeProductDto;
 import com.main.datn_sd31.entity.ChiTietSanPham;
 import com.main.datn_sd31.entity.DanhGia;
 import com.main.datn_sd31.entity.HinhAnh;
@@ -28,40 +28,39 @@ public class HomePageServiceImpl implements HomePageService {
     private final Hinhanhrepository hinhAnhRepository;
     private final DanhGiaRepository danhGiaRepository;
 
-//    @Override
-//    public List<HomeProductDto> getLatestProducts(int limit) {
-//        List<SanPham> sanPhams = sanPhamRepository.findAll().stream()
-//                .sorted(Comparator.comparing(SanPham::getNgayTao, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
-//                .limit(limit)
-//                .collect(Collectors.toList());
-//
-//        List<HomeProductDto> result = new ArrayList<>();
-//        for (SanPham sp : sanPhams) {
-//            String imageUrl = resolveMainImage(sp.getId());
-//            var priceAndDiscount = resolvePriceAndDiscount(sp.getId());
-//            Double ratingAvg = resolveRatingAvg(sp.getId());
-//
-//            String priceText = null;
-//            if (priceAndDiscount.price != null) {
-//                // Format price with Vietnamese locale thousand separators, without currency symbol
-//                NumberFormat nf = NumberFormat.getInstance(new Locale("vi", "VN"));
-//                nf.setMaximumFractionDigits(0);
-//                nf.setMinimumFractionDigits(0);
-//                priceText = nf.format(priceAndDiscount.price) + " đ";
-//            }
-//
-//            result.add(HomeProductDto.builder()
-//                    .id(sp.getId())
-//                    .name(sp.getTen())
-//                    .imageUrl(imageUrl)
-//                    .price(priceAndDiscount.price)
-//                    .discountPercent(priceAndDiscount.discountPercent)
-//                    .ratingAvg(ratingAvg)
-//                    .priceText(priceText)
-//                    .build());
-//        }
-//        return result;
-//    }
+    @Override
+    public List<HomeProductDto> getLatestProducts(int limit) {
+        List<SanPham> sanPhams = sanPhamRepository.findByTrangThaiTrue().stream()
+                .sorted(Comparator.comparing(SanPham::getNgayTao, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
+
+        List<HomeProductDto> result = new ArrayList<>();
+        for (SanPham sp : sanPhams) {
+            // Lấy ảnh chính của sản phẩm
+            String imageUrl = resolveMainImage(sp.getId());
+            
+            // Lấy thông tin giá và giảm giá 
+            PriceDiscount priceAndDiscount = resolvePriceAndDiscount(sp.getId());
+            
+            // Lấy đánh giá trung bình
+            Double ratingAvg = resolveRatingAvg(sp.getId());
+
+            // Tạo DTO và thêm vào kết quả
+            HomeProductDto dto = new HomeProductDto();
+            dto.setId(sp.getId());
+            dto.setName(sp.getTen());
+            dto.setImageUrl(imageUrl);
+            dto.setPrice(priceAndDiscount.price());
+            dto.setPriceText(priceAndDiscount.price() != null ? String.format("%,.0f đ", priceAndDiscount.price()) : "Liên hệ");
+            dto.setDiscountPercent(priceAndDiscount.discountPercent());
+            dto.setRatingAvg(ratingAvg);
+            
+            result.add(dto);
+        }
+        
+        return result;
+    }
 
     private String resolveMainImage(Integer sanPhamId) {
         List<HinhAnh> hinhAnhs = hinhAnhRepository.findByhinhanhid(sanPhamId);

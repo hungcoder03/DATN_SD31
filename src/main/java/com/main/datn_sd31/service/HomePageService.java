@@ -1,9 +1,8 @@
 package com.main.datn_sd31.service;
 
-//import com.main.datn_sd31.dto.home.HomeProductDto;
-
+import com.main.datn_sd31.dto.HomeProductDto;
 import java.util.List;
 
 public interface HomePageService {
-//    List<HomeProductDto> getLatestProducts(int limit);
+    List<HomeProductDto> getLatestProducts(int limit);
 } 
