@@ -1,195 +1,340 @@
 <!DOCTYPE html>
-<!--Cấu hình layout cho Thymleaf-->
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{admin/layout}">
 <head>
     <title>Đơn hàng</title>
-    <!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"-->
-    <!--          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">-->
-
-    <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">-->
-    <!--    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />-->
-
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
-    <link rel="stylesheet" th:href="@{/css/admin/don-hang-custom.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
     <style>
-        /* Override container để mở rộng full width */
-        .container {
+        /* === RESET & BASE === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+
+        /* === LAYOUT === */
+        .page-container {
             max-width: none !important;
             width: 100%;
-            padding-left: 30px;
-            padding-right: 30px;
+            padding: 2rem 3rem;
         }
 
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3436;
+            margin: 0;
+        }
+
+        /* === CARDS === */
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        /* === FILTER SECTION === */
         .filter-section {
-            background-color: #f8f9fa;
-            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            grid-column: 1 / -1;
+        }
+
+        /* === FORM CONTROLS === */
+        .form-label {
+            font-weight: 600;
+            color: #2d3436;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            padding: 0.75rem 1rem;
+            border: 1px solid #dee2e6;
             border-radius: 8px;
-            margin-bottom: 30px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
         }
 
-        .filter-buttons .btn {
-            margin-right: 10px;
-            margin-bottom: 10px;
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #2d3436;
+            box-shadow: 0 0 0 3px rgba(45, 52, 54, 0.1);
         }
 
-        .filter-buttons a:hover {
+        /* === BUTTONS === */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: #2d3436;
             color: white;
         }
 
-        .filter-buttons a {
-            color: #0d6efd;
+        .btn-primary:hover {
+            background: #636e72;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #2d3436;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn-outline-primary {
+            background: transparent;
+            color: #2d3436;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-outline-primary:hover {
+            background: #2d3436;
+            color: white;
+        }
+
+        .btn-outline-primary.active {
+            background: #2d3436;
+            color: white;
+        }
+
+        /* === FILTER BUTTONS === */
+        .status-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-btn {
+            position: relative;
+            padding: 0.5rem 1rem;
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #2d3436;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
             text-decoration: none;
-            transition: color 0.2s ease;
+            transition: all 0.2s;
         }
 
-        /* Table Section - Responsive wrapper */
+        .status-btn:hover {
+            background: #f8f9fa;
+            color: #2d3436;
+        }
+
+        .status-btn.active {
+            background: #2d3436;
+            color: white;
+            border-color: #2d3436;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #e17055;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* === SEARCH & CONTROLS === */
+        .controls-section {
+            display: grid;
+            grid-template-columns: 200px 1fr 400px;
+            gap: 2rem;
+            align-items: end;
+            margin-bottom: 2rem;
+        }
+
+        .entries-control {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .radio-item input[type="radio"] {
+            margin: 0;
+        }
+
+        .search-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+        }
+
+        /* === TABLE === */
         .table-section {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-            overflow-x: auto; /* Cho phép scroll ngang */
-            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
-        /* Table wrapper để kiểm soát overflow */
         .table-wrapper {
             overflow-x: auto;
-            margin: -1px; /* Để border không bị cắt */
         }
 
-        /* Thiết lập table cơ bản */
         #billTable {
             width: 100%;
-            min-width: 1200px; /* Đảm bảo table có độ rộng tối thiểu */
-            margin-bottom: 0;
-            white-space: nowrap;
+            min-width: 1200px;
+            border-collapse: collapse;
+            margin: 0;
         }
 
-        /* Header bảng */
         #billTable thead th {
-            background-color: #f1f1f1;
+            background: #f8f9fa;
+            color: #2d3436;
             font-weight: 600;
             text-align: center;
             vertical-align: middle;
-            padding: 12px 8px;
-            border: 1px solid #dee2e6;
+            padding: 1rem 0.75rem;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 0.9rem;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
-        /* Điều chỉnh độ rộng từng cột */
-        #billTable th:nth-child(1) {
-            width: 60px;
-        }
-
-        /* STT */
-        #billTable th:nth-child(2) {
-            width: 120px;
-        }
-
-        /* Mã */
-        #billTable th:nth-child(3) {
-            width: 150px;
-        }
-
-        /* Khách hàng */
-        #billTable th:nth-child(4) {
-            width: 120px;
-        }
-
-        /* Trạng thái */
-        #billTable th:nth-child(5) {
-            width: 130px;
-        }
-
-        /* Thành tiền */
-        #billTable th:nth-child(6) {
-            width: 100px;
-        }
-
-        /* Thanh toán */
-        #billTable th:nth-child(7) {
-            width: 100px;
-        }
-
-        /* Loại hóa đơn */
-        #billTable th:nth-child(8) {
-            width: 120px;
-        }
-
-        /* Ngày tạo */
-        #billTable th:nth-child(9) {
-            width: 120px;
-        }
-
-        /* Cập nhật */
-        #billTable th:nth-child(10) {
-            width: 100px;
-        }
-
-        /* Thao tác */
-
-        /* Cells trong bảng */
-        #billTable td {
-            vertical-align: middle;
+        #billTable tbody td {
+            padding: 1rem 0.75rem;
             text-align: center;
-            padding: 12px 8px;
-            border: 1px solid #dee2e6;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 0.9rem;
+            color: #2d3436;
         }
 
-        /* Căn trái cho tên khách hàng */
+        #billTable tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        #billTable tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Column specific styling */
         #billTable td:nth-child(3) {
             text-align: left;
-            padding-left: 12px;
-        }
-
-        /* Căn phải cho số tiền */
-        #billTable td:nth-child(5) {
-            text-align: right;
-            padding-right: 12px;
             font-weight: 500;
         }
 
-        /* Hover effect cho rows */
-        #billTable tbody tr:hover {
-            background-color: #f8f9fa;
-            transition: background-color 0.2s ease;
+        #billTable td:nth-child(5) {
+            text-align: right;
+            font-weight: 600;
+            color: #00b894;
         }
 
-        /* Action buttons */
+        /* === ACTION BUTTONS === */
         .action-btn {
-            border: none;
             background: none;
+            border: none;
             cursor: pointer;
-            font-size: 1.2rem;
-            padding: 5px;
-            margin: 0 2px;
-            transition: all 0.2s ease;
-            border-radius: 4px;
+            font-size: 1.1rem;
+            padding: 0.5rem;
+            margin: 0 0.25rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+            color: #636e72;
         }
 
         .action-btn:hover {
-            background-color: rgba(0, 0, 0, 0.1);
+            background: #f8f9fa;
+            transform: scale(1.1);
         }
 
         .action-btn.accept {
-            color: #28a745;
+            color: #00b894;
         }
 
         .action-btn.cancel {
-            color: #dc3545;
+            color: #e17055;
         }
 
         .action-btn.info {
-            color: #0d6efd;
+            color: #74b9ff;
         }
 
         .action-btn a {
@@ -197,35 +342,119 @@
             text-decoration: none;
         }
 
-        /* Disabled state */
-        button.disabled-custom {
-            opacity: 0.5;
-            cursor: not-allowed !important;
+        .action-btn.disabled-custom {
+            opacity: 0.3;
+            cursor: not-allowed;
             pointer-events: none;
         }
 
-        /* Responsive breakpoints */
-        @media (max-width: 1400px) {
-            .table-section {
-                padding: 15px;
+        /* === PAGINATION === */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            padding: 2rem;
+            background: white;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 0.25rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .page-item {
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .page-link {
+            padding: 0.5rem 0.75rem;
+            color: #2d3436;
+            text-decoration: none;
+            border: 1px solid #dee2e6;
+            background: white;
+            transition: all 0.2s;
+            display: block;
+        }
+
+        .page-link:hover {
+            background: #f8f9fa;
+            color: #2d3436;
+        }
+
+        .page-item.active .page-link {
+            background: #2d3436;
+            color: white;
+            border-color: #2d3436;
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* === MODAL === */
+        .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem 1.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 1200px) {
+            .page-container {
+                padding: 1.5rem 2rem;
             }
 
-            #billTable {
-                min-width: 1100px;
-            }
-
-            #billTable th,
-            #billTable td {
-                padding: 10px 6px;
-                font-size: 0.9rem;
+            .controls-section {
+                grid-template-columns: 1fr;
+                gap: 1rem;
             }
         }
 
         @media (max-width: 768px) {
-            .table-section {
-                padding: 10px;
-                margin: 0 -15px; /* Extend to screen edges on mobile */
-                border-radius: 0;
+            .page-container {
+                padding: 1rem;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .status-filters {
+                justify-content: center;
+            }
+
+            .controls-section {
+                grid-template-columns: 1fr;
             }
 
             #billTable {
@@ -234,173 +463,150 @@
 
             #billTable th,
             #billTable td {
-                padding: 8px 4px;
+                padding: 0.75rem 0.5rem;
                 font-size: 0.85rem;
-            }
-
-            .action-btn {
-                font-size: 1rem;
-                padding: 3px;
             }
         }
 
-        /* Scrollbar styling cho webkit browsers */
-        .table-section::-webkit-scrollbar {
+        /* === SCROLLBAR === */
+        .table-wrapper::-webkit-scrollbar {
             height: 8px;
         }
 
-        .table-section::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f1f3f4;
             border-radius: 4px;
         }
 
-        .table-section::-webkit-scrollbar-thumb {
+        .table-wrapper::-webkit-scrollbar-thumb {
             background: #c1c1c1;
             border-radius: 4px;
         }
 
-        .table-section::-webkit-scrollbar-thumb:hover {
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
-
-        /* Filter buttons responsive */
-        .filter-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .filter-buttons .btn {
-            margin: 0;
-            white-space: nowrap;
-        }
-
-        @media (max-width: 576px) {
-            .filter-buttons {
-                justify-content: center;
-            }
-
-            .filter-buttons .btn {
-                font-size: 0.85rem;
-                padding: 6px 12px;
-            }
-        }
-
     </style>
 </head>
 <body>
 
 <section layout:fragment="content">
-    <div class="container mt-4">
-        <h2 class="mb-4 text-center">Danh Sách Đơn Hàng</h2>
+    <div class="page-container">
+        <div class="page-header">
+            <h1 class="page-title">Quản lý Đơn hàng</h1>
+        </div>
 
-        <p style="display: none;">DEBUG startDate: [[${startDate}]]</p>
         <!-- Filter Section -->
         <div class="filter-section">
             <form method="get" th:action="@{/admin/don-hang}">
-                <div class="row g-3 align-items-end mb-4">
-                    <div class="col-md-3">
+                <div class="filter-row">
+                    <div class="filter-group">
                         <label for="startDate" class="form-label">Ngày bắt đầu</label>
                         <input type="date" class="form-control" id="startDate" name="startDate"
                                th:value="${startDate != null ? #temporals.format(startDate, 'yyyy-MM-dd') : ''}">
-
                     </div>
-                    <div class="col-md-3">
+
+                    <div class="filter-group">
                         <label for="endDate" class="form-label">Ngày kết thúc</label>
                         <input type="date" class="form-control" id="endDate" name="endDate"
                                th:value="${endDate != null ? #temporals.format(endDate, 'yyyy-MM-dd') : ''}">
                     </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
-                    </div>
-                    <div class="col-md-3">
-                        <a th:href="@{/admin/don-hang}" class="btn btn-outline-secondary w-100">Làm mới</a>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-search"></i>
+                            Tìm kiếm
+                        </button>
+                        <a th:href="@{/admin/don-hang}" class="btn btn-secondary">
+                            <i class="fa-solid fa-refresh"></i>
+                            Làm mới
+                        </a>
                     </div>
                 </div>
             </form>
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-2">
-                    <label for="entries" class="form-label">Hiển thị</label>
-                    <select id="entries" class="form-select" onchange="changePageSize(this.value)">
-                        <option value="10" th:selected="${pageInfo.size == 10}">10</option>
-                        <option value="25" th:selected="${pageInfo.size == 25}">25</option>
-                        <option value="50" th:selected="${pageInfo.size == 50}">50</option>
-                        <option value="100" th:selected="${pageInfo.size == 100}">100</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <form th:action="@{/admin/don-hang/filter}" method="get">
-                        <label class="radio-item">
-                            <input type="radio" name="loaiHoaDon" value="" th:checked="${loaiHoaDon == null}">
-                            Tất cả
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="loaiHoaDon" value="Online" th:checked="${loaiHoaDon == 'Online'}">
-                            Online
-                        </label>
-                        <label class="radio-item">
-                            <input type="radio" name="loaiHoaDon" value="Offline"
-                                   th:checked="${loaiHoaDon == 'Offline'}">
-                            Tại quầy
-                        </label>
-                        <button class="btn btn-primary">Lọc</button>
-                    </form>
-                </div>
-                <div class="col-md-7 text-end">
-                    <form th:action="@{/admin/don-hang/search}" method="get">
-                        <div>
-                            <label for="keyword" class="form-label me-2">Tìm kiếm:</label>
-                            <input type="text" name="keyword" id="keyword" class="form-control d-inline-block"
-                                   style="width: 400px;"
-                                   placeholder="Tìm theo mã, tên KH, SĐT">
-                            <button class="btn btn-primary">Tìm</button>
-                        </div>
-                    </form>
-                </div>
+        </div>
+
+        <!-- Status Filter Buttons -->
+        <div class="status-filters">
+            <a th:href="@{/admin/don-hang}" class="status-btn">
+                Tất cả
+            </a>
+            <a th:each="status : ${T(com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon).values()}"
+               th:if="${status.value != 5 and status.value != 8 and status.value != 9 and status.value != 10}"
+               th:href="@{/admin/don-hang(trang-thai=${status.name()})}"
+               th:text="${status.moTa}"
+               class="status-btn">
+                <span th:if="${trangThaiCount[status.moTa] != null and trangThaiCount[status.moTa] != 0}"
+                      th:text="${trangThaiCount[status.moTa]}" class="status-badge"></span>
+            </a>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section">
+            <div class="entries-control">
+                <label for="entries" class="form-label">Hiển thị</label>
+                <select id="entries" class="form-select" onchange="changePageSize(this.value)">
+                    <option value="10" th:selected="${pageInfo.size == 10}">10</option>
+                    <option value="25" th:selected="${pageInfo.size == 25}">25</option>
+                    <option value="50" th:selected="${pageInfo.size == 50}">50</option>
+                    <option value="100" th:selected="${pageInfo.size == 100}">100</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="form-label">Loại hóa đơn</label>
+                <form th:action="@{/admin/don-hang/filter}" method="get" class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="loaiHoaDon" value="" th:checked="${loaiHoaDon == null}">
+                        Tất cả
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="loaiHoaDon" value="Online" th:checked="${loaiHoaDon == 'Online'}">
+                        Online
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="loaiHoaDon" value="Offline" th:checked="${loaiHoaDon == 'Offline'}">
+                        Tại quầy
+                    </label>
+                    <button class="btn btn-primary" style="margin-top: 0.5rem;">Lọc</button>
+                </form>
+            </div>
+
+            <div class="filter-group">
+                <label for="keyword" class="form-label">Tìm kiếm</label>
+                <form th:action="@{/admin/don-hang/search}" method="get" class="search-group">
+                    <input type="text" name="keyword" id="keyword" class="form-control search-input"
+                           placeholder="Tìm theo mã, tên KH, SĐT">
+                    <button class="btn btn-primary">
+                        <i class="fa-solid fa-search"></i>
+                    </button>
+                </form>
             </div>
         </div>
 
         <!-- Table Section -->
         <div class="table-section">
-            <div class="filter-buttons mb-3">
-                <button class="btn btn-outline-primary">
-                    <a th:href="@{/admin/don-hang}">Tất cả</a>
-                </button>
-                <button th:each="status : ${T(com.main.datn_sd31.Enum.TrangThaiLichSuHoaDon).values()}"
-                        th:if="${status.value != 5 and status.value != 8 and status.value != 9 and status.value != 10}"
-                        class="btn btn-outline-primary position-relative">
-                    <a th:href="@{/admin/don-hang(trang-thai=${status.name()})}" th:text="${status.moTa}"></a>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                          th:if="${trangThaiCount[status.moTa] != null and
-                         trangThaiCount[status.moTa] != 0
-                         }"
-                          th:text="${trangThaiCount[status.moTa]}">
-                    </span>
-                </button>
-            </div>
-
             <div class="table-wrapper">
-                <table id="billTable" class="table table-bordered table-hover">
+                <table id="billTable" class="table">
                     <thead>
                     <tr>
                         <th>STT</th>
                         <th>Mã</th>
                         <th>Khách hàng</th>
-                        <th>Trạng Thái</th>
-                        <th>Thành Tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thành tiền</th>
                         <th>Thanh toán</th>
                         <th>Loại hóa đơn</th>
                         <th>Ngày tạo</th>
                         <th>Cập nhật lần cuối</th>
-                        <th>Thao Tác</th>
+                        <th>Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="hoaDon, index : ${hoaDonList}">
                         <td th:text="${index.index + 1 + (pageInfo.currentPage * pageInfo.size)}"></td>
                         <td th:text="${hoaDon.ma}"></td>
-                        <td th:text="${hoaDon.tenKH != null ? hoaDon.tenKH : 'Khách lẻ' }"></td>
+                        <td th:text="${hoaDon.tenKH != null ? hoaDon.tenKH : 'Khách lẻ'}"></td>
                         <td th:text="${hoaDon.trangThaiLichSuHoaDonMoTa}"></td>
                         <td th:text="${@utils.formatCurrency(hoaDon.thanhTien) + ' đ'}"></td>
                         <td th:text="${hoaDon.trangThaiHoaDonString}"></td>
@@ -408,28 +614,24 @@
                         <td th:text="${hoaDon.ngayTao}"></td>
                         <td th:text="${hoaDon.capNhatLanCuoi}"></td>
                         <td>
-                            <!-- Nút mở Modal -->
                             <button class="action-btn accept" data-bs-toggle="modal"
                                     th:attr="data-bs-target='#modalCapNhatTrangThai__' + ${hoaDon.ma}"
                                     th:classappend="${@hoa_don_utils.khongChoPhepCapNhatTrangThai(hoaDon.trangThaiLichSuHoaDon) ? '' : 'disabled-custom'}"
                                     th:disabled="${!@hoa_don_utils.khongChoPhepCapNhatTrangThai(hoaDon.trangThaiLichSuHoaDon)}"
-                                    th:title="${!@hoa_don_utils.khongChoPhepCapNhatTrangThai(hoaDon.trangThaiLichSuHoaDon) ? 'Không thể cập nhật trạng thái hiện tại' : ''}"
-                            >
+                                    th:title="${!@hoa_don_utils.khongChoPhepCapNhatTrangThai(hoaDon.trangThaiLichSuHoaDon) ? 'Không thể cập nhật trạng thái hiện tại' : ''}">
                                 <i class="fa-solid fa-retweet"></i>
                             </button>
-                            <!-- In-->
-                            <button type="button"
-                                    class="action-btn cancel"
+
+                            <button type="button" class="action-btn cancel"
                                     data-bs-toggle="modal"
                                     th:data-bs-target="${'#confirmPrintModal-' + hoaDon.ma}"
                                     th:classappend="${@hoa_don_utils.choPhepInHoaDon(hoaDon.trangThaiLichSuHoaDon, hoaDon.trangThaiHoaDonInteger) ? '' : 'disabled-custom'}"
                                     th:disabled="${!@hoa_don_utils.choPhepInHoaDon(hoaDon.trangThaiLichSuHoaDon, hoaDon.trangThaiHoaDonInteger)}"
-                                    th:title="${!@hoa_don_utils.choPhepInHoaDon(hoaDon.trangThaiLichSuHoaDon, hoaDon.trangThaiHoaDonInteger) ? 'Không thể in ở trạng thái hiện tại' : ''}"
-                            >
+                                    th:title="${!@hoa_don_utils.choPhepInHoaDon(hoaDon.trangThaiLichSuHoaDon, hoaDon.trangThaiHoaDonInteger) ? 'Không thể in ở trạng thái hiện tại' : ''}">
                                 <i class="fa-solid fa-print"></i>
                             </button>
-                            <!-- Detail-->
-                            <button class="action-btn accept">
+
+                            <button class="action-btn info">
                                 <a th:href="@{/admin/don-hang/detail(maHoaDon=${hoaDon.ma})}">
                                     <i class="fa-solid fa-circle-info"></i>
                                 </a>
@@ -439,20 +641,56 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <div class="pagination-wrapper">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${pageInfo.first} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/don-hang(page=${pageInfo.number - 1},
+                               'trang-thai'=${param['trang-thai']},
+                               size=${pageInfo.size},
+                               keyword=${param.keyword},
+                               loaiHoaDon=${param.loaiHoaDon},
+                               startDate=${param.startDate},
+                               endDate=${param.endDate})}">Trước</a>
+                        </li>
+                        <li th:if="${pageInfo.totalPages > 0}"
+                            class="page-item"
+                            th:each="i : ${#numbers.sequence(0, pageInfo.totalPages - 1)}"
+                            th:classappend="${i == pageInfo.number} ? 'active'">
+                            <a class="page-link" th:href="@{/admin/don-hang(page=${i},
+                               'trang-thai'=${param['trang-thai']},
+                               size=${pageInfo.size},
+                               keyword=${param.keyword},
+                               loaiHoaDon=${param.loaiHoaDon},
+                               startDate=${param.startDate},
+                               endDate=${param.endDate})}"
+                               th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${pageInfo.last} ? 'disabled'">
+                            <a class="page-link" th:href="@{/admin/don-hang(page=${pageInfo.number + 1},
+                               'trang-thai'=${param['trang-thai']},
+                               size=${pageInfo.size},
+                               keyword=${param.keyword},
+                               loaiHoaDon=${param.loaiHoaDon},
+                               startDate=${param.startDate},
+                               endDate=${param.endDate})}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
 
-        <!-- Modal riêng cho mỗi hóa đơn -->
+        <!-- Modal for each invoice -->
         <div th:each="hoaDon : ${hoaDonList}">
-            <div class="modal fade" th:id="'modalCapNhatTrangThai__' + ${hoaDon.ma}" tabindex="-1"
-                 aria-labelledby="modalLabel"
-                 aria-hidden="true">
+            <div class="modal fade" th:id="'modalCapNhatTrangThai__' + ${hoaDon.ma}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <form th:action="@{/admin/don-hang/cap-nhat-trang-thai}" method="post">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="modalLabel">Cập nhật trạng thái đơn hàng</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Đóng"></button>
+                                <h5 class="modal-title">Cập nhật trạng thái đơn hàng</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
                                 <input type="hidden" name="maHoaDon" th:value="${hoaDon.ma}"/>
@@ -473,24 +711,19 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">Ghi chú
-                                        <span class="liDoGhiChu" style="display:none;">
-                                          lí do <span style="color:red;">*</span>
+                                        <span class="liDoGhiChu" style="display:none; color: #e17055;">
+                                          lí do *
                                         </span>
                                     </label>
                                     <textarea class="form-control"
                                               th:id="'ghiChu_' + ${hoaDon.ma}"
                                               name="ghiChu"
                                               rows="3"
-                                              placeholder="Nhập ghi chú..."
-                                              oninvalid="this.setCustomValidity('Vui lòng nhập ghi chú khi Hủy hoặc Giao Hàng Không Thành Công')"
-                                              oninput="this.setCustomValidity('')"
-                                    ></textarea>
+                                              placeholder="Nhập ghi chú..."></textarea>
                                 </div>
-
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng
-                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                                 <button type="submit" class="btn btn-primary">Xác nhận</button>
                             </div>
                         </div>
@@ -498,52 +731,9 @@
                 </div>
             </div>
         </div>
-
-        <!-- Sửa phần pagination trong don-hang.html -->
-        <div class="col-md-6 text-end">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-end mb-0">
-                    <li class="page-item" th:classappend="${pageInfo.first} ? 'disabled'">
-                        <a class="page-link"
-                           th:href="@{/admin/don-hang(page=${pageInfo.number - 1},
-                   'trang-thai'=${param['trang-thai']},
-                   size=${pageInfo.size},
-                   keyword=${param.keyword},
-                   loaiHoaDon=${param.loaiHoaDon},
-                   startDate=${param.startDate},
-                   endDate=${param.endDate})}">Trước</a>
-                    </li>
-                    <li th:if="${pageInfo.totalPages > 0}"
-                        class="page-item"
-                        th:each="i : ${#numbers.sequence(0, pageInfo.totalPages - 1)}"
-                        th:classappend="${i == pageInfo.number} ? 'active'">
-
-                        <a class="page-link"
-                           th:href="@{/admin/don-hang(page=${i},
-                   'trang-thai'=${param['trang-thai']},
-                   size=${pageInfo.size},
-                   keyword=${param.keyword},
-                   loaiHoaDon=${param.loaiHoaDon},
-                   startDate=${param.startDate},
-                   endDate=${param.endDate})}"
-                           th:text="${i + 1}"></a>
-                    </li>
-                    <li class="page-item" th:classappend="${pageInfo.last} ? 'disabled'">
-                        <a class="page-link"
-                           th:href="@{/admin/don-hang(page=${pageInfo.number + 1},
-                   'trang-thai'=${param['trang-thai']},
-                   size=${pageInfo.size},
-                   keyword=${param.keyword},
-                   loaiHoaDon=${param.loaiHoaDon},
-                   startDate=${param.startDate},
-                   endDate=${param.endDate})}">Sau</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
     </div>
 
-    <!-- Yeu cau nhap ghi chú -->
+    <!-- JavaScript -->
     <script>
         function toggleRequired(selectElement) {
             const modal = selectElement.closest(".modal-body");
@@ -552,23 +742,18 @@
 
             if (selectElement.value === "10" || selectElement.value === "9") {
                 ghiChu.setAttribute("required", "required");
-                liDo.style.display = "inline";   // hiện chữ "lí do *"
+                liDo.style.display = "inline";
             } else {
                 ghiChu.removeAttribute("required");
-                liDo.style.display = "none";     // ẩn luôn
+                liDo.style.display = "none";
             }
         }
-    </script>
-
-    <!--Change size Pagination-->
-    <script>
 
         function changePageSize(size) {
             const url = new URL(window.location.href);
             url.searchParams.set('size', size);
-            url.searchParams.set('page', 0); // reset về page 0 khi đổi size
+            url.searchParams.set('page', 0);
 
-            // Loại bỏ các parameter undefined
             if (url.searchParams.get('startDate') === 'undefined') {
                 url.searchParams.delete('startDate');
             }
@@ -580,11 +765,9 @@
         }
     </script>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </section>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
-        crossorigin="anonymous"></script>
 
 </body>
 </html>

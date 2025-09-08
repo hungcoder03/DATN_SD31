@@ -116,6 +116,16 @@ public class VnpayController {
 
             model.addAttribute("ma", maHoaDon);
             model.addAttribute("message", "Thanh toán VNPay thành công!");
+
+            // 🎯 GỬI EMAIL HTML ĐẸP
+            try {
+                sendMailService.sendOrderConfirmationMail(hoaDon.getEmail(), hoaDon, gioHangChiTiets);
+                System.out.println("✅ Gửi email xác nhận thành công tới: " + hoaDon.getEmail());
+            } catch (Exception e) {
+                System.err.println("❌ Lỗi gửi email: " + e.getMessage());
+                // Email thất bại nhưng đơn hàng vẫn thành công, không cần redirect
+            }
+
             return "/client/pages/payment/success";
         } else {
             // --- 2. Lưu chi tiết hóa đơn (để báo cáo đơn hủy) ---
@@ -150,16 +160,11 @@ public class VnpayController {
             lichSuHoaDonRepository.save(lichSu);
 
             model.addAttribute("message", "Thanh toán thất bại hoặc bị hủy.");
+
+
         }
 
-        // 🎯 GỬI EMAIL HTML ĐẸP
-        try {
-            sendMailService.sendOrderConfirmationMail(hoaDon.getEmail(), hoaDon, gioHangChiTiets);
-            System.out.println("✅ Gửi email xác nhận thành công tới: " + hoaDon.getEmail());
-        } catch (Exception e) {
-            System.err.println("❌ Lỗi gửi email: " + e.getMessage());
-            // Email thất bại nhưng đơn hàng vẫn thành công, không cần redirect
-        }
+
 
         return "/client/pages/payment/success";
     }
