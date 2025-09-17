@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Giỏ Hàng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .product-img {
+            width: 80px;
+            height: auto;
+            border-radius: 8px;
+        }
+        .quantity-input {
+            width: 60px;
+        }
+        /* Đưa checkbox vào cột đầu tiên */
+        table thead tr th:first-child,
+        table tbody tr td:first-child {
+            width: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">🛒 Giỏ Hàng Của Bạn</h2>
+
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="chonTatCa" />
+        <label class="form-check-label fw-bold" for="chonTatCa">Chọn tất cả</label>
+    </div>
+
+    <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th></th> <!-- cột checkbox -->
+            <th>#</th>
+            <th>Ảnh</th>
+            <th>Sản Phẩm</th>
+            <th>Size</th>
+            <th>Màu sắc</th>
+            <th>Giá</th>
+            <th>Số Lượng</th>
+            <th>Thành Tiền</th>
+            <th>Trạng Thái</th>
+            <th>Hành Động</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Lặp qua danh sách giỏ hàng -->
+        <tr th:each="item, iterStat : ${list}"
+            th:data-price="${item.chiTietSanPham.giaBan}"
+            th:data-soluong="${item.soluong}">
+            <td class="text-center">
+                <input type="checkbox" class="item-checkbox" />
+            </td>
+            <td th:text="${iterStat.count}">1</td>
+
+            <!-- Ảnh sản phẩm -->
+            <td>
+                <img th:src="@{${item.chiTietSanPham.sanpham.hinhAnhs[0].url}}" alt="Ảnh" class="product-img" />
+            </td>
+
+            <!-- Tên sản phẩm -->
+
+            <td th:text="${item.chiTietSanPham.sanpham.ten}">Tên sản phẩm</td>
+
+            <td th:text="${item.chiTietSanPham.size.ten}"></td>
+
+            <td th:text="${item.chiTietSanPham.mausac.ten}"></td>
+            <!-- Giá đơn vị -->
+            <td th:text="${item.chiTietSanPham.giaBan} + '₫'">0₫</td>
+
+            <!-- Số lượng -->
+            <td>
+                <form th:action="@{'/gio-hang/cap-nhat/' + ${item.id}}" method="post" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="soluong" th:value="${item.soluong}" />
+                    <button type="submit" name="action" value="decrease" class="btn btn-outline-secondary btn-sm">-</button>
+
+                    <input type="number" name="newSoluong" class="form-control text-center quantity-input" th:value="${item.soluong}" min="1" />
+
+                    <button type="submit" name="action" value="increase" class="btn btn-outline-secondary btn-sm">+</button>
+                </form>
+            </td>
+
+            <!-- Thành tiền -->
+            <td class="line-total" th:text="${item.thanhtien} + '₫'">0₫</td>
+
+            <!-- Trạng thái -->
+            <td>
+                <span th:switch="${item.trangthai}">
+                  <span th:case="0" class="badge bg-secondary">Mới</span>
+                  <span th:case="1" class="badge bg-success">Đã xác nhận</span>
+                  <span th:case="2" class="badge bg-danger">Đã hủy</span>
+                  <span th:case="*">Không xác định</span>
+                </span>
+            </td>
+
+            <!-- Hành động -->
+            <td>
+                <a class="btn btn-danger btn-sm" th:href="@{'/gio-hang/xoa/' + ${item.id}}" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?');">Xóa</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Tổng tiền và nút thanh toán -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <a th:href="@{/admin/san-pham/khach-hang/danh-sach}" class="btn btn-secondary">← Tiếp tục mua sắm</a>
+        </div>
+        <div class="col-md-6 text-end">
+            <h5 class="mb-3">
+                Tổng tiền:
+                <span id="totalTien" class="text-danger fw-bold" th:text="${#numbers.formatDecimal(tongTien, 0, 'COMMA', 2, 'POINT')} + '₫'">0₫</span>
+            </h5>
+            <a th:href="@{/thanh-toan}" class="btn btn-success btn-lg">🔒 Thanh Toán</a>
+        </div>
+    </div>
+</div>
+
+<!-- Script tự động submit form khi thay đổi số lượng -->
+<script>
+    document.querySelectorAll('input[name="newSoluong"]').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.value < 1) {
+                this.value = 1;
+            }
+            this.closest('form').submit();
+        });
+    });
+</script>
+
+<!-- Script xử lý chọn sản phẩm và tính tổng tiền -->
+<script>
+    function formatMoney(number) {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "₫";
+    }
+
+    function parseFormattedMoney(formatted) {
+        return Number(formatted.replace(/[₫,]/g, ''));
+    }
+
+    // Cập nhật tổng tiền dựa trên checkbox đã chọn
+    function updateTotalTien() {
+        let total = 0;
+        document.querySelectorAll('tbody tr').forEach(tr => {
+            const checkbox = tr.querySelector('input.item-checkbox');
+            if(checkbox && checkbox.checked) {
+                const price = parseInt(tr.getAttribute('data-price'));
+                // Lấy số lượng từ input trong form
+                const quantityInput = tr.querySelector('input[name="newSoluong"]');
+                const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+                total += price * quantity;
+            }
+        });
+        document.getElementById('totalTien').textContent = formatMoney(total);
+    }
+
+    // Bắt sự kiện cho checkbox chọn tất cả và từng checkbox
+    document.addEventListener('DOMContentLoaded', function () {
+        const chonTatCa = document.getElementById('chonTatCa');
+        const itemCheckboxes = document.querySelectorAll('input.item-checkbox');
+
+        // Khi click chọn tất cả
+        chonTatCa.addEventListener('change', function() {
+            itemCheckboxes.forEach(cb => cb.checked = this.checked);
+            updateTotalTien();
+        });
+
+        // Khi chọn/bỏ chọn từng sản phẩm
+        itemCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                // Nếu có checkbox nào chưa chọn thì bỏ chọn checkbox chọn tất cả
+                if (!this.checked) {
+                    chonTatCa.checked = false;
+                } else {
+                    // Nếu tất cả checkbox đều được chọn thì tích checkbox chọn tất cả
+                    const allChecked = Array.from(itemCheckboxes).every(cb => cb.checked);
+                    chonTatCa.checked = allChecked;
+                }
+                updateTotalTien();
+            });
+        });
+
+        // Cập nhật tổng tiền ngay khi trang load
+        updateTotalTien();
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
